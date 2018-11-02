@@ -106,6 +106,10 @@ public:
         {
             DisableDuration();
         }
+        else
+        {
+            g_needToRefreshTime = true;
+        }
     }
     void on_playback_seek( double time ) override
     {
