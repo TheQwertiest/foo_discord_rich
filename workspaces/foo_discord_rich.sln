@@ -11,8 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foobar2000_component_client
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foo_discord_rich", "..\foo_discord_rich\foo_discord_rich.vcxproj", "{2512D1C5-90F3-45D2-83E6-65C6FBBAB7B7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "discord", "..\submodules\discord-rpc\src\discord.vcxproj", "{0F807CDE-0674-40AE-8D6F-9850B6394E48}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -45,18 +43,12 @@ Global
 		{2512D1C5-90F3-45D2-83E6-65C6FBBAB7B7}.Release|Win32.ActiveCfg = Release|Win32
 		{2512D1C5-90F3-45D2-83E6-65C6FBBAB7B7}.Release|Win32.Build.0 = Release|Win32
 		{2512D1C5-90F3-45D2-83E6-65C6FBBAB7B7}.Release|x64.ActiveCfg = Release|Win32
-		{0F807CDE-0674-40AE-8D6F-9850B6394E48}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0F807CDE-0674-40AE-8D6F-9850B6394E48}.Debug|Win32.Build.0 = Debug|Win32
-		{0F807CDE-0674-40AE-8D6F-9850B6394E48}.Debug|x64.ActiveCfg = Debug|Win32
-		{0F807CDE-0674-40AE-8D6F-9850B6394E48}.Release|Win32.ActiveCfg = Release|Win32
-		{0F807CDE-0674-40AE-8D6F-9850B6394E48}.Release|Win32.Build.0 = Release|Win32
-		{0F807CDE-0674-40AE-8D6F-9850B6394E48}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionNewStyle = 1
 		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
+		SolutionNewStyle = 1
 	EndGlobalSection
 EndGlobal

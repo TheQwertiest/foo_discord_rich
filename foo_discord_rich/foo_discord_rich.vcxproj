@@ -36,6 +36,7 @@
     <Import Project="$(SolutionDir)\..\props\BuildEnvCpp.props" />
     <Import Project="$(SolutionDir)\..\props\DynamicRuntime.props" />
     <Import Project="$(SolutionDir)\..\props\submodules.props" />
+    <Import Project="$(SolutionDir)\..\props\discord.props" />
     <Import Project="$(SolutionDir)\..\props\foobar2000_sdk.props" />
     <Import Project="$(SolutionDir)\..\props\pfc.props" />
     <Import Project="$(SolutionDir)\..\props\wtl.props" />
@@ -99,6 +100,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="discord_impl.cpp" />
     <ClCompile Include="foo_discord_rich.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -106,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h" />
+    <ClInclude Include="discord_impl.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

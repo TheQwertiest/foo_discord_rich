@@ -16,12 +16,18 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="discord_impl.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="discord_impl.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
