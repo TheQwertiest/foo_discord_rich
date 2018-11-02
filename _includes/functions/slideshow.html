@@ -1,0 +1,44 @@
+<!-- Slideshow container -->
+<div class="slideshow-container">
+  <div class="slideshow">
+    <ul class="slideshow-list">
+      {% for item in include.collection %}
+        {% if include.gallery_path %}
+          {%- assign img_path = include.gallery_path | append: '/' | append: item.path -%}
+        {% else %}
+          {%- assign img_path = item.path -%}
+        {% endif %}
+        {% if item.alt %}
+          {%- assign img_alt = item.alt -%}
+        {% else %}
+          {%- assign img_alt = include.alt -%}
+        {% endif %}
+        {% if item.text %}
+          {%- assign img_text = item.text -%}
+        {% else %}
+          {%- assign img_text = include.text -%}
+        {% endif %}
+        <!-- Full-width images with number and caption text -->
+        <div class="slides fade">
+          {% if include.show_index %}
+            <div class="slide-numbertext">{{ forloop.index + 1 }} / {{ forloop.length }}</div>
+          {% endif %}
+          <a href="{{ img_path }}">
+            <img class="scriptimg" src="{{ img_path }}" alt="{{ img_alt }}" title="{{ img_text }}" />
+          </a>
+        </div>
+      {% endfor %}
+    </ul>
+    
+    <!-- Next and previous buttons -->
+    <a class="slide-prev" onclick="plusSlides(this, -1)">&#10094;</a>
+    <a class="slide-next" onclick="plusSlides(this, 1)">&#10095;</a>
+
+    <!-- The dots/circles -->
+    <div class="slide-dot-container">
+      {% for img in include.collection %}
+        <span class="slide-dot" onclick="currentSlide(this, {{ forloop.index + 1 }})"></span>
+      {% endfor %}
+    </div>
+  </div>
+</div>

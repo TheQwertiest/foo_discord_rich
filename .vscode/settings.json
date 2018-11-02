@@ -1,0 +1,5 @@
+{
+    "files.exclude": {
+        "assets/generated_files": true
+    }
+}

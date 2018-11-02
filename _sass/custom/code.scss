@@ -1,0 +1,126 @@
+//
+// Code and syntax highlighting
+//
+// stylelint-disable selector-no-qualifying-type, declaration-block-semicolon-newline-after,declaration-block-single-line-max-declarations, selector-no-type, selector-max-type
+
+code {
+  padding: 0.2em 0.15em;
+  font-weight: 400;
+  background-color: $code-background-color;
+  border: $border $border-color;
+  border-radius: $border-radius;
+}
+
+pre.highlight,
+figure.highlight {
+  padding: $sp-3;
+  margin-bottom: 0;
+  -webkit-overflow-scrolling: touch;
+  background-color: $code-background-color;
+
+  code {
+    padding: 0;
+    border: 0;
+  }
+}
+
+.highlighter-rouge {
+  margin-bottom: $sp-3;
+  overflow: hidden;
+  border-radius: $border-radius;
+}
+
+.highlight .w { color: #000000; } // Specially highlighted whitespace //
+.highlight .err { color: #fc3e36; } // Lexer errors //
+.highlight .x { color: #dcdcdc; } // Token for data not matched by a parser (e.g. HTML markup in PHP code) //
+.highlight .k { color: #569cd6; } // Any keyword //
+.highlight .kc { color: #569cd6; } // Keywords that are constants //
+.highlight .kd { color: #569cd6; } // Keywords used for variable declaration (e.g. var in javascript) //
+.highlight .kn { color: #569cd6; } // Keywords used for namespace declarations //
+.highlight .kp { color: #569cd6; } // Keywords that aren't really keywords //
+.highlight .kr { color: #569cd6; } // Keywords which are reserved (such as end in Ruby) //
+.highlight .kt { color: #569cd6; } // Keywords wich refer to a type id (such as int in C) //
+.highlight .n { color: #bdb76b; } // Variable/function names //
+.highlight .na { color: #9cdcfe; } // Attributes (in HTML for instance) //
+.highlight .nb { color: #ffd700; } // Builtin names which are available in the global namespace //
+.highlight .bp { color: #000000; } // Builtin names that are implicit (such as self in Ruby) //
+.highlight .nc { color: #ffd700; } // For class declaration //
+.highlight .no { color: #000000; } // For constants //
+.highlight .nd { color: #000000; } // For decorators in languages such as Python or Java //
+.highlight .ni { color: #000000; } // Token for entitites such as &nbsp; in HTML //
+.highlight .ne { color: #000000; } // Exceptions and errors (e.g. ArgumentError in Ruby) //
+.highlight .nf { color: #ff8000; } // Function names //
+.highlight .py { color: #000000; } // Token for properties //
+.highlight .nl { color: #d7ba7d; } // For label names //
+.highlight .nn { color: #b8d7a3; } // Token for namespaces //
+.highlight .nx { color: #bdb76b; } // For other names //
+.highlight .nt { color: #c8c8c8; } // Tag mainly for markup such as XML or HTML //
+.highlight .nv { color: #bdb76b; } // Token for variables //
+.highlight .vc { color: #000000; } // Token for class variables (e.g. @@var in Ruby) //
+.highlight .vg { color: #000000; } // For global variables (such as $LOAD_PATH in Ruby) //
+.highlight .vi { color: #000000; } // Token for instance variables (such as @var in Ruby) //
+.highlight .l { color: #dadada; } // Any literal (if not further defined) //
+.highlight .ld { color: #dadada; } // Date literals //
+.highlight .s { color: #d69d85; } // String literals //
+.highlight .sb { color: #d69d85; } // String enclosed in backticks //
+.highlight .sc { color: #dadada; } // Token type for single characters //
+.highlight .sd { color: #dadada; } // Documentation strings (such as in Python) //
+.highlight .s2 { color: #d69d85; } // Double quoted strings //
+.highlight .se { color: #dadada; } // Escaped sequences in strings //
+.highlight .sh { color: #dadada; } // For "heredoc" strings (e.g. in Ruby) //
+.highlight .si { color: #dadada; } // For interpoled part in strings (e.g. in Ruby) //
+.highlight .sx { color: #dadada; } // Token type for any other strings (for example %q{foo} string constructs in Ruby) //
+.highlight .sr { color: #dadada; } // Regular expressions literals //
+.highlight .s1 { color: #d69d85; } // Single quoted strings //
+.highlight .ss { color: #dadada; } // Symbols (such as :foo in Ruby) //
+.highlight .m { color: #b5cea8; } // Any number literal (if not further defined) //
+.highlight .mf { color: #b5cea8; } // Float numbers //
+.highlight .mh { color: #b5cea8; } // Hexadecimal numbers //
+.highlight .mi { color: #b5cea8; } // Integer literals //
+.highlight .il { color: #b5cea8; } // Long interger literals //
+.highlight .mo { color: #b5cea8; } // Octal literals //
+.highlight .mx { color: #b5cea8; } // Hexadecimal literals //
+.highlight .mb { color: #b5cea8; } // Binary literals //
+.highlight .o { color: #b4b4b4; } // Operators (commonly +, -, /, *) //
+.highlight .ow { color: #b4b4b4; } // Word operators (e.g. and) //
+.highlight .p { color: #dcdcdc; } // Punctuation which is not an operator //
+.highlight .c { color: #57a64a; } // Single ligne comments //
+.highlight .cm { color: #57a64a; } // Mutliline comments //
+.highlight .cp { color: #000000; } // Preprocessor comments such as <% %> in ERb //
+.highlight .c1 { color: #57a64a; } // Comments that end at the end of the line //
+.highlight .cs { color: #000000; } // Special data in comments such as @license in Javadoc //
+.highlight .g { color: #dcdcdc; } // Unstyled token //
+.highlight .gd { color: #000000; } // Token value as deleted //
+.highlight .ge { color: #000000; } // Token value as emphasized //
+.highlight .gr { color: #000000; } // Token value as an error message //
+.highlight .gh { color: #000000; } // Token value as a headline //
+.highlight .gi { color: #000000; } // Token value as inserted //
+.highlight .go { color: #000000; } // Marked as a program output //
+.highlight .gp { color: #000000; } // Marked as a command prompt //
+.highlight .gs { color: #000000; } // Mark the token value as bold (for rst lexer) //
+.highlight .gu { color: #000000; } // Marked as a subheadline //
+.highlight .gt { color: #000000; } // Mark the token as a part of an error traceback //
+.highlight .gl { color: #2b91af; } // Line numbers //
+
+//
+// Code examples (rendered)
+//
+
+.code-example {
+  padding: $sp-3;
+  margin-bottom: $sp-3;
+  overflow: auto;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+
+  + .highlighter-rouge,
+  + figure.highlight {
+    position: relative;
+    margin-top: -$sp-4;
+    border-right: 1px solid $border-color;
+    border-bottom: 1px solid $border-color;
+    border-left: 1px solid $border-color;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
