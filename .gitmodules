@@ -1,0 +1,12 @@
+[submodule "submodules/foobar2000"]
+	path = submodules/foobar2000
+	url = https://github.com/TheQwertiest/foobar2000-sdk.git
+[submodule "submodules/pfc"]
+	path = submodules/pfc
+	url = https://github.com/TheQwertiest/pfc.git
+[submodule "submodules/wtl"]
+	path = submodules/wtl
+	url = https://git.code.sf.net/p/wtl/git
+[submodule "submodules/discord-rpc"]
+	path = submodules/discord-rpc
+	url = https://github.com/discordapp/discord-rpc.git
