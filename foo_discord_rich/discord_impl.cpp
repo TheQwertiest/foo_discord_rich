@@ -30,26 +30,33 @@ void UpdateTrackData( metadb_handle_ptr metadb )
     titleformat_object::ptr tfLength;
     titleformat_compiler::get()->compile_safe( tfLength, "[%length_seconds%]" );
     pfc::string8_fast lengthStr;
+    titleformat_object::ptr tfDuration;
+    titleformat_compiler::get()->compile_safe( tfDuration, "[%playback_time_seconds%]" );
+    pfc::string8_fast durationStr;
+
     if ( isPlaying )
     {
         metadb_handle_ptr dummyHandle;
         pc->playback_format_title_ex( dummyHandle, nullptr, g_trackName, tfTrack, nullptr, playback_control::display_level_all );
         pc->playback_format_title_ex( dummyHandle, nullptr, g_artistAndAlbum, tfArtistAndAlbum, nullptr, playback_control::display_level_all );
         pc->playback_format_title_ex( dummyHandle, nullptr, lengthStr, tfLength, nullptr, playback_control::display_level_all );
+        pc->playback_format_title_ex( dummyHandle, nullptr, durationStr, tfDuration, nullptr, playback_control::display_level_all );
     }
     else if ( metadb.is_valid() )
     {
         metadb->format_title( nullptr, g_trackName, tfTrack, nullptr );
         metadb->format_title( nullptr, g_artistAndAlbum, tfArtistAndAlbum, nullptr );
         metadb->format_title( nullptr, lengthStr, tfLength, nullptr );
+        metadb->format_title( nullptr, durationStr, tfDuration, nullptr );
     }
 
     g_trackLength = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
+    uint64_t trackDuration = ( durationStr.is_empty() ? 0 : stoll( std::string( durationStr ) ) );
 
     g_discordPresence.state = g_trackName.c_str();
     g_discordPresence.details = g_artistAndAlbum.c_str();
     g_discordPresence.startTimestamp = 0;
-    g_discordPresence.endTimestamp = ( g_trackLength ? std::time( nullptr ) + g_trackLength : 0 );
+    g_discordPresence.endTimestamp = ( g_trackLength ? std::time( nullptr ) + std::max<uint64_t>( 0, ( g_trackLength - trackDuration ) ) : 0 );
 
     Discord_UpdatePresence( &g_discordPresence );
 }
