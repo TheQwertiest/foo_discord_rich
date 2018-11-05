@@ -1,5 +1,5 @@
-Spider Monkey Panel uses third-party libraries or other resources that may
-be distributed under licenses different than the Spider Monkey Panel software.
+Discord Rich Presence Integration uses third-party libraries or other resources that may
+be distributed under licenses different than the Discord Rich Presence Integration software.
 
 The linked notices are provided for information only.
 
