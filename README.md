@@ -11,7 +11,7 @@ Features:
 ## Prerequisites
 
 - Windows 7 or later.
-- foobar2000 v1.3.17 or later (some features are only available in v1.4 and later).
+- foobar2000 v1.3.17 or later.
 - [Visual Studio 2017 Redistributable](https://aka.ms/vs/15/release/vc_redist.x86.exe) (needed only for foobar2000 v1.3.*).
 
 ## Installation
