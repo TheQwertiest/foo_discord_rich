@@ -1,0 +1,154 @@
+
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 1.0.{build}-{branch}
+
+# branches to build
+branches:
+  # blacklist
+  except:
+    - gh-pages
+
+# Skipping commits affecting specific files (GitHub only). More details here: /docs/appveyor-yml
+# Disabled skips, since it prevents tag build from triggering, if last commit contains only skipped files
+#skip_commits:
+#  files:
+#     - README.md
+#    - docs/*
+#    - '**/*.png'
+#    - '**/*.jpg'
+#    - '**/*.jpeg'
+#    - '**/*.bmp'
+#    - '**/*.gif'
+#    - '**/*.js'
+#    - '**/*.txt'
+#    - '**/*.md'
+
+# Maximum number of concurrent jobs for the project
+max_jobs: 1
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Build worker image (VM template)
+image: Visual Studio 2017
+
+# this is how to allow failing jobs in the matrix
+matrix:
+  fast_finish: true     # set this flag to immediately finish build once one of the jobs fails.
+
+# scripts that run after cloning repository
+install:
+  - scripts\setup.bat %cd%\
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform:
+  - Win32
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration:
+  - Debug
+  - Release
+
+# Build settings, not to be confused with "before_build" and "after_build".
+# "project" is relative to the original build directory and not influenced by directory changes in "before_build".
+build:
+  parallel: true                              # enable MSBuild parallel builds
+  project: workspaces\$(APPVEYOR_PROJECT_NAME).sln    # path to Visual Studio solution or project
+
+  # MSBuild verbosity level
+  verbosity: normal
+
+# scripts to run before build
+before_build:
+
+# to run your custom scripts instead of automatic MSBuild
+build_script:
+
+# scripts to run after build (working directory and environment changes are persisted from the previous steps)
+after_build:
+
+# scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
+before_package:
+  - if '%configuration%' == 'Debug' (
+      call scripts\pack_component.bat %cd%\ --debug
+    )
+    else (
+      call scripts\pack_component.bat %cd%\
+    )
+  - if '%configuration%' == 'Debug' (
+      ren "_result\%platform%_%configuration%\%APPVEYOR_PROJECT_NAME%.fb2k-component" "%APPVEYOR_PROJECT_NAME%.fb2k-component_debug"
+    )
+
+# to disable automatic builds
+#build: off
+
+#---------------------------------#
+#      artifacts configuration    #
+#---------------------------------#
+
+artifacts:
+  # pushing a single file with environment variable in path and "Deployment name" specified
+  - path: _result\$(platform)_$(configuration)\$(APPVEYOR_PROJECT_NAME).fb2k-component
+    name: Component package (Release)
+  - path: _result\$(platform)_$(configuration)\$(APPVEYOR_PROJECT_NAME)_pdb.zip
+    name: Component PDB package (Release)
+  - path: _result\$(platform)_$(configuration)\$(APPVEYOR_PROJECT_NAME).fb2k-component_debug
+    name: Component package (Debug)
+
+#---------------------------------#
+#     deployment configuration    #
+#---------------------------------#
+
+# providers: Local, FTP, WebDeploy, AzureCS, AzureBlob, S3, NuGet, Environment
+# provider names are case-sensitive!
+deploy:
+  description: 'Dummy description'
+  provider: GitHub
+  auth_token:
+    secure: gBfHQnRcGcTS0yQXWOHhKfDkTZfIBwPIDjTsCQOGmOSPkRqs1QPYBX47BjCvJKim # your encrypted token from GitHub
+  artifact: /$(APPVEYOR_PROJECT_NAME).*/           # upload all NuGet packages to release assets
+  prerelease: true
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: true        # deploy on tag push only
+
+
+# scripts to run before deployment
+before_deploy:
+
+# scripts to run after deployment
+after_deploy:
+
+# to run your custom scripts instead of provider deployments
+deploy_script:
+
+# to disable deployment
+# deploy: off
+
+#---------------------------------#
+#        global handlers          #
+#---------------------------------#
+
+# on successful build
+on_success:
+
+# on build failure
+on_failure:
+
+# after build failure or success
+on_finish:
+
+#---------------------------------#
+#         notifications           #
+#---------------------------------#
+
+notifications:
