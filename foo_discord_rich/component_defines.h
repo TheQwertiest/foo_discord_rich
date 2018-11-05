@@ -1,7 +1,6 @@
 #pragma once
 
-#define DRP_NAME "Discord RP Integration"
-//#define DRP_WINDOW_CLASS_NAME "foo_spider_monkey_panel_class"
+#define DRP_NAME "Discord Rich Presense Integration"
 #define DRP_DLL_NAME "foo_discord_rich.dll"
 
 #define DRP_STRINGIFY_HELPER(x) #x

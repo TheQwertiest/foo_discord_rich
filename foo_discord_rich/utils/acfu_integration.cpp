@@ -49,7 +49,7 @@ public:
         }
 
         info.meta_set( "version", installedVersion_.c_str() );
-        info.meta_set( "name", "Discord Rich" );
+        info.meta_set( "name", DRP_NAME );
         info.meta_set( "module", componentFileName_ );
     }
     virtual bool is_newer( const file_info& info )
