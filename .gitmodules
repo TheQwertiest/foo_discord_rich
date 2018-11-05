@@ -10,3 +10,9 @@
 [submodule "submodules/discord-rpc"]
 	path = submodules/discord-rpc
 	url = https://github.com/discordapp/discord-rpc.git
+[submodule "submodules/acfu-sdk"]
+	path = submodules/acfu-sdk
+	url = https://github.com/3dyd/acfu-sdk.git
+[submodule "submodules/json"]
+	path = submodules/json
+	url = https://github.com/nlohmann/json.git
