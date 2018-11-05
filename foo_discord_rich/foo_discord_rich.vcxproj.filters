@@ -60,5 +60,8 @@
     <None Include="..\CHANGELOG.md">
       <Filter>_docs</Filter>
     </None>
+    <None Include="..\README.md">
+      <Filter>_docs</Filter>
+    </None>
   </ItemGroup>
 </Project>

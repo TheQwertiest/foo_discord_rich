@@ -27,8 +27,7 @@ Features:
 - [Respective authors](THIRD_PARTY_NOTICES.md) of the code being used in this project.
 
 [changelog]: CHANGELOG.md
-[todo]: https://github.com/TheQwertiest/foo_discord_rich/projects/1
 [version_badge]: https://img.shields.io/github/release/theqwertiest/foo_discord_rich.svg
-[appveyor_badge]: https://ci.appveyor.com/api/projects/status/4fg787ijr73u7mxc/branch/master?svg=true
-[codacy_badge]: https://api.codacy.com/project/badge/Grade/19c686bcf26d46e6a639bdece347ae3d
+[appveyor_badge]: https://ci.appveyor.com/api/projects/status/t5bhoxmfgavhq81m/branch/master?svg=true
+[codacy_badge]: https://api.codacy.com/project/badge/Grade/319298ca5bd64a739d1e70e3e27d59ab
 [codefactor_badge]: https://www.codefactor.io/repository/github/theqwertiest/foo_discord_rich/badge/master
