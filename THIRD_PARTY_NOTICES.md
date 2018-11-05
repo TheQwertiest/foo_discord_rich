@@ -3,7 +3,7 @@ be distributed under licenses different than the Discord Rich Presence Integrati
 
 The linked notices are provided for information only.
 
-- [Discord RPC - MIT](component/licenses/Discord RPC.txt)
+- [Discord RPC - MIT](component/licenses/Discord%20RPC.txt)
 - [foobar2000 SDK - other](component/licenses/foobar2000%20SDK.txt)
 - [JSON for Modern C++ - MIT](component/licenses/JSON%20for%20Modern%20C%2B%2B.txt)
 - [PFC - Unlicense](component/licenses/PFC.txt)
