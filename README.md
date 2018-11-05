@@ -3,8 +3,9 @@
 
 This is a component for the [foobar2000](https://www.foobar2000.org) audio player.
 
+Displays currently played track data via Discord Rich Presence.
+
 Features:
-- Discord Rich Presence Integration.
 - [foo_acfu](https://acfu.3dyd.com) integration.
 
 ## Prerequisites
