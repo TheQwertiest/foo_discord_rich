@@ -90,6 +90,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\submodules\discord-rpc\src\discord-rpc.vcxproj">
+      <Project>{fd83c8ca-35c7-4f67-ade3-2fd99c91b230}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\submodules\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
       <Project>{71ad2674-065b-48f5-b8b0-e1f9d3892081}</Project>
     </ProjectReference>
@@ -119,6 +122,7 @@
     <ClInclude Include="utils\version_helpers.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\CHANGELOG.md" />
     <None Include=".clang-format" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

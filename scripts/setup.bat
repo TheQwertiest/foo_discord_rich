@@ -12,6 +12,8 @@ echo Preparing project repo
 
 call %CUR_DIR%fetch_submodules.bat %ROOT_DIR%
 if errorlevel 1 goto fail
+call %CUR_DIR%prepare_discord_rpc.bat %ROOT_DIR%
+if errorlevel 1 goto fail
 
 echo Setup complete!
 exit /b 0
