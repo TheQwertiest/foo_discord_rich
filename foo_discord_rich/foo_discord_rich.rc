@@ -1,0 +1,133 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_PREFERENCE DIALOGEX 0, 0, 334, 319
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 8, "Tahoma", 400, 0, 0x0
+BEGIN
+    CONTROL         "Rich Presense Configuration",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,0,0,90,8
+    CONTROL         "",IDC_STATIC,"Static",SS_GRAYFRAME | SS_SUNKEN | WS_GROUP,94,4,229,1,WS_EX_STATICEDGE
+    PUSHBUTTON      "&Import",IDC_BUTTON_IMPORT,219,256,50,14
+    PUSHBUTTON      "E&xport",IDC_BUTTON_EXPORT,273,256,50,14
+    EDITTEXT        IDC_TEXTBOX_DETAILS,21,49,75,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TEXTBOX_STATE,24,87,75,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TEXTBOX_PARTYID,23,133,75,12,ES_AUTOHSCROLL
+    GROUPBOX        "Image",IDC_STATIC,162,58,119,84
+    CONTROL         "Light image",IDC_RADIO_IMG_LIGHT,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,175,73,52,10
+    CONTROL         "Dark image",IDC_RADIO_IMG_DARK,"Button",BS_AUTORADIOBUTTON,171,91,51,10
+    CONTROL         "Disabled",IDC_RADIO_IMG_DISABLED,"Button",BS_AUTORADIOBUTTON,175,114,39,10
+    GROUPBOX        "Time",IDC_STATIC,161,146,127,79
+    CONTROL         "Elapsed track time",IDC_RADIO_TIME_ELAPSED,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,172,157,74,10
+    CONTROL         "Remaining track time",IDC_RADIO_TIME_REMAINING,"Button",BS_AUTORADIOBUTTON,169,172,82,10
+    CONTROL         "Disabled",IDC_RADIO_TIME_DISABLED,"Button",BS_AUTORADIOBUTTON,173,205,39,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG_PREFERENCE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 327
+        VERTGUIDE, 12
+        VERTGUIDE, 322
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 262
+        HORZGUIDE, 18
+        HORZGUIDE, 225
+        HORZGUIDE, 226
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DIALOG_HTML AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 100, 100
+END
+
+IDD_DIALOG_PREFERENCE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

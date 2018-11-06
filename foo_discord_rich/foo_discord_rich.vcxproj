@@ -109,6 +109,7 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ui\ui_pref.cpp" />
     <ClCompile Include="utils\acfu_integration.cpp" />
     <ClCompile Include="utils\string_helpers.cpp" />
     <ClCompile Include="utils\version_helpers.cpp" />
@@ -116,7 +117,9 @@
   <ItemGroup>
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="discord_impl.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="ui\ui_pref.h" />
     <ClInclude Include="utils\acfu_github.h" />
     <ClInclude Include="utils\string_helpers.h" />
     <ClInclude Include="utils\version_helpers.h" />
@@ -125,6 +128,9 @@
     <None Include="..\CHANGELOG.md" />
     <None Include="..\README.md" />
     <None Include=".clang-format" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="foo_discord_rich.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

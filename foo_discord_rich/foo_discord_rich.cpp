@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include <ui/ui_pref.h>
 #include <discord_impl.h>
 
 #include <ctime>
@@ -19,6 +20,7 @@ class ComponentInitQuit : public initquit
 public:
     void on_init() override
     {
+        drp::ui::CDialogPref::InitConfiguration();
         discord::InitializeDiscord();
     }
 

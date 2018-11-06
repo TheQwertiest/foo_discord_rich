@@ -4,7 +4,6 @@
 
 #include <ctime>
 
-using namespace discord;
 
 namespace
 {
