@@ -1,8 +1,13 @@
-#include "stdafx.h"
+#include <stdafx.h>
+#include "discord_impl.h"
+
+#include <ui/ui_pref.h>
 
 #include <discord_rpc.h>
 
 #include <ctime>
+
+using pref = drp::ui::CDialogPref;
 
 
 namespace
@@ -14,7 +19,6 @@ public:
     DiscordDataHandler()
     {
         memset( &presence_, 0, sizeof( presence_ ) );
-        presence_.largeImageKey = "foobar2000";
     }
 
     void Initialize()
@@ -35,12 +39,12 @@ public:
     {
         state_.reset();
         details_.reset();
-        partyIdQuery_.reset();
+        partyId_.reset();
         trackLength_ = 0;
         needToRefreshTime_ = true;
 
         auto pc = playback_control::get();        
-        auto queryData = [&pc, &metadb]( const pfc::string8_fast& query )
+        auto queryData = [&pc, &metadb]( const char* query )
         {
             titleformat_object::ptr tf;
             titleformat_compiler::get()->compile_safe( tf, query );
@@ -59,22 +63,20 @@ public:
             return result;
         };
 
-        state_ = queryData( stateQuery_ );
-        details_ = queryData( detailsQuery_ );
-        partyId_ = queryData( partyIdQuery_ );
+        state_ = queryData( pref::GetStateQuery().c_str() );
+        details_ = queryData( pref::GetDetailsQuery().c_str() );
+        partyId_ = queryData( pref::GetPartyIdQuery().c_str() );
         pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
         pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
         trackLength_ = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
-        uint64_t trackDuration = ( durationStr.is_empty() ? 0 : stoll( std::string( durationStr ) ) );
 
-        presence_.state = state_.c_str();
-        presence_.details = details_.c_str();
-        presence_.partyId = partyId_.c_str();
-        presence_.startTimestamp = 0;
-        presence_.endTimestamp = ( trackLength_ ? std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - trackDuration ) ) : 0 );
+        presence_.state = state_;
+        presence_.details = details_;
+        presence_.partyId = partyId_;
+        SetDurationInPresence( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
 
-        Discord_UpdatePresence( &presence_ );
+        UpdatePresense();
     }
 
     void DisableTrackData()
@@ -89,21 +91,15 @@ public:
             return;
         }
 
-        if ( !trackLength_ )
-        {
-            return;
-        }
-
-        presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - std::llround( time ) ) );
-
-        Discord_UpdatePresence( &presence_ );
+        SetDurationInPresence( time );
+        UpdatePresense();
     }
 
     void DisableDuration()
     {
+        presence_.startTimestamp = 0;
         presence_.endTimestamp = 0;
-
-        Discord_UpdatePresence( &presence_ );
+        UpdatePresense();
     }
 
     void RequestTimeRefresh()
@@ -112,11 +108,66 @@ public:
     }
 
 private:
-    DiscordRichPresence presence_;
+    void SetDurationInPresence( double time )
+    {
+        pref::TimeSetting timeSetting = ( trackLength_ ? pref::GetTimeSetting() : pref::TimeSetting::Disabled );
 
-    pfc::string8_fast stateQuery_ = "[%title%]";
-    pfc::string8_fast detailsQuery_ = "[%album artist%[: %album%]]";
-    pfc::string8_fast partyIdQuery_;
+        switch ( timeSetting )
+        {
+        case pref::TimeSetting::Elapsed:
+        {
+            presence_.startTimestamp = std::time( nullptr ) - std::llround( time );
+            presence_.endTimestamp = 0;
+
+            break;
+        }
+        case pref::TimeSetting::Remaining:
+        {
+            presence_.startTimestamp = 0;
+            presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - std::llround( time ) ) );
+
+            break;
+        }
+        case pref::TimeSetting::Disabled:
+        {
+            presence_.startTimestamp = 0;
+            presence_.endTimestamp = 0;
+
+            break;
+        }
+        }
+    }
+
+    void UpdatePresense()
+    {
+        // TODO: if we can detect preferences changes, then move it to that callback instead
+        switch ( pref::GetImageSettings() )
+        {
+        case pref::ImageSetting::Light:
+        case pref::ImageSetting::Dark:
+        {
+            presence_.largeImageKey = "foobar2000";
+            break;
+        }
+        case pref::ImageSetting::Disabled:
+        {
+            presence_.largeImageKey = nullptr;
+            break;
+        }
+        }
+
+        if ( pref::IsEnabled() )
+        {
+            Discord_UpdatePresence( &presence_ );
+        }
+        else
+        {
+            Discord_ClearPresence();
+        }
+    }
+
+private:
+    DiscordRichPresence presence_;
 
     bool needToRefreshTime_ = false;
     pfc::string8_fast state_;
