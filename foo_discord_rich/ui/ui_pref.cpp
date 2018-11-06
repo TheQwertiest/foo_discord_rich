@@ -53,13 +53,13 @@ CDialogPref::CfgWrap<cfg_int_t<uint8_t>, uint8_t>
 CDialogPref::CfgWrap<cfg_int_t<uint8_t>, uint8_t>
     CDialogPref::timeSettings_( g_guid_drp_conf_time_settings, static_cast<uint8_t>( CDialogPref::TimeSetting::Elapsed ) );
 
-CDialogPref::CfgWrap<cfg_string, pfc::string>
+CDialogPref::CfgWrap<cfg_string, pfc::string8_fast>
     CDialogPref::stateQuery_( g_guid_drp_conf_state_query, "[%title%]" );
 
-CDialogPref::CfgWrap<cfg_string, pfc::string>
+CDialogPref::CfgWrap<cfg_string, pfc::string8_fast>
     CDialogPref::detailsQuery_( g_guid_drp_conf_details_query, "[%album artist%[: %album%]]" );
 
-CDialogPref::CfgWrap<cfg_string, pfc::string>
+CDialogPref::CfgWrap<cfg_string, pfc::string8_fast>
     CDialogPref::partyIdQuery_( g_guid_drp_conf_partyId_query, "" );
 
 CDialogPref::CDialogPref( preferences_page_callback::ptr callback )
@@ -115,7 +115,7 @@ void CDialogPref::reset()
     stateQuery_.Reset();
     detailsQuery_.Reset();
     partyIdQuery_.Reset();
-    
+
     UpdateUiFromCfg();
 
     OnChanged();
@@ -136,17 +136,17 @@ CDialogPref::TimeSetting CDialogPref::GetTimeSetting()
     return static_cast<TimeSetting>( timeSettings_.GetValue() );
 }
 
-const pfc::string& CDialogPref::GetStateQuery()
+const pfc::string8_fast& CDialogPref::GetStateQuery()
 {
     return stateQuery_;
 }
 
-const pfc::string& CDialogPref::GetDetailsQuery()
+const pfc::string8_fast& CDialogPref::GetDetailsQuery()
 {
     return detailsQuery_;
 }
 
-const pfc::string& CDialogPref::GetPartyIdQuery()
+const pfc::string8_fast& CDialogPref::GetPartyIdQuery()
 {
     return partyIdQuery_;
 }
@@ -160,17 +160,33 @@ BOOL CDialogPref::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 
 void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
+    auto getDlgItemText = [nID, &wndCtl]() {
+        CString tmp;
+        if ( !wndCtl.GetDlgItemText( nID, tmp ) )
+        {
+            tmp = "";
+        }
+        const pfc::string8_fast str8 = pfc::stringcvt::string_utf8_from_wide( tmp.GetBuffer() );
+        return str8;
+    };
+
     switch ( nID )
     {
     case IDC_TEXTBOX_STATE:
-        stateQuery_ = uGetDlgItemText( this->m_hWnd, nID );
+    {
+        stateQuery_ = getDlgItemText();
         break;
+    }
     case IDC_TEXTBOX_DETAILS:
-        detailsQuery_ = uGetDlgItemText( this->m_hWnd, nID );
+    {
+        detailsQuery_ = getDlgItemText();
         break;
+    }
     case IDC_TEXTBOX_PARTYID:
-        partyIdQuery_ = uGetDlgItemText( this->m_hWnd, nID );
+    {
+        partyIdQuery_ = getDlgItemText();
         break;
+    }
     case IDC_RADIO_IMG_LIGHT:
     case IDC_RADIO_IMG_DARK:
     case IDC_RADIO_IMG_DISABLED:

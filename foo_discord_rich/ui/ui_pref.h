@@ -58,9 +58,9 @@ public:
     static bool IsEnabled();
     static ImageSetting GetImageSettings();
     static TimeSetting GetTimeSetting();
-    static const pfc::string& GetStateQuery();
-    static const pfc::string& GetDetailsQuery();
-    static const pfc::string& GetPartyIdQuery();
+    static const pfc::string8_fast& GetStateQuery();
+    static const pfc::string8_fast& GetDetailsQuery();
+    static const pfc::string8_fast& GetPartyIdQuery();
 
 private:
     BOOL OnInitDialog( HWND hwndFocus, LPARAM lParam );
@@ -150,9 +150,9 @@ private:
     static CfgWrap<cfg_bool, bool> isEnabled_;
     static CfgWrap<cfg_int_t<uint8_t>, uint8_t> imageSettings_;
     static CfgWrap<cfg_int_t<uint8_t>, uint8_t> timeSettings_;
-    static CfgWrap<cfg_string, pfc::string> stateQuery_;
-    static CfgWrap<cfg_string, pfc::string> detailsQuery_;
-    static CfgWrap<cfg_string, pfc::string> partyIdQuery_;
+    static CfgWrap<cfg_string, pfc::string8_fast> stateQuery_;
+    static CfgWrap<cfg_string, pfc::string8_fast> detailsQuery_;
+    static CfgWrap<cfg_string, pfc::string8_fast> partyIdQuery_;
 };
 
 } // namespace drp::ui

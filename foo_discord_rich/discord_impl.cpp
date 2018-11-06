@@ -77,7 +77,7 @@ void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
     needToRefreshTime_ = true;
 
     auto pc = playback_control::get();
-    auto queryData = [&pc, &metadb]( const char* query ) {
+    auto queryData = [&pc, &metadb]( const pfc::string8_fast& query ) {
         titleformat_object::ptr tf;
         titleformat_compiler::get()->compile_safe( tf, query );
         pfc::string8_fast result;
@@ -95,9 +95,9 @@ void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
         return result;
     };
 
-    state_ = queryData( pref::GetStateQuery().c_str() );
-    details_ = queryData( pref::GetDetailsQuery().c_str() );
-    partyId_ = queryData( pref::GetPartyIdQuery().c_str() );
+    state_ = queryData( pref::GetStateQuery() );
+    details_ = queryData( pref::GetDetailsQuery() );
+    partyId_ = queryData( pref::GetPartyIdQuery() );
     pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
     pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
