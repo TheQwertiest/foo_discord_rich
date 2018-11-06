@@ -9,162 +9,32 @@
 
 using pref = drp::ui::CDialogPref;
 
-
 namespace
 {
 
-class DiscordDataHandler
+class DiscordHandler
 {
 public:
-    DiscordDataHandler()
-    {
-        memset( &presence_, 0, sizeof( presence_ ) );
-    }
+    DiscordHandler();
 
-    void Initialize()
-    {
-        DiscordEventHandlers handlers;
-        memset( &handlers, 0, sizeof( handlers ) );
-
-        Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
-    }
-
-    void Finalize()
-    {
-        Discord_Shutdown();
-    }
+    void Initialize();
+    void Finalize();
 
 public:
-    void UpdateTrackData( metadb_handle_ptr metadb )
-    {
-        state_.reset();
-        details_.reset();
-        partyId_.reset();
-        trackLength_ = 0;
-        needToRefreshTime_ = true;
-
-        auto pc = playback_control::get();        
-        auto queryData = [&pc, &metadb]( const char* query )
-        {
-            titleformat_object::ptr tf;
-            titleformat_compiler::get()->compile_safe( tf, query );
-            pfc::string8_fast result;
-
-            if ( pc->is_playing() )
-            {
-                metadb_handle_ptr dummyHandle;
-                pc->playback_format_title_ex( dummyHandle, nullptr, result, tf, nullptr, playback_control::display_level_all );
-            }
-            else if ( metadb.is_valid() )
-            {
-                metadb->format_title( nullptr, result, tf, nullptr );
-            }
-
-            return result;
-        };
-
-        state_ = queryData( pref::GetStateQuery().c_str() );
-        details_ = queryData( pref::GetDetailsQuery().c_str() );
-        partyId_ = queryData( pref::GetPartyIdQuery().c_str() );
-        pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
-        pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
-
-        trackLength_ = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
-
-        presence_.state = state_;
-        presence_.details = details_;
-        presence_.partyId = partyId_;
-        SetDurationInPresence( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
-
-        UpdatePresense();
-    }
-
-    void DisableTrackData()
-    {
-        Discord_ClearPresence();
-    }
-
-    void UpdateDuration( double time, bool force = false )
-    {
-        if ( !needToRefreshTime_ && !force )
-        {
-            return;
-        }
-
-        SetDurationInPresence( time );
-        UpdatePresense();
-    }
-
-    void DisableDuration()
-    {
-        presence_.startTimestamp = 0;
-        presence_.endTimestamp = 0;
-        UpdatePresense();
-    }
-
-    void RequestTimeRefresh()
-    {
-        needToRefreshTime_ = true;
-    }
+    void UpdateTrackData( metadb_handle_ptr metadb );
+    void DisableTrackData();
+    void UpdateDuration( double time, bool force = false );
+    void DisableDuration();
+    void RequestTimeRefresh();
 
 private:
-    void SetDurationInPresence( double time )
-    {
-        pref::TimeSetting timeSetting = ( trackLength_ ? pref::GetTimeSetting() : pref::TimeSetting::Disabled );
+    void SetDurationInPresence( double time );
+    void UpdatePresense();
 
-        switch ( timeSetting )
-        {
-        case pref::TimeSetting::Elapsed:
-        {
-            presence_.startTimestamp = std::time( nullptr ) - std::llround( time );
-            presence_.endTimestamp = 0;
-
-            break;
-        }
-        case pref::TimeSetting::Remaining:
-        {
-            presence_.startTimestamp = 0;
-            presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - std::llround( time ) ) );
-
-            break;
-        }
-        case pref::TimeSetting::Disabled:
-        {
-            presence_.startTimestamp = 0;
-            presence_.endTimestamp = 0;
-
-            break;
-        }
-        }
-    }
-
-    void UpdatePresense()
-    {
-        // TODO: if we can detect preferences changes, then move it to that callback instead
-        switch ( pref::GetImageSettings() )
-        {
-        case pref::ImageSetting::Light:
-        case pref::ImageSetting::Dark:
-        {
-            presence_.largeImageKey = "foobar2000";
-            break;
-        }
-        case pref::ImageSetting::Disabled:
-        {
-            presence_.largeImageKey = nullptr;
-            break;
-        }
-        }
-
-        if ( pref::IsEnabled() )
-        {
-            Discord_UpdatePresence( &presence_ );
-        }
-        else
-        {
-            Discord_ClearPresence();
-        }
-    }
+private:
+    static void OnReady( const DiscordUser* request );
+    static void OnDisconnected( int errorCode, const char* message );
+    static void OnErrored( int errorCode, const char* message );
 
 private:
     DiscordRichPresence presence_;
@@ -176,7 +46,180 @@ private:
     uint64_t trackLength_ = 0;
 };
 
-DiscordDataHandler g_discordHandler;
+DiscordHandler::DiscordHandler()
+{
+    memset( &presence_, 0, sizeof( presence_ ) );
+}
+
+void DiscordHandler::Initialize()
+{
+    DiscordEventHandlers handlers;
+    memset( &handlers, 0, sizeof( handlers ) );
+
+    handlers.ready = OnReady;
+    handlers.disconnected = OnDisconnected;
+    handlers.errored = OnErrored;
+
+    Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
+}
+
+void DiscordHandler::Finalize()
+{
+    Discord_Shutdown();
+}
+
+void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
+{
+    state_.reset();
+    details_.reset();
+    partyId_.reset();
+    trackLength_ = 0;
+    needToRefreshTime_ = true;
+
+    auto pc = playback_control::get();
+    auto queryData = [&pc, &metadb]( const char* query ) {
+        titleformat_object::ptr tf;
+        titleformat_compiler::get()->compile_safe( tf, query );
+        pfc::string8_fast result;
+
+        if ( pc->is_playing() )
+        {
+            metadb_handle_ptr dummyHandle;
+            pc->playback_format_title_ex( dummyHandle, nullptr, result, tf, nullptr, playback_control::display_level_all );
+        }
+        else if ( metadb.is_valid() )
+        {
+            metadb->format_title( nullptr, result, tf, nullptr );
+        }
+
+        return result;
+    };
+
+    state_ = queryData( pref::GetStateQuery().c_str() );
+    details_ = queryData( pref::GetDetailsQuery().c_str() );
+    partyId_ = queryData( pref::GetPartyIdQuery().c_str() );
+    pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
+    pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
+
+    trackLength_ = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
+
+    presence_.state = state_;
+    presence_.details = details_;
+    presence_.partyId = partyId_;
+    SetDurationInPresence( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
+
+    UpdatePresense();
+}
+
+void DiscordHandler::DisableTrackData()
+{
+    Discord_ClearPresence();
+}
+
+void DiscordHandler::UpdateDuration( double time, bool force )
+{
+    if ( !needToRefreshTime_ && !force )
+    {
+        return;
+    }
+
+    SetDurationInPresence( time );
+    UpdatePresense();
+}
+
+void DiscordHandler::DisableDuration()
+{
+    presence_.startTimestamp = 0;
+    presence_.endTimestamp = 0;
+    UpdatePresense();
+}
+
+void DiscordHandler::RequestTimeRefresh()
+{
+    needToRefreshTime_ = true;
+}
+
+void DiscordHandler::SetDurationInPresence( double time )
+{
+    const pref::TimeSetting timeSetting = ( trackLength_ ? pref::GetTimeSetting() : pref::TimeSetting::Disabled );
+    switch ( timeSetting )
+    {
+    case pref::TimeSetting::Elapsed:
+    {
+        presence_.startTimestamp = std::time( nullptr ) - std::llround( time );
+        presence_.endTimestamp = 0;
+
+        break;
+    }
+    case pref::TimeSetting::Remaining:
+    {
+        presence_.startTimestamp = 0;
+        presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - std::llround( time ) ) );
+
+        break;
+    }
+    case pref::TimeSetting::Disabled:
+    {
+        presence_.startTimestamp = 0;
+        presence_.endTimestamp = 0;
+
+        break;
+    }
+    }
+}
+
+void DiscordHandler::UpdatePresense()
+{
+    switch ( pref::GetImageSettings() )
+    { // TODO: if we can detect preferences changes, then move it to that callback instead
+    case pref::ImageSetting::Light:
+    case pref::ImageSetting::Dark:
+    {
+        presence_.largeImageKey = "foobar2000";
+        break;
+    }
+    case pref::ImageSetting::Disabled:
+    {
+        presence_.largeImageKey = nullptr;
+        break;
+    }
+    }
+
+    if ( pref::IsEnabled() )
+    {
+        Discord_UpdatePresence( &presence_ );
+    }
+    else
+    {
+        Discord_ClearPresence();
+    }
+    Discord_RunCallbacks();
+}
+
+void DiscordHandler::OnReady( const DiscordUser* request )
+{
+    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": connected to " << ( request->username ? request->username : "<null>" );
+}
+
+void DiscordHandler::OnDisconnected( int errorCode, const char* message )
+{
+    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": disconnected with code " << errorCode;
+    if ( message )
+    {
+        FB2K_console_formatter() << message;
+    }
+}
+
+void DiscordHandler::OnErrored( int errorCode, const char* message )
+{
+    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": error " << errorCode;
+    if ( message )
+    {
+        FB2K_console_formatter() << message;
+    }
+}
+
+DiscordHandler g_discordHandler;
 
 } // namespace
 
