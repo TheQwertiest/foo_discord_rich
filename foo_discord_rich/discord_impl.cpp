@@ -40,39 +40,31 @@ public:
         trackLength_ = 0;
         needToRefreshTime_ = true;
 
-        auto pc = playback_control::get();
-        const bool isPlaying = pc->is_playing();
-
-        titleformat_object::ptr tfState;
-        titleformat_compiler::get()->compile_safe( tfState, stateQuery_ );
-        titleformat_object::ptr tfDetails;
-        titleformat_compiler::get()->compile_safe( tfDetails, detailsQuery_ );
-        titleformat_object::ptr tfPartyId;
-        titleformat_compiler::get()->compile_safe( tfPartyId, partyIdQuery_ );
-        titleformat_object::ptr tfLength;
-        titleformat_compiler::get()->compile_safe( tfLength, "[%length_seconds%]" );
-        pfc::string8_fast lengthStr;
-        titleformat_object::ptr tfDuration;
-        titleformat_compiler::get()->compile_safe( tfDuration, "[%playback_time_seconds%]" );
-        pfc::string8_fast durationStr;
-
-        if ( isPlaying )
+        auto pc = playback_control::get();        
+        auto queryData = [&pc, &metadb]( const pfc::string8_fast& query )
         {
-            metadb_handle_ptr dummyHandle;
-            pc->playback_format_title_ex( dummyHandle, nullptr, state_, tfState, nullptr, playback_control::display_level_all );
-            pc->playback_format_title_ex( dummyHandle, nullptr, details_, tfDetails, nullptr, playback_control::display_level_all );
-            pc->playback_format_title_ex( dummyHandle, nullptr, partyId_, tfPartyId, nullptr, playback_control::display_level_all );
-            pc->playback_format_title_ex( dummyHandle, nullptr, lengthStr, tfLength, nullptr, playback_control::display_level_all );
-            pc->playback_format_title_ex( dummyHandle, nullptr, durationStr, tfDuration, nullptr, playback_control::display_level_all );
-        }
-        else if ( metadb.is_valid() )
-        {
-            metadb->format_title( nullptr, state_, tfState, nullptr );
-            metadb->format_title( nullptr, details_, tfDetails, nullptr );
-            metadb->format_title( nullptr, partyId_, tfPartyId, nullptr );
-            metadb->format_title( nullptr, lengthStr, tfLength, nullptr );
-            metadb->format_title( nullptr, durationStr, tfDuration, nullptr );
-        }
+            titleformat_object::ptr tf;
+            titleformat_compiler::get()->compile_safe( tf, query );
+            pfc::string8_fast result;
+
+            if ( pc->is_playing() )
+            {
+                metadb_handle_ptr dummyHandle;
+                pc->playback_format_title_ex( dummyHandle, nullptr, result, tf, nullptr, playback_control::display_level_all );
+            }
+            else if ( metadb.is_valid() )
+            {
+                metadb->format_title( nullptr, result, tf, nullptr );
+            }
+
+            return result;
+        };
+
+        state_ = queryData( stateQuery_ );
+        details_ = queryData( detailsQuery_ );
+        partyId_ = queryData( partyIdQuery_ );
+        pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
+        pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
         trackLength_ = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
         uint64_t trackDuration = ( durationStr.is_empty() ? 0 : stoll( std::string( durationStr ) ) );
