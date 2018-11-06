@@ -2,8 +2,6 @@
 
 #include <discord_impl.h>
 
-#include <discord_rpc.h>
-
 #include <ctime>
 
 DECLARE_COMPONENT_VERSION(
