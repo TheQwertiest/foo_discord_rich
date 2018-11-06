@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#include <api_key.h>
-
 #include <discord_rpc.h>
 
 #include <ctime>
@@ -25,7 +23,7 @@ public:
         DiscordEventHandlers handlers;
         memset( &handlers, 0, sizeof( handlers ) );
 
-        Discord_Initialize( discordApiKey, &handlers, 1, nullptr );
+        Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
     }
 
     void Finalize()
@@ -36,18 +34,21 @@ public:
 public:
     void UpdateTrackData( metadb_handle_ptr metadb )
     {
-        trackName_.reset();
-        artistAndAlbum_.reset();
+        state_.reset();
+        details_.reset();
+        partyIdQuery_.reset();
         trackLength_ = 0;
         needToRefreshTime_ = true;
 
         auto pc = playback_control::get();
         const bool isPlaying = pc->is_playing();
 
-        titleformat_object::ptr tfTrack;
-        titleformat_compiler::get()->compile_safe( tfTrack, "[%title%]" );
-        titleformat_object::ptr tfArtistAndAlbum;
-        titleformat_compiler::get()->compile_safe( tfArtistAndAlbum, "[%album artist%[: %album%]]" );
+        titleformat_object::ptr tfState;
+        titleformat_compiler::get()->compile_safe( tfState, stateQuery_ );
+        titleformat_object::ptr tfDetails;
+        titleformat_compiler::get()->compile_safe( tfDetails, detailsQuery_ );
+        titleformat_object::ptr tfPartyId;
+        titleformat_compiler::get()->compile_safe( tfPartyId, partyIdQuery_ );
         titleformat_object::ptr tfLength;
         titleformat_compiler::get()->compile_safe( tfLength, "[%length_seconds%]" );
         pfc::string8_fast lengthStr;
@@ -58,15 +59,17 @@ public:
         if ( isPlaying )
         {
             metadb_handle_ptr dummyHandle;
-            pc->playback_format_title_ex( dummyHandle, nullptr, trackName_, tfTrack, nullptr, playback_control::display_level_all );
-            pc->playback_format_title_ex( dummyHandle, nullptr, artistAndAlbum_, tfArtistAndAlbum, nullptr, playback_control::display_level_all );
+            pc->playback_format_title_ex( dummyHandle, nullptr, state_, tfState, nullptr, playback_control::display_level_all );
+            pc->playback_format_title_ex( dummyHandle, nullptr, details_, tfDetails, nullptr, playback_control::display_level_all );
+            pc->playback_format_title_ex( dummyHandle, nullptr, partyId_, tfPartyId, nullptr, playback_control::display_level_all );
             pc->playback_format_title_ex( dummyHandle, nullptr, lengthStr, tfLength, nullptr, playback_control::display_level_all );
             pc->playback_format_title_ex( dummyHandle, nullptr, durationStr, tfDuration, nullptr, playback_control::display_level_all );
         }
         else if ( metadb.is_valid() )
         {
-            metadb->format_title( nullptr, trackName_, tfTrack, nullptr );
-            metadb->format_title( nullptr, artistAndAlbum_, tfArtistAndAlbum, nullptr );
+            metadb->format_title( nullptr, state_, tfState, nullptr );
+            metadb->format_title( nullptr, details_, tfDetails, nullptr );
+            metadb->format_title( nullptr, partyId_, tfPartyId, nullptr );
             metadb->format_title( nullptr, lengthStr, tfLength, nullptr );
             metadb->format_title( nullptr, durationStr, tfDuration, nullptr );
         }
@@ -74,8 +77,9 @@ public:
         trackLength_ = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
         uint64_t trackDuration = ( durationStr.is_empty() ? 0 : stoll( std::string( durationStr ) ) );
 
-        presence_.state = trackName_.c_str();
-        presence_.details = artistAndAlbum_.c_str();
+        presence_.state = state_.c_str();
+        presence_.details = details_.c_str();
+        presence_.partyId = partyId_.c_str();
         presence_.startTimestamp = 0;
         presence_.endTimestamp = ( trackLength_ ? std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - trackDuration ) ) : 0 );
 
@@ -119,9 +123,14 @@ public:
 private:
     DiscordRichPresence presence_;
 
+    pfc::string8_fast stateQuery_ = "[%title%]";
+    pfc::string8_fast detailsQuery_ = "[%album artist%[: %album%]]";
+    pfc::string8_fast partyIdQuery_;
+
     bool needToRefreshTime_ = false;
-    pfc::string8_fast trackName_;
-    pfc::string8_fast artistAndAlbum_;
+    pfc::string8_fast state_;
+    pfc::string8_fast details_;
+    pfc::string8_fast partyId_;
     uint64_t trackLength_ = 0;
 };
 

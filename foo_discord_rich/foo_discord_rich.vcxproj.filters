@@ -54,9 +54,6 @@
     <ClInclude Include="utils\acfu_github.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="api_key.h">
-      <Filter>core</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />
