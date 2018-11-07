@@ -73,7 +73,15 @@ public:
             hasChanged_ = false;
         }
     }
-    void Reset()
+    void Revert()
+    {
+        if ( hasChanged_ )
+        {
+            curValue_ = cachedConfValue_;
+            hasChanged_ = false;
+        }
+    }
+    void ResetToDefault()
     {
         curValue_ = defValue_;
         hasChanged_ = ( defValue_ != conf_ );

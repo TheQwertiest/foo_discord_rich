@@ -34,6 +34,7 @@ public:
 
 public:
     CDialogPref( preferences_page_callback::ptr callback );
+    ~CDialogPref() override;
 
     // preferences_page_instance
     HWND get_wnd() override;

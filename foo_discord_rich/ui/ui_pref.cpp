@@ -54,6 +54,15 @@ CDialogPref::CDialogPref( preferences_page_callback::ptr callback )
 {
 }
 
+CDialogPref::~CDialogPref()
+{
+    g_isEnabled.Revert();
+    g_imageSettings.Revert();
+    g_timeSettings.Revert();
+    g_stateQuery.Revert();
+    g_detailsQuery.Revert();
+}
+
 HWND CDialogPref::get_wnd()
 {
     return m_hWnd;
@@ -85,11 +94,11 @@ void CDialogPref::apply()
 
 void CDialogPref::reset()
 {
-    g_isEnabled.Reset();
-    g_imageSettings.Reset();
-    g_timeSettings.Reset();
-    g_stateQuery.Reset();
-    g_detailsQuery.Reset();
+    g_isEnabled.ResetToDefault();
+    g_imageSettings.ResetToDefault();
+    g_timeSettings.ResetToDefault();
+    g_stateQuery.ResetToDefault();
+    g_detailsQuery.ResetToDefault();
 
     UpdateUiFromCfg();
 
@@ -182,17 +191,17 @@ void CDialogPref::OnChanged()
 
 void CDialogPref::UpdateUiFromCfg()
 {
-    uButton_SetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED, g_isEnabled );
+    uButton_SetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED, g_isEnabled.GetCurrentValue() );
 
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_STATE, g_stateQuery.GetSavedValue().c_str() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_DETAILS, g_detailsQuery.GetSavedValue().c_str() );
+    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_STATE, g_stateQuery.GetCurrentValue() );
+    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_DETAILS, g_detailsQuery.GetCurrentValue() );
 
-    const auto imageSettings = static_cast<ImageSetting>( g_imageSettings.GetSavedValue() );
+    const auto imageSettings = static_cast<ImageSetting>( g_imageSettings.GetCurrentValue() );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT, ImageSetting::Light == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK, ImageSetting::Dark == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED, ImageSetting::Disabled == imageSettings );
 
-    const auto timeSettings = static_cast<TimeSetting>( g_timeSettings.GetSavedValue() );
+    const auto timeSettings = static_cast<TimeSetting>( g_timeSettings.GetCurrentValue() );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_ELAPSED, TimeSetting::Elapsed == timeSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_REMAINING, TimeSetting::Remaining == timeSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_DISABLED, TimeSetting::Disabled == timeSettings );
