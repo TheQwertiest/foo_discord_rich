@@ -13,9 +13,9 @@ ___
 
 ### Added
 - Added Preferences page with the following settings:
-  - Text fields setup via tittle formatting queries.
-  - Track duration: elapsed, remaining, disable.
-  - Foobar2000 image: light, dark, disable.
+  - Text fields configuration via title formatting queries.
+  - Track duration: elapsed, remaining, disabled.
+  - Foobar2000 image: light, dark, disabled.
 - Added main menu command to toggle component.
 
 ### Fixed
