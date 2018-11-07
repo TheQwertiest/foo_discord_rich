@@ -6,7 +6,7 @@
 
 #include <acfu-sdk/utils/common.h>
 
-namespace utils::acfu
+namespace drp::acfu
 {
 
 class SmpSource
@@ -38,7 +38,7 @@ public:
     }
     virtual GUID get_guid()
     {
-        return g_guid_acfu_source;
+        return g_guid_drp_acfu_source;
     }
     virtual void get_info( file_info& info )
     {
@@ -88,4 +88,4 @@ private:
 };
 static service_factory_single_t<SmpSource> g_smpSource;
 
-} // namespace utils::acfu
+} // namespace drp::acfu

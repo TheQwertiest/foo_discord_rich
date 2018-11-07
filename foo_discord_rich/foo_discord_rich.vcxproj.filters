@@ -27,14 +27,20 @@
     <ClCompile Include="utils\version_helpers.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="utils\acfu_integration.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="utils\string_helpers.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="ui\ui_pref.cpp">
       <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="acfu_integration.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="mainmenu.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="config.cpp">
+      <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="utils\cfg_wrap.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,16 +1,16 @@
 #include <stdafx.h>
 #include "discord_impl.h"
 
-#include <ui/ui_pref.h>
+#include <config.h>
 
 #include <discord_rpc.h>
 
 #include <ctime>
 
-using pref = drp::ui::CDialogPref;
-
 namespace
 {
+
+using namespace drp;
 
 class DiscordHandler
 {
@@ -82,19 +82,19 @@ void DiscordHandler::OnSettingsChanged()
 
 void DiscordHandler::SetImagePresence()
 {
-    switch ( pref::GetImageSettings() )
+    switch ( static_cast<config::ImageSetting>( config::g_imageSettings.GetSavedValue() ) )
     {
-    case pref::ImageSetting::Light:
+    case config::ImageSetting::Light:
     {
         presence_.largeImageKey = "foobar2000";
         break;
     }
-    case pref::ImageSetting::Dark:
+    case config::ImageSetting::Dark:
     {
         presence_.largeImageKey = "foobar2000-dark";
         break;
     }
-    case pref::ImageSetting::Disabled:
+    case config::ImageSetting::Disabled:
     {
         presence_.largeImageKey = nullptr;
         break;
@@ -133,8 +133,8 @@ void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
         return result;
     };
 
-    state_ = queryData( pref::GetStateQuery() );
-    details_ = queryData( pref::GetDetailsQuery() );
+    state_ = queryData( config::g_stateQuery );
+    details_ = queryData( config::g_detailsQuery );
     pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
     pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
@@ -180,26 +180,26 @@ void DiscordHandler::RequestTimeRefresh()
 void DiscordHandler::SetDurationInPresence( double time )
 {
     auto pc = playback_control::get();
-    const pref::TimeSetting timeSetting = ( ( trackLength_ && pc->is_playing() && !pc->is_paused() )
-                                                ? pref::GetTimeSetting()
-                                                : pref::TimeSetting::Disabled );
+    const config::TimeSetting timeSetting = ( ( trackLength_ && pc->is_playing() && !pc->is_paused() )
+                                                  ? static_cast<config::TimeSetting>( config::g_timeSettings.GetSavedValue() )
+                                                  : config::TimeSetting::Disabled );
     switch ( timeSetting )
     {
-    case pref::TimeSetting::Elapsed:
+    case config::TimeSetting::Elapsed:
     {
         presence_.startTimestamp = std::time( nullptr ) - std::llround( time );
         presence_.endTimestamp = 0;
 
         break;
     }
-    case pref::TimeSetting::Remaining:
+    case config::TimeSetting::Remaining:
     {
         presence_.startTimestamp = 0;
         presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - std::llround( time ) ) );
 
         break;
     }
-    case pref::TimeSetting::Disabled:
+    case config::TimeSetting::Disabled:
     {
         presence_.startTimestamp = 0;
         presence_.endTimestamp = 0;
@@ -211,7 +211,7 @@ void DiscordHandler::SetDurationInPresence( double time )
 
 void DiscordHandler::UpdatePresense()
 {
-    if ( pref::IsEnabled() )
+    if ( config::g_isEnabled )
     {
         Discord_UpdatePresence( &presence_ );
     }

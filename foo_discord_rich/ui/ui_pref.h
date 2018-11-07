@@ -35,33 +35,11 @@ public:
 public:
     CDialogPref( preferences_page_callback::ptr callback );
 
-    static void InitConfiguration();
-
     // preferences_page_instance
     HWND get_wnd() override;
     t_uint32 get_state() override;
     void apply() override;
     void reset() override;
-
-public:
-    enum class ImageSetting : uint8_t
-    {
-        Light,
-        Dark,
-        Disabled
-    };
-    enum class TimeSetting : uint8_t
-    {
-        Elapsed,
-        Remaining,
-        Disabled
-    };
-
-    static bool IsEnabled();
-    static ImageSetting GetImageSettings();
-    static TimeSetting GetTimeSetting();
-    static const pfc::string8_fast& GetStateQuery();
-    static const pfc::string8_fast& GetDetailsQuery();
 
 private:
     BOOL OnInitDialog( HWND hwndFocus, LPARAM lParam );
@@ -71,12 +49,6 @@ private:
 
 private:
     preferences_page_callback::ptr m_callback;
-
-    static utils::CfgWrap<cfg_bool, bool> isEnabled_;
-    static utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> imageSettings_;
-    static utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> timeSettings_;
-    static utils::CfgWrap<cfg_string, pfc::string8_fast> stateQuery_;
-    static utils::CfgWrap<cfg_string, pfc::string8_fast> detailsQuery_;
 };
 
 } // namespace drp::ui

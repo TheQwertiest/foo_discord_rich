@@ -2,6 +2,7 @@
 #include "ui_pref.h"
 
 #include <discord_impl.h>
+#include <config.h>
 
 namespace
 {
@@ -46,33 +47,11 @@ preferences_page_factory_t<preferences_page_impl> g_pref;
 namespace drp::ui
 {
 
-utils::CfgWrap<cfg_bool, bool>
-    CDialogPref::isEnabled_( g_guid_drp_conf_is_enabled, true );
-
-utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t>
-    CDialogPref::imageSettings_( g_guid_drp_conf_image_settings, static_cast<uint8_t>( CDialogPref::ImageSetting::Light ) );
-
-utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t>
-    CDialogPref::timeSettings_( g_guid_drp_conf_time_settings, static_cast<uint8_t>( CDialogPref::TimeSetting::Elapsed ) );
-
-utils::CfgWrap<cfg_string, pfc::string8_fast>
-    CDialogPref::stateQuery_( g_guid_drp_conf_state_query, "[%title%]" );
-
-utils::CfgWrap<cfg_string, pfc::string8_fast>
-    CDialogPref::detailsQuery_( g_guid_drp_conf_details_query, "[%album artist%[: %album%]]" );
+using namespace config;
 
 CDialogPref::CDialogPref( preferences_page_callback::ptr callback )
     : m_callback( callback )
 {
-}
-
-void CDialogPref::InitConfiguration()
-{
-    isEnabled_.Reread();
-    imageSettings_.Reread();
-    timeSettings_.Reread();
-    stateQuery_.Reread();
-    detailsQuery_.Reread();
 }
 
 HWND CDialogPref::get_wnd()
@@ -83,22 +62,22 @@ HWND CDialogPref::get_wnd()
 t_uint32 CDialogPref::get_state()
 {
     const bool hasChanged =
-        isEnabled_.HasChanged()
-        || imageSettings_.HasChanged()
-        || timeSettings_.HasChanged()
-        || stateQuery_.HasChanged()
-        || detailsQuery_.HasChanged();
+        g_isEnabled.HasChanged()
+        || g_imageSettings.HasChanged()
+        || g_timeSettings.HasChanged()
+        || g_stateQuery.HasChanged()
+        || g_detailsQuery.HasChanged();
 
     return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
 }
 
 void CDialogPref::apply()
 {
-    isEnabled_.Apply();
-    imageSettings_.Apply();
-    timeSettings_.Apply();
-    stateQuery_.Apply();
-    detailsQuery_.Apply();
+    g_isEnabled.Apply();
+    g_imageSettings.Apply();
+    g_timeSettings.Apply();
+    g_stateQuery.Apply();
+    g_detailsQuery.Apply();
 
     OnChanged();
     drp::UpdateDiscordSettings();
@@ -106,40 +85,15 @@ void CDialogPref::apply()
 
 void CDialogPref::reset()
 {
-    isEnabled_.Reset();
-    imageSettings_.Reset();
-    timeSettings_.Reset();
-    stateQuery_.Reset();
-    detailsQuery_.Reset();
+    g_isEnabled.Reset();
+    g_imageSettings.Reset();
+    g_timeSettings.Reset();
+    g_stateQuery.Reset();
+    g_detailsQuery.Reset();
 
     UpdateUiFromCfg();
 
     OnChanged();
-}
-
-bool CDialogPref::IsEnabled()
-{
-    return isEnabled_;
-}
-
-CDialogPref::ImageSetting CDialogPref::GetImageSettings()
-{
-    return static_cast<ImageSetting>( imageSettings_.GetSavedValue() );
-}
-
-CDialogPref::TimeSetting CDialogPref::GetTimeSetting()
-{
-    return static_cast<TimeSetting>( timeSettings_.GetSavedValue() );
-}
-
-const pfc::string8_fast& CDialogPref::GetStateQuery()
-{
-    return stateQuery_;
-}
-
-const pfc::string8_fast& CDialogPref::GetDetailsQuery()
-{
-    return detailsQuery_;
 }
 
 BOOL CDialogPref::OnInitDialog( HWND hwndFocus, LPARAM lParam )
@@ -165,17 +119,17 @@ void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
     {
     case IDC_CHECK_IS_ENABLED:
     {
-        isEnabled_ = uButton_GetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED );
+        g_isEnabled = uButton_GetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED );
         break;
     }
     case IDC_TEXTBOX_STATE:
     {
-        stateQuery_ = getDlgItemText();
+        g_stateQuery = getDlgItemText();
         break;
     }
     case IDC_TEXTBOX_DETAILS:
     {
-        detailsQuery_ = getDlgItemText();
+        g_detailsQuery = getDlgItemText();
         break;
     }
     case IDC_RADIO_IMG_LIGHT:
@@ -184,15 +138,15 @@ void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
     {
         if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT ) )
         {
-            imageSettings_ = static_cast<uint8_t>( ImageSetting::Light );
+            g_imageSettings = static_cast<uint8_t>( ImageSetting::Light );
         }
         else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK ) )
         {
-            imageSettings_ = static_cast<uint8_t>( ImageSetting::Dark );
+            g_imageSettings = static_cast<uint8_t>( ImageSetting::Dark );
         }
         else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED ) )
         {
-            imageSettings_ = static_cast<uint8_t>( ImageSetting::Disabled );
+            g_imageSettings = static_cast<uint8_t>( ImageSetting::Disabled );
         }
         break;
     }
@@ -202,15 +156,15 @@ void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
     {
         if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_TIME_ELAPSED ) )
         {
-            timeSettings_ = static_cast<uint8_t>( TimeSetting::Elapsed );
+            g_timeSettings = static_cast<uint8_t>( TimeSetting::Elapsed );
         }
         else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_TIME_REMAINING ) )
         {
-            timeSettings_ = static_cast<uint8_t>( TimeSetting::Remaining );
+            g_timeSettings = static_cast<uint8_t>( TimeSetting::Remaining );
         }
         else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_TIME_DISABLED ) )
         {
-            timeSettings_ = static_cast<uint8_t>( TimeSetting::Disabled );
+            g_timeSettings = static_cast<uint8_t>( TimeSetting::Disabled );
         }
         break;
     }
@@ -228,17 +182,17 @@ void CDialogPref::OnChanged()
 
 void CDialogPref::UpdateUiFromCfg()
 {
-    uButton_SetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED, isEnabled_ );
+    uButton_SetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED, g_isEnabled );
 
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_STATE, stateQuery_.GetSavedValue().c_str() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_DETAILS, detailsQuery_.GetSavedValue().c_str() );
+    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_STATE, g_stateQuery.GetSavedValue().c_str() );
+    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_DETAILS, g_detailsQuery.GetSavedValue().c_str() );
 
-    const auto imageSettings = static_cast<ImageSetting>( imageSettings_.GetSavedValue() );
+    const auto imageSettings = static_cast<ImageSetting>( g_imageSettings.GetSavedValue() );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT, ImageSetting::Light == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK, ImageSetting::Dark == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED, ImageSetting::Disabled == imageSettings );
 
-    const auto timeSettings = static_cast<TimeSetting>( timeSettings_.GetSavedValue() );
+    const auto timeSettings = static_cast<TimeSetting>( g_timeSettings.GetSavedValue() );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_ELAPSED, TimeSetting::Elapsed == timeSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_REMAINING, TimeSetting::Remaining == timeSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_DISABLED, TimeSetting::Disabled == timeSettings );
