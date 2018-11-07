@@ -43,7 +43,7 @@ private:
 
     pfc::string8_fast state_;
     pfc::string8_fast details_;
-    uint64_t trackLength_ = 0;
+    double trackLength_ = 0;
 };
 
 DiscordHandler::DiscordHandler()
@@ -136,8 +136,8 @@ void DiscordHandler::UpdateTrack( metadb_handle_ptr metadb )
     details_ = queryData( config::g_detailsQuery );
     details_.truncate( 127 );
 
-    pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
-    trackLength_ = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
+    pfc::string8_fast lengthStr = queryData( "[%length_seconds_fp%]" );
+    trackLength_ = ( lengthStr.is_empty() ? 0 : stold( std::string( lengthStr ) ) );
 
     pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
@@ -164,7 +164,7 @@ void DiscordHandler::UpdateDuration( double time )
     case config::TimeSetting::Remaining:
     {
         presence_.startTimestamp = 0;
-        presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, ( trackLength_ - std::llround( time ) ) );
+        presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( trackLength_- time ) );
 
         break;
     }
