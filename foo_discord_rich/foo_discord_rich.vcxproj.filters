@@ -62,6 +62,9 @@
     <ClInclude Include="resource.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="utils\cfg_wrap.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />

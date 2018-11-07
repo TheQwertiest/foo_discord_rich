@@ -121,6 +121,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ui\ui_pref.h" />
     <ClInclude Include="utils\acfu_github.h" />
+    <ClInclude Include="utils\cfg_wrap.h" />
     <ClInclude Include="utils\string_helpers.h" />
     <ClInclude Include="utils\version_helpers.h" />
   </ItemGroup>

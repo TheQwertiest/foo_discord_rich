@@ -21,7 +21,10 @@ public:
     void Finalize();
 
 public:
-    void UpdateTrackData( metadb_handle_ptr metadb );
+    void OnSettingsChanged();
+
+    void SetImagePresence();
+    void UpdateTrackData( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void DisableTrackData();
     void UpdateDuration( double time, bool force = false );
     void DisableDuration();
@@ -39,10 +42,11 @@ private:
 private:
     DiscordRichPresence presence_;
 
+    metadb_handle_ptr metadb_;
+
     bool needToRefreshTime_ = false;
     pfc::string8_fast state_;
     pfc::string8_fast details_;
-    pfc::string8_fast partyId_;
     uint64_t trackLength_ = 0;
 };
 
@@ -61,23 +65,57 @@ void DiscordHandler::Initialize()
     handlers.errored = OnErrored;
 
     Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
+    SetImagePresence();
 }
 
 void DiscordHandler::Finalize()
 {
+    Discord_ClearPresence();
     Discord_Shutdown();
+}
+
+void DiscordHandler::OnSettingsChanged()
+{
+    SetImagePresence();
+    UpdateTrackData();
+}
+
+void DiscordHandler::SetImagePresence()
+{
+    switch ( pref::GetImageSettings() )
+    {
+    case pref::ImageSetting::Light:
+    {
+        presence_.largeImageKey = "foobar2000";
+        break;
+    }
+    case pref::ImageSetting::Dark:
+    {
+        presence_.largeImageKey = "foobar2000-dark";
+        break;
+    }
+    case pref::ImageSetting::Disabled:
+    {
+        presence_.largeImageKey = nullptr;
+        break;
+    }
+    }
 }
 
 void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
 {
     state_.reset();
     details_.reset();
-    partyId_.reset();
     trackLength_ = 0;
     needToRefreshTime_ = true;
 
+    if ( metadb.is_valid() )
+    { // Need to save in case refresh requested on settings update
+        metadb_ = metadb;
+    }
+
     auto pc = playback_control::get();
-    auto queryData = [&pc, &metadb]( const pfc::string8_fast& query ) {
+    auto queryData = [&pc, metadb = metadb_]( const pfc::string8_fast& query ) {
         titleformat_object::ptr tf;
         titleformat_compiler::get()->compile_safe( tf, query );
         pfc::string8_fast result;
@@ -97,7 +135,6 @@ void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
 
     state_ = queryData( pref::GetStateQuery() );
     details_ = queryData( pref::GetDetailsQuery() );
-    partyId_ = queryData( pref::GetPartyIdQuery() );
     pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
     pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
@@ -105,7 +142,6 @@ void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
 
     presence_.state = state_;
     presence_.details = details_;
-    presence_.partyId = partyId_;
     SetDurationInPresence( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
 
     UpdatePresense();
@@ -125,6 +161,8 @@ void DiscordHandler::UpdateDuration( double time, bool force )
 
     SetDurationInPresence( time );
     UpdatePresense();
+
+    needToRefreshTime_ = false;
 }
 
 void DiscordHandler::DisableDuration()
@@ -141,7 +179,10 @@ void DiscordHandler::RequestTimeRefresh()
 
 void DiscordHandler::SetDurationInPresence( double time )
 {
-    const pref::TimeSetting timeSetting = ( trackLength_ ? pref::GetTimeSetting() : pref::TimeSetting::Disabled );
+    auto pc = playback_control::get();
+    const pref::TimeSetting timeSetting = ( ( trackLength_ && pc->is_playing() && !pc->is_paused() )
+                                                ? pref::GetTimeSetting()
+                                                : pref::TimeSetting::Disabled );
     switch ( timeSetting )
     {
     case pref::TimeSetting::Elapsed:
@@ -170,21 +211,6 @@ void DiscordHandler::SetDurationInPresence( double time )
 
 void DiscordHandler::UpdatePresense()
 {
-    switch ( pref::GetImageSettings() )
-    { // TODO: if we can detect preferences changes, then move it to that callback instead
-    case pref::ImageSetting::Light:
-    case pref::ImageSetting::Dark:
-    {
-        presence_.largeImageKey = "foobar2000";
-        break;
-    }
-    case pref::ImageSetting::Disabled:
-    {
-        presence_.largeImageKey = nullptr;
-        break;
-    }
-    }
-
     if ( pref::IsEnabled() )
     {
         Discord_UpdatePresence( &presence_ );
@@ -238,7 +264,7 @@ public:
     }
     void on_playback_dynamic_info_track( const file_info& info ) override
     {
-        g_discordHandler.UpdateTrackData( metadb_handle_ptr() );
+        g_discordHandler.UpdateTrackData();
     }
     void on_playback_edited( metadb_handle_ptr track ) override
     {
@@ -287,7 +313,7 @@ play_callback_static_factory_t<PlaybackCallback> playbackCallback;
 
 } // namespace
 
-namespace discord
+namespace drp
 {
 
 void InitializeDiscord()
@@ -300,4 +326,9 @@ void FinalizeDiscord()
     g_discordHandler.Finalize();
 }
 
-} // namespace discord
+void UpdateDiscordSettings()
+{
+    g_discordHandler.OnSettingsChanged();
+}
+
+} // namespace drp

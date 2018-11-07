@@ -21,12 +21,12 @@ public:
     void on_init() override
     {
         drp::ui::CDialogPref::InitConfiguration();
-        discord::InitializeDiscord();
+        drp::InitializeDiscord();
     }
 
     void on_quit() override
     {
-        discord::FinalizeDiscord();
+        drp::FinalizeDiscord();
     }
 };
 

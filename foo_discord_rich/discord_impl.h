@@ -1,9 +1,10 @@
 #pragma once
 
-namespace discord
+namespace drp
 {
 
 void InitializeDiscord();
 void FinalizeDiscord();
+void UpdateDiscordSettings();
 
-} // namespace discord
+} // namespace drp
