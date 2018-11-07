@@ -134,11 +134,14 @@ void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
     };
 
     state_ = queryData( config::g_stateQuery );
+    state_.truncate( 127 );
     details_ = queryData( config::g_detailsQuery );
-    pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
-    pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
+    details_.truncate( 127 );
 
+    pfc::string8_fast lengthStr = queryData( "[%length_seconds%]" );
     trackLength_ = ( lengthStr.is_empty() ? 0 : stoll( std::string( lengthStr ) ) );
+
+    pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
     presence_.state = state_;
     presence_.details = details_;
