@@ -3,9 +3,6 @@
 // Used by foo_discord_rich.rc
 //
 #define IDD_DIALOG_PREFERENCE           107
-#define IDC_LIST_EDITOR_PROP            1050
-#define IDC_BUTTON_IMPORT               1051
-#define IDC_BUTTON_EXPORT               1052
 #define IDC_TEXTBOX_DETAILS             1068
 #define IDC_TEXTBOX_STATE               1069
 #define IDC_TEXTBOX_PARTYID             1070
