@@ -1,13 +1,13 @@
 #pragma once
 
-#define DRP_NAME "Discord Rich Presense Integration"
+#define DRP_NAME "Discord Rich Presense"
 #define DRP_DLL_NAME "foo_discord_rich.dll"
 
 #define DRP_STRINGIFY_HELPER( x ) #x
 #define DRP_STRINGIFY( x ) DRP_STRINGIFY_HELPER( x )
 
 #define DRP_VERSION_MAJOR 1
-#define DRP_VERSION_MINOR 0
+#define DRP_VERSION_MINOR 1
 #define DRP_VERSION_PATCH 0
 //#define DRP_VERSION_PRERELEASE_TEXT "alpha"
 
