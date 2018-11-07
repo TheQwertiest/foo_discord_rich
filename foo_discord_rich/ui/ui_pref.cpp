@@ -50,17 +50,23 @@ namespace drp::ui
 using namespace config;
 
 CDialogPref::CDialogPref( preferences_page_callback::ptr callback )
-    : m_callback( callback )
+    : callback_( callback )
+    , configs_( {
+          config::g_isEnabled,
+          config::g_imageSettings,
+          config::g_timeSettings,
+          config::g_stateQuery,
+          config::g_detailsQuery,
+      } )
 {
 }
 
 CDialogPref::~CDialogPref()
 {
-    g_isEnabled.Revert();
-    g_imageSettings.Revert();
-    g_timeSettings.Revert();
-    g_stateQuery.Revert();
-    g_detailsQuery.Revert();
+    for ( auto& config : configs_ )
+    {
+        config.get().Revert();
+    }
 }
 
 HWND CDialogPref::get_wnd()
@@ -71,22 +77,19 @@ HWND CDialogPref::get_wnd()
 t_uint32 CDialogPref::get_state()
 {
     const bool hasChanged =
-        g_isEnabled.HasChanged()
-        || g_imageSettings.HasChanged()
-        || g_timeSettings.HasChanged()
-        || g_stateQuery.HasChanged()
-        || g_detailsQuery.HasChanged();
+        configs_.cend() != std::find_if( configs_.cbegin(), configs_.cend(), []( const auto& config ) {
+            return config.get().HasChanged();
+        } );
 
     return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
 }
 
 void CDialogPref::apply()
 {
-    g_isEnabled.Apply();
-    g_imageSettings.Apply();
-    g_timeSettings.Apply();
-    g_stateQuery.Apply();
-    g_detailsQuery.Apply();
+    for ( auto& config : configs_ )
+    {
+        config.get().Apply();
+    }
 
     OnChanged();
     drp::UpdateDiscordSettings();
@@ -94,11 +97,10 @@ void CDialogPref::apply()
 
 void CDialogPref::reset()
 {
-    g_isEnabled.ResetToDefault();
-    g_imageSettings.ResetToDefault();
-    g_timeSettings.ResetToDefault();
-    g_stateQuery.ResetToDefault();
-    g_detailsQuery.ResetToDefault();
+    for ( auto& config : configs_ )
+    {
+        config.get().ResetToDefault();
+    }
 
     UpdateUiFromCfg();
 
@@ -186,7 +188,7 @@ void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 
 void CDialogPref::OnChanged()
 {
-    m_callback->on_state_changed();
+    callback_->on_state_changed();
 }
 
 void CDialogPref::UpdateUiFromCfg()

@@ -3,8 +3,22 @@
 namespace utils
 {
 
+class ICfgWrap
+{
+public:
+    ICfgWrap(){};
+    virtual ~ICfgWrap() = default;
+
+    virtual void Reread() = 0;
+    virtual bool HasChanged() const = 0;
+    virtual void Apply() = 0;
+    virtual void Revert() = 0;
+    virtual void ResetToDefault() = 0;
+};
+
 template <typename T, typename InnerT>
 class CfgWrap
+    : public ICfgWrap
 {
 public:
     template <typename ArgT, class = typename std::enable_if_t<std::is_convertible_v<ArgT, InnerT>>>
@@ -15,10 +29,11 @@ public:
         , defValue_( defaultValue )
     {
     }
+    ~CfgWrap() override = default;
 
     CfgWrap( const CfgWrap& ) = delete;
 
-    void Reread()
+    void Reread() override
     {
         curValue_ = conf_;
         cachedConfValue_ = conf_;
@@ -36,7 +51,7 @@ public:
         return GetSavedValue();
     }
 
-    bool HasChanged() const
+    bool HasChanged() const override
     {
         return hasChanged_;
     }
@@ -57,7 +72,7 @@ public:
             hasChanged_ = true;
         }
     }
-    void Apply()
+    void Apply() override
     {
         if ( hasChanged_ )
         {
@@ -73,7 +88,7 @@ public:
             hasChanged_ = false;
         }
     }
-    void Revert()
+    void Revert() override
     {
         if ( hasChanged_ )
         {
@@ -81,7 +96,7 @@ public:
             hasChanged_ = false;
         }
     }
-    void ResetToDefault()
+    void ResetToDefault() override
     {
         curValue_ = defValue_;
         hasChanged_ = ( defValue_ != conf_ );

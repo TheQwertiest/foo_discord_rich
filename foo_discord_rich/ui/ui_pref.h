@@ -1,9 +1,10 @@
 #pragma once
 
 #include <utils/cfg_wrap.h>
-
-#include <resource.h>
 #include <component_defines.h>
+#include <resource.h>
+
+#include <array>
 
 namespace drp::ui
 {
@@ -49,7 +50,8 @@ private:
     void UpdateUiFromCfg();
 
 private:
-    preferences_page_callback::ptr m_callback;
+    preferences_page_callback::ptr callback_;
+    std::array<std::reference_wrapper<utils::ICfgWrap>, 5> configs_;
 };
 
 } // namespace drp::ui
