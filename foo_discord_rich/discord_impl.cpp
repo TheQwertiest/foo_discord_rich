@@ -23,16 +23,13 @@ public:
 public:
     void OnSettingsChanged();
 
-    void SetImagePresence();
-    void UpdateTrackData( metadb_handle_ptr metadb = metadb_handle_ptr() );
-    void DisableTrackData();
-    void UpdateDuration( double time, bool force = false );
-    void DisableDuration();
-    void RequestTimeRefresh();
+    void UpdateImage();
+    void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
+    void UpdateDuration( double time );
 
-private:
-    void SetDurationInPresence( double time );
-    void UpdatePresense();
+    void SendPresense();
+    void DisableDurationPresence();
+    void DisableAllPresence();
 
 private:
     static void OnReady( const DiscordUser* request );
@@ -44,7 +41,6 @@ private:
 
     metadb_handle_ptr metadb_;
 
-    bool needToRefreshTime_ = false;
     pfc::string8_fast state_;
     pfc::string8_fast details_;
     uint64_t trackLength_ = 0;
@@ -65,7 +61,9 @@ void DiscordHandler::Initialize()
     handlers.errored = OnErrored;
 
     Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
-    SetImagePresence();
+    Discord_RunCallbacks();
+
+    UpdateImage();
 }
 
 void DiscordHandler::Finalize()
@@ -76,11 +74,12 @@ void DiscordHandler::Finalize()
 
 void DiscordHandler::OnSettingsChanged()
 {
-    SetImagePresence();
-    UpdateTrackData();
+    UpdateImage();
+    UpdateTrack();
+    SendPresense();
 }
 
-void DiscordHandler::SetImagePresence()
+void DiscordHandler::UpdateImage()
 {
     switch ( static_cast<config::ImageSetting>( config::g_imageSettings.GetSavedValue() ) )
     {
@@ -102,12 +101,11 @@ void DiscordHandler::SetImagePresence()
     }
 }
 
-void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
+void DiscordHandler::UpdateTrack( metadb_handle_ptr metadb )
 {
     state_.reset();
     details_.reset();
     trackLength_ = 0;
-    needToRefreshTime_ = true;
 
     if ( metadb.is_valid() )
     { // Need to save in case refresh requested on settings update
@@ -145,42 +143,10 @@ void DiscordHandler::UpdateTrackData( metadb_handle_ptr metadb )
 
     presence_.state = state_;
     presence_.details = details_;
-    SetDurationInPresence( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
-
-    UpdatePresense();
+    UpdateDuration( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
 }
 
-void DiscordHandler::DisableTrackData()
-{
-    Discord_ClearPresence();
-}
-
-void DiscordHandler::UpdateDuration( double time, bool force )
-{
-    if ( !needToRefreshTime_ && !force )
-    {
-        return;
-    }
-
-    SetDurationInPresence( time );
-    UpdatePresense();
-
-    needToRefreshTime_ = false;
-}
-
-void DiscordHandler::DisableDuration()
-{
-    presence_.startTimestamp = 0;
-    presence_.endTimestamp = 0;
-    UpdatePresense();
-}
-
-void DiscordHandler::RequestTimeRefresh()
-{
-    needToRefreshTime_ = true;
-}
-
-void DiscordHandler::SetDurationInPresence( double time )
+void DiscordHandler::UpdateDuration( double time )
 {
     auto pc = playback_control::get();
     const config::TimeSetting timeSetting = ( ( trackLength_ && pc->is_playing() && !pc->is_paused() )
@@ -212,7 +178,7 @@ void DiscordHandler::SetDurationInPresence( double time )
     }
 }
 
-void DiscordHandler::UpdatePresense()
+void DiscordHandler::SendPresense()
 {
     if ( config::g_isEnabled )
     {
@@ -222,6 +188,19 @@ void DiscordHandler::UpdatePresense()
     {
         Discord_ClearPresence();
     }
+    Discord_RunCallbacks();
+}
+
+void DiscordHandler::DisableDurationPresence()
+{
+    presence_.startTimestamp = 0;
+    presence_.endTimestamp = 0;
+    SendPresense();
+}
+
+void DiscordHandler::DisableAllPresence()
+{
+    Discord_ClearPresence();
     Discord_RunCallbacks();
 }
 
@@ -262,54 +241,76 @@ public:
     {
         return flag_on_playback_all;
     }
-    void on_playback_dynamic_info( const file_info& info ) override
-    {
-    }
-    void on_playback_dynamic_info_track( const file_info& info ) override
-    {
-        g_discordHandler.UpdateTrackData();
-    }
-    void on_playback_edited( metadb_handle_ptr track ) override
-    {
-        g_discordHandler.UpdateTrackData( track );
+    void on_playback_starting( play_control::t_track_command cmd, bool paused ) override
+    { // ignore
     }
     void on_playback_new_track( metadb_handle_ptr track ) override
     {
-        g_discordHandler.UpdateTrackData( track );
-    }
-    void on_playback_pause( bool state ) override
-    {
-        if ( state )
-        {
-            g_discordHandler.DisableDuration();
-        }
-        else
-        {
-            g_discordHandler.RequestTimeRefresh();
-        }
-    }
-    void on_playback_seek( double time ) override
-    {
-        g_discordHandler.UpdateDuration( time, true );
-        g_discordHandler.RequestTimeRefresh(); ///< track seeking might take some time, thus on_playback_time is needed
-    }
-    void on_playback_starting( play_control::t_track_command cmd, bool paused ) override
-    {
+        on_playback_changed( track );
     }
     void on_playback_stop( play_control::t_stop_reason reason ) override
     {
         if ( play_control::t_stop_reason::stop_reason_starting_another != reason )
         {
-            g_discordHandler.DisableTrackData();
+            g_discordHandler.DisableAllPresence();
         }
+    }
+    void on_playback_seek( double time ) override
+    {
+        g_discordHandler.UpdateDuration( time );
+        if ( playback_control::get()->is_playing() )
+        { // track seeking might take some time, thus on_playback_time is needed
+            needTimeRefresh_ = true;
+        }
+        else
+        {
+            g_discordHandler.SendPresense();
+        }
+    }
+    void on_playback_pause( bool state ) override
+    {
+        if ( state )
+        {
+            g_discordHandler.DisableDurationPresence();
+        }
+        else
+        {
+            needTimeRefresh_ = true;
+        }
+    }
+    void on_playback_edited( metadb_handle_ptr track ) override
+    {
+        on_playback_changed( track );
+    }
+    void on_playback_dynamic_info( const file_info& info ) override
+    { // ignore
+    }
+    void on_playback_dynamic_info_track( const file_info& info ) override
+    {
+        on_playback_changed();
     }
     void on_playback_time( double time ) override
     {
-        g_discordHandler.UpdateDuration( time );
+        if ( needTimeRefresh_ )
+        {
+            g_discordHandler.UpdateDuration( time );
+            g_discordHandler.SendPresense();
+            needTimeRefresh_ = false;
+        }
     }
     void on_volume_change( float p_new_val ) override
-    {
+    { // ignore
     }
+
+private:
+    void on_playback_changed( metadb_handle_ptr track = metadb_handle_ptr() )
+    {
+        g_discordHandler.UpdateTrack( track );
+        g_discordHandler.SendPresense();
+    }
+
+private:
+    bool needTimeRefresh_ = false;
 };
 
 play_callback_static_factory_t<PlaybackCallback> playbackCallback;
