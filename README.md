@@ -21,6 +21,7 @@ Features:
 1. Install the component using the [following instructions](http://wiki.hydrogenaud.io/index.php?title=Foobar2000:How_to_install_a_component).
 
 ## Links
+[Support thread](https://hydrogenaud.io/index.php/topic,116860.new.html)  
 [Changelog][changelog]  
 [Nightly build](https://ci.appveyor.com/api/projects/theqwertiest/foo-discord-rich/artifacts/_result%2FWin32_Release%2Ffoo_discord_rich.fb2k-component?branch=master&job=Configuration%3A%20Release)
 
