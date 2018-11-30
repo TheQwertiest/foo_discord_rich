@@ -107,6 +107,7 @@
     <ClCompile Include="acfu_integration.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="discord_impl.cpp" />
+    <ClCompile Include="fb2k_callbacks.cpp" />
     <ClCompile Include="foo_discord_rich.cpp" />
     <ClCompile Include="mainmenu.cpp" />
     <ClCompile Include="stdafx.cpp">

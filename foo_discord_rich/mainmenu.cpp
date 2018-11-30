@@ -47,7 +47,7 @@ public:
     {
         drp::config::g_isEnabled = !drp::config::g_isEnabled;
         drp::config::g_isEnabled.Apply();
-        drp::UpdateDiscordSettings();
+        drp::DiscordHandler::GetInstance().OnSettingsChanged();
     }
     bool get_display( t_uint32 p_index, pfc::string_base& p_out, t_uint32& p_flags ) override
     {

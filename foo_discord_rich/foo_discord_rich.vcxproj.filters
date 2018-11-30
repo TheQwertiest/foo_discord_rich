@@ -42,6 +42,9 @@
     <ClCompile Include="config.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="fb2k_callbacks.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h">

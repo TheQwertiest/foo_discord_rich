@@ -92,7 +92,7 @@ void CDialogPref::apply()
     }
 
     OnChanged();
-    drp::UpdateDiscordSettings();
+    drp::DiscordHandler::GetInstance().OnSettingsChanged();
 }
 
 void CDialogPref::reset()

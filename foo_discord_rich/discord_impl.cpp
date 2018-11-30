@@ -3,117 +3,135 @@
 
 #include <config.h>
 
-#include <discord_rpc.h>
-
 #include <ctime>
 
-namespace
+namespace drp::internal
 {
 
-using namespace drp;
-
-class DiscordHandler
+PresenceData::PresenceData()
 {
-public:
-    DiscordHandler();
-
-    void Initialize();
-    void Finalize();
-
-public:
-    void OnSettingsChanged();
-
-    void UpdateImage();
-    void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
-    void UpdateDuration( double time );
-    void DisableDuration();
-
-    void SendPresense();
-    void ClearPresence();
-
-private:
-    static void OnReady( const DiscordUser* request );
-    static void OnDisconnected( int errorCode, const char* message );
-    static void OnErrored( int errorCode, const char* message );
-
-private:
-    DiscordRichPresence presence_;
-
-    metadb_handle_ptr metadb_;
-
-    pfc::string8_fast state_;
-    pfc::string8_fast details_;
-    double trackLength_ = 0;
-};
-
-DiscordHandler::DiscordHandler()
-{
-    memset( &presence_, 0, sizeof( presence_ ) );
+    memset( &presence, 0, sizeof( presence ) );
+    presence.state = state.c_str();
+    presence.details = details.c_str();
 }
 
-void DiscordHandler::Initialize()
+PresenceData::PresenceData( const PresenceData& other )
 {
-    DiscordEventHandlers handlers;
-    memset( &handlers, 0, sizeof( handlers ) );
+    metadb = other.metadb;
+    state = other.state;
+    details = other.details;
+    trackLength = other.trackLength;
 
-    handlers.ready = OnReady;
-    handlers.disconnected = OnDisconnected;
-    handlers.errored = OnErrored;
-
-    Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
-    Discord_RunCallbacks();
-
-    UpdateImage();
+    memcpy( &presence, &other.presence, sizeof( presence ) );
+    presence.state = state.c_str();
+    presence.details = details.c_str();
 }
 
-void DiscordHandler::Finalize()
+PresenceData& PresenceData::operator=( const PresenceData& other )
 {
-    Discord_ClearPresence();
-    Discord_Shutdown();
+    if ( this != &other )
+    {
+        metadb = other.metadb;
+        state = other.state;
+        details = other.details;
+        trackLength = other.trackLength;
+
+        memcpy( &presence, &other.presence, sizeof( presence ) );
+        presence.state = state.c_str();
+        presence.details = details.c_str();
+    }
+
+    return *this;
 }
 
-void DiscordHandler::OnSettingsChanged()
+bool PresenceData::operator==( const PresenceData& other )
 {
-    UpdateImage();
-    UpdateTrack();
-    SendPresense();
+    auto areStringsSame = []( const char* a, const char* b ) {
+        return ( ( a == b ) || ( a && b && !strcmp( a, b ) ) );
+    };
+
+    return ( areStringsSame( presence.state, other.presence.state )
+             && areStringsSame( presence.details, other.presence.details )
+             && areStringsSame( presence.largeImageKey, other.presence.largeImageKey )
+             && areStringsSame( presence.largeImageText, other.presence.largeImageText )
+             && areStringsSame( presence.smallImageKey, other.presence.smallImageKey )
+             && areStringsSame( presence.smallImageText, other.presence.smallImageText )
+             && trackLength == other.trackLength );
 }
 
-void DiscordHandler::UpdateImage()
+bool PresenceData::operator!=( const PresenceData& other )
 {
+    return operator==( other );
+}
+
+} // namespace drp::internal
+
+namespace drp
+{
+
+PresenceModifier::PresenceModifier( DiscordHandler& parent,
+                                    const drp::internal::PresenceData& presenceData )
+    : parent_( parent )
+    , presenceData_( presenceData )
+{
+}
+
+PresenceModifier::~PresenceModifier()
+{
+    if ( parent_.presenceData_ != presenceData_ )
+    {
+        parent_.presenceData_ = presenceData_;
+    }
+
+    if ( isCleared_ )
+    {
+        parent_.ClearPresence();
+    }
+    else
+    {
+        parent_.SendPresense();
+    }
+}
+
+void PresenceModifier::UpdateImage()
+{
+    auto& pd = presenceData_;
+
     switch ( static_cast<config::ImageSetting>( config::g_imageSettings.GetSavedValue() ) )
     {
     case config::ImageSetting::Light:
     {
-        presence_.largeImageKey = "foobar2000";
+        pd.presence.largeImageKey = "foobar2000";
         break;
     }
     case config::ImageSetting::Dark:
     {
-        presence_.largeImageKey = "foobar2000-dark";
+        pd.presence.largeImageKey = "foobar2000-dark";
         break;
     }
     case config::ImageSetting::Disabled:
     {
-        presence_.largeImageKey = nullptr;
+        pd.presence.largeImageKey = nullptr;
         break;
     }
     }
 }
 
-void DiscordHandler::UpdateTrack( metadb_handle_ptr metadb )
+void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
 {
-    state_.reset();
-    details_.reset();
-    trackLength_ = 0;
+    auto& pd = presenceData_;
+
+    pd.state.reset();
+    pd.details.reset();
+    pd.trackLength = 0;
 
     if ( metadb.is_valid() )
     { // Need to save in case refresh requested on settings update
-        metadb_ = metadb;
+        pd.metadb = metadb;
     }
 
     auto pc = playback_control::get();
-    auto queryData = [&pc, metadb = metadb_]( const pfc::string8_fast& query ) {
+    auto queryData = [&pc, metadb = pd.metadb]( const pfc::string8_fast& query ) {
         titleformat_object::ptr tf;
         titleformat_compiler::get()->compile_safe( tf, query );
         pfc::string8_fast result;
@@ -131,64 +149,107 @@ void DiscordHandler::UpdateTrack( metadb_handle_ptr metadb )
         return result;
     };
 
-    state_ = queryData( config::g_stateQuery );
-    state_.truncate( 127 );
-    details_ = queryData( config::g_detailsQuery );
-    details_.truncate( 127 );
+    pd.state = queryData( config::g_stateQuery );
+    pd.state.truncate( 127 );
+    pd.details = queryData( config::g_detailsQuery );
+    pd.details.truncate( 127 );
 
     pfc::string8_fast lengthStr = queryData( "[%length_seconds_fp%]" );
-    trackLength_ = ( lengthStr.is_empty() ? 0 : stold( std::string( lengthStr ) ) );
+    pd.trackLength = ( lengthStr.is_empty() ? 0 : stold( std::string( lengthStr ) ) );
 
     pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
 
-    presence_.state = state_;
-    presence_.details = details_;
+    pd.presence.state = pd.state.c_str();
+    pd.presence.details = pd.details.c_str();
     UpdateDuration( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
 }
 
-void DiscordHandler::UpdateDuration( double time )
+void PresenceModifier::UpdateDuration( double time )
 {
+    auto& pd = presenceData_;
     auto pc = playback_control::get();
-    const config::TimeSetting timeSetting = ( ( trackLength_ && pc->is_playing() && !pc->is_paused() )
+    const config::TimeSetting timeSetting = ( ( pd.trackLength && pc->is_playing() && !pc->is_paused() )
                                                   ? static_cast<config::TimeSetting>( config::g_timeSettings.GetSavedValue() )
                                                   : config::TimeSetting::Disabled );
     switch ( timeSetting )
     {
     case config::TimeSetting::Elapsed:
     {
-        presence_.startTimestamp = std::time( nullptr ) - std::llround( time );
-        presence_.endTimestamp = 0;
+        pd.presence.startTimestamp = std::time( nullptr ) - std::llround( time );
+        pd.presence.endTimestamp = 0;
 
         break;
     }
     case config::TimeSetting::Remaining:
     {
-        presence_.startTimestamp = 0;
-        presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( trackLength_ - time ) );
+        pd.presence.startTimestamp = 0;
+        pd.presence.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( pd.trackLength - time ) );
 
         break;
     }
     case config::TimeSetting::Disabled:
     {
-        presence_.startTimestamp = 0;
-        presence_.endTimestamp = 0;
+        pd.presence.startTimestamp = 0;
+        pd.presence.endTimestamp = 0;
 
         break;
     }
     }
 }
 
-void DiscordHandler::DisableDuration()
+void PresenceModifier::DisableDuration()
 {
-    presence_.startTimestamp = 0;
-    presence_.endTimestamp = 0;
+    auto& pd = presenceData_;
+    pd.presence.startTimestamp = 0;
+    pd.presence.endTimestamp = 0;
+}
+
+void PresenceModifier::Clear()
+{
+    isCleared_ = true;
+}
+
+DiscordHandler& DiscordHandler::GetInstance()
+{
+    static DiscordHandler discordHandler;
+    return discordHandler;
+}
+
+void DiscordHandler::Initialize()
+{
+    DiscordEventHandlers handlers;
+    memset( &handlers, 0, sizeof( handlers ) );
+
+    handlers.ready = OnReady;
+    handlers.disconnected = OnDisconnected;
+    handlers.errored = OnErrored;
+
+    Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
+    Discord_RunCallbacks();
+
+    auto pm = GetPresenceModifier();
+    pm.UpdateImage();
+    pm.Clear(); ///< we don't want to activate presence yet
+}
+
+void DiscordHandler::Finalize()
+{
+    Discord_ClearPresence();
+    Discord_Shutdown();
+}
+
+void DiscordHandler::OnSettingsChanged()
+{
+    auto pm = GetPresenceModifier();
+    pm.UpdateImage();
+    pm.UpdateTrack();
 }
 
 void DiscordHandler::SendPresense()
 {
     if ( config::g_isEnabled )
     {
-        Discord_UpdatePresence( &presence_ );
+        Discord_UpdatePresence( &presenceData_.presence );
     }
     else
     {
@@ -201,6 +262,11 @@ void DiscordHandler::ClearPresence()
 {
     Discord_ClearPresence();
     Discord_RunCallbacks();
+}
+
+PresenceModifier DiscordHandler::GetPresenceModifier()
+{
+    return PresenceModifier( *this, presenceData_ );
 }
 
 void DiscordHandler::OnReady( const DiscordUser* request )
@@ -224,115 +290,6 @@ void DiscordHandler::OnErrored( int errorCode, const char* message )
     {
         FB2K_console_formatter() << message;
     }
-}
-
-DiscordHandler g_discordHandler;
-
-} // namespace
-
-namespace
-{
-
-class PlaybackCallback : public play_callback_static
-{
-public:
-    unsigned get_flags() override
-    {
-        return flag_on_playback_all;
-    }
-    void on_playback_starting( play_control::t_track_command cmd, bool paused ) override
-    { // ignore
-    }
-    void on_playback_new_track( metadb_handle_ptr track ) override
-    {
-        on_playback_changed( track );
-    }
-    void on_playback_stop( play_control::t_stop_reason reason ) override
-    {
-        if ( play_control::t_stop_reason::stop_reason_starting_another != reason )
-        {
-            g_discordHandler.ClearPresence();
-        }
-    }
-    void on_playback_seek( double time ) override
-    {
-        if ( playback_control::get()->is_playing() )
-        { // track seeking might take some time, thus on_playback_time is needed
-            needTimeRefresh_ = true;
-        }
-        else
-        {
-            g_discordHandler.UpdateDuration( time );
-            g_discordHandler.SendPresense();
-        }
-    }
-    void on_playback_pause( bool state ) override
-    {
-        if ( state )
-        {
-            g_discordHandler.DisableDuration();
-            g_discordHandler.SendPresense();
-        }
-        else
-        {
-            needTimeRefresh_ = true;
-        }
-    }
-    void on_playback_edited( metadb_handle_ptr track ) override
-    {
-        on_playback_changed( track );
-    }
-    void on_playback_dynamic_info( const file_info& info ) override
-    { // ignore
-    }
-    void on_playback_dynamic_info_track( const file_info& info ) override
-    {
-        on_playback_changed();
-    }
-    void on_playback_time( double time ) override
-    {
-        if ( needTimeRefresh_ )
-        {
-            g_discordHandler.UpdateDuration( time );
-            g_discordHandler.SendPresense();
-            needTimeRefresh_ = false;
-        }
-    }
-    void on_volume_change( float p_new_val ) override
-    { // ignore
-    }
-
-private:
-    void on_playback_changed( metadb_handle_ptr track = metadb_handle_ptr() )
-    {
-        g_discordHandler.UpdateTrack( track );
-        g_discordHandler.SendPresense();
-    }
-
-private:
-    bool needTimeRefresh_ = false;
-};
-
-play_callback_static_factory_t<PlaybackCallback> playbackCallback;
-
-} // namespace
-
-namespace drp
-{
-
-void InitializeDiscord()
-{
-    g_discordHandler.Initialize();
-}
-
-void FinalizeDiscord()
-{
-    g_discordHandler.Finalize();
-}
-
-void UpdateDiscordSettings()
-{
-    g_discordHandler.OnSettingsChanged();
 }
 
 } // namespace drp

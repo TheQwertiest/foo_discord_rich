@@ -19,12 +19,12 @@ public:
     void on_init() override
     {
         drp::config::InitializeConfig();
-        drp::InitializeDiscord();
+        drp::DiscordHandler::GetInstance().Initialize();
     }
 
     void on_quit() override
     {
-        drp::FinalizeDiscord();
+        drp::DiscordHandler::GetInstance().Finalize();
     }
 };
 
