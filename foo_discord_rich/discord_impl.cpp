@@ -26,10 +26,10 @@ public:
     void UpdateImage();
     void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateDuration( double time );
+    void DisableDuration();
 
     void SendPresense();
-    void DisableDurationPresence();
-    void DisableAllPresence();
+    void ClearPresence();
 
 private:
     static void OnReady( const DiscordUser* request );
@@ -164,7 +164,7 @@ void DiscordHandler::UpdateDuration( double time )
     case config::TimeSetting::Remaining:
     {
         presence_.startTimestamp = 0;
-        presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( trackLength_- time ) );
+        presence_.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( trackLength_ - time ) );
 
         break;
     }
@@ -176,6 +176,12 @@ void DiscordHandler::UpdateDuration( double time )
         break;
     }
     }
+}
+
+void DiscordHandler::DisableDuration()
+{
+    presence_.startTimestamp = 0;
+    presence_.endTimestamp = 0;
 }
 
 void DiscordHandler::SendPresense()
@@ -191,14 +197,7 @@ void DiscordHandler::SendPresense()
     Discord_RunCallbacks();
 }
 
-void DiscordHandler::DisableDurationPresence()
-{
-    presence_.startTimestamp = 0;
-    presence_.endTimestamp = 0;
-    SendPresense();
-}
-
-void DiscordHandler::DisableAllPresence()
+void DiscordHandler::ClearPresence()
 {
     Discord_ClearPresence();
     Discord_RunCallbacks();
@@ -252,18 +251,18 @@ public:
     {
         if ( play_control::t_stop_reason::stop_reason_starting_another != reason )
         {
-            g_discordHandler.DisableAllPresence();
+            g_discordHandler.ClearPresence();
         }
     }
     void on_playback_seek( double time ) override
     {
-        g_discordHandler.UpdateDuration( time );
         if ( playback_control::get()->is_playing() )
         { // track seeking might take some time, thus on_playback_time is needed
             needTimeRefresh_ = true;
         }
         else
         {
+            g_discordHandler.UpdateDuration( time );
             g_discordHandler.SendPresense();
         }
     }
@@ -271,7 +270,8 @@ public:
     {
         if ( state )
         {
-            g_discordHandler.DisableDurationPresence();
+            g_discordHandler.DisableDuration();
+            g_discordHandler.SendPresense();
         }
         else
         {
