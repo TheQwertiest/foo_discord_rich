@@ -8,6 +8,11 @@
 ___
 
 ## [Unreleased][]
+### Changed
+- Improved the frequency of presence updates.
+
+### Fixed
+- Fixed title formatting not updating when pausing and resuuming playback.
 
 ## [1.1.0][] - 2018-11-07
 
