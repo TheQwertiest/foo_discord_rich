@@ -33,7 +33,7 @@ public:
     {
         if ( playback_control::get()->is_playing() )
         { // track seeking might take some time, thus on_playback_time is needed
-            needTimeRefresh_ = true;
+            needPresenceRefresh_ = true;
         }
         else
         {
@@ -46,11 +46,11 @@ public:
         if ( state )
         {
             auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
-            pm.DisableDuration();
+            pm.UpdateTrack();
         }
         else
-        {
-            needTimeRefresh_ = true;
+        { // resuming playback may take some time, thus on_playback_time is needed
+            needPresenceRefresh_ = true;
         }
     }
     void on_playback_edited( metadb_handle_ptr track ) override
@@ -66,12 +66,12 @@ public:
     }
     void on_playback_time( double time ) override
     {
-        if ( needTimeRefresh_ )
+        if ( needPresenceRefresh_ )
         {
             auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
-            pm.UpdateDuration( time );
+            pm.UpdateTrack();
 
-            needTimeRefresh_ = false;
+            needPresenceRefresh_ = false;
         }
     }
     void on_volume_change( float p_new_val ) override
@@ -86,7 +86,7 @@ private:
     }
 
 private:
-    bool needTimeRefresh_ = false;
+    bool needPresenceRefresh_ = false;
 };
 
 play_callback_static_factory_t<PlaybackCallback> playbackCallback;

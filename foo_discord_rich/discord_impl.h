@@ -28,6 +28,7 @@ namespace drp
 
 class DiscordHandler;
 
+/// @details Destructor updates presence data in parent and sends it to Discord
 class PresenceModifier
 {
     friend class drp::DiscordHandler;
@@ -39,6 +40,9 @@ public:
     void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateDuration( double time );
     void DisableDuration();
+
+    /// @brief Disables Discord Rich Presence
+    /// @details The updated data will still be transferred to parent
     void Clear();
 
 private:
