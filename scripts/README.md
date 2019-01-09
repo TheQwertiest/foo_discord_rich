@@ -6,3 +6,4 @@
 - fetch_submodules.bat - Download submodule sources.
 - update_submodules.bat - Update submodules to their latest HEADs.
 - prepare_discord_rpc.bat - Configure discord-rpc.
+- generate_commit_hash_header - Generate `commit_hash.h` header, which contains commit hash.
