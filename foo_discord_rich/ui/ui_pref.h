@@ -51,7 +51,7 @@ private:
 
 private:
     preferences_page_callback::ptr callback_;
-    std::array<std::reference_wrapper<utils::ICfgWrap>, 5> configs_;
+    std::array<std::reference_wrapper<utils::ICfgWrap>, 13> configs_;
 };
 
 } // namespace drp::ui

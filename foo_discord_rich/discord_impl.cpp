@@ -17,28 +17,14 @@ PresenceData::PresenceData()
 
 PresenceData::PresenceData( const PresenceData& other )
 {
-    metadb = other.metadb;
-    state = other.state;
-    details = other.details;
-    trackLength = other.trackLength;
-
-    memcpy( &presence, &other.presence, sizeof( presence ) );
-    presence.state = state.c_str();
-    presence.details = details.c_str();
+    CopyData( other );
 }
 
 PresenceData& PresenceData::operator=( const PresenceData& other )
 {
     if ( this != &other )
     {
-        metadb = other.metadb;
-        state = other.state;
-        details = other.details;
-        trackLength = other.trackLength;
-
-        memcpy( &presence, &other.presence, sizeof( presence ) );
-        presence.state = state.c_str();
-        presence.details = details.c_str();
+        CopyData( other );
     }
 
     return *this;
@@ -66,6 +52,22 @@ bool PresenceData::operator!=( const PresenceData& other )
     return !operator==( other );
 }
 
+void PresenceData::CopyData( const PresenceData& other )
+{
+    metadb = other.metadb;
+    state = other.state;
+    details = other.details;
+    largeImageKey = other.largeImageKey;
+    smallImageKey = other.smallImageKey;
+    trackLength = other.trackLength;
+
+    memcpy( &presence, &other.presence, sizeof( presence ) );
+    presence.state = state.c_str();
+    presence.details = details.c_str();
+    presence.largeImageKey = largeImageKey.length() ? largeImageKey.c_str() : nullptr;
+    presence.smallImageKey = smallImageKey.length() ? smallImageKey.c_str() : nullptr;
+}
+
 } // namespace drp::internal
 
 namespace drp
@@ -80,16 +82,17 @@ PresenceModifier::PresenceModifier( DiscordHandler& parent,
 
 PresenceModifier::~PresenceModifier()
 {
-    if ( parent_.presenceData_ != presenceData_ )
+    const bool hasChanged = ( parent_.presenceData_ != presenceData_ );
+    if ( hasChanged )
     {
         parent_.presenceData_ = presenceData_;
     }
 
-    if ( isCleared_ )
+    if ( parent_.HasPresence() && isCleared_ )
     {
         parent_.ClearPresence();
     }
-    else
+    else if ( !parent_.HasPresence() || hasChanged )
     {
         parent_.SendPresense();
     }
@@ -99,21 +102,71 @@ void PresenceModifier::UpdateImage()
 {
     auto& pd = presenceData_;
 
-    switch ( static_cast<config::ImageSetting>( config::g_imageSettings.GetSavedValue() ) )
+    auto setImageKey = [&pd]( const pfc::string8_fast& imageKey )
+    {
+        pd.largeImageKey = imageKey;
+        pd.presence.largeImageKey = pd.largeImageKey.length() ? pd.largeImageKey.c_str() : nullptr;
+    };
+
+    switch ( static_cast<config::ImageSetting>( config::g_largeImageSettings.GetSavedValue() ) )
     {
     case config::ImageSetting::Light:
     {
-        pd.presence.largeImageKey = "foobar2000";
+        setImageKey( static_cast<pfc::string8_fast>( config::g_largeImageId_Light ) );
         break;
     }
     case config::ImageSetting::Dark:
     {
-        pd.presence.largeImageKey = "foobar2000-dark";
+        setImageKey( static_cast<pfc::string8_fast>( config::g_largeImageId_Dark ) );
         break;
     }
     case config::ImageSetting::Disabled:
     {
-        pd.presence.largeImageKey = nullptr;
+        setImageKey( pfc::string8_fast{} );
+        break;
+    }
+    }
+}
+
+void PresenceModifier::UpdateSmallImage()
+{
+    auto& pd = presenceData_;
+    auto pc = playback_control::get();
+
+    auto setImageKey = [&pd]( const pfc::string8_fast& imageKey ) {
+        pd.largeImageKey = imageKey;
+        pd.presence.largeImageKey = pd.largeImageKey.length() ? pd.largeImageKey.c_str() : nullptr;
+    };
+
+    switch ( static_cast<config::ImageSetting>( config::g_smallImageSettings.GetSavedValue() ) )
+    {
+    case config::ImageSetting::Light:
+    {
+        if ( pc->is_paused() )
+        {
+            setImageKey( static_cast<pfc::string8_fast>( config::g_pausedImageId_Light ) );
+        }
+        else
+        {
+            setImageKey( static_cast<pfc::string8_fast>( config::g_playingImageId_Light ) );
+        }
+        break;
+    }
+    case config::ImageSetting::Dark:
+    {
+        if ( pc->is_paused() )
+        {
+            setImageKey( static_cast<pfc::string8_fast>( config::g_pausedImageId_Dark ) );
+        }
+        else
+        {
+            setImageKey( static_cast<pfc::string8_fast>( config::g_playingImageId_Dark ) );
+        }
+        break;
+    }
+    case config::ImageSetting::Disabled:
+    {
+        setImageKey( pfc::string8_fast{} );
         break;
     }
     }
@@ -128,7 +181,7 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     pd.trackLength = 0;
 
     if ( metadb.is_valid() )
-    { // Need to save in case refresh requested on settings update
+    { // Need to save, since refresh might be required when settings are changed
         pd.metadb = metadb;
     }
 
@@ -219,6 +272,8 @@ DiscordHandler& DiscordHandler::GetInstance()
 
 void DiscordHandler::Initialize()
 {
+    appToken_ = config::g_discordAppToken;
+
     DiscordEventHandlers handlers;
     memset( &handlers, 0, sizeof( handlers ) );
 
@@ -226,7 +281,7 @@ void DiscordHandler::Initialize()
     handlers.disconnected = OnDisconnected;
     handlers.errored = OnErrored;
 
-    Discord_Initialize( "507982587416018945", &handlers, 1, nullptr );
+    Discord_Initialize( appToken_.c_str(), &handlers, 1, nullptr );
     Discord_RunCallbacks();
 
     auto pm = GetPresenceModifier();
@@ -242,9 +297,21 @@ void DiscordHandler::Finalize()
 
 void DiscordHandler::OnSettingsChanged()
 {
+    if ( appToken_ != config::g_discordAppToken )
+    {
+        Finalize();
+        Initialize();
+    }
+
     auto pm = GetPresenceModifier();
     pm.UpdateImage();
+    pm.UpdateSmallImage();
     pm.UpdateTrack();
+}
+
+bool DiscordHandler::HasPresence() const
+{
+    return hasPresence_;
 }
 
 void DiscordHandler::SendPresense()
@@ -252,10 +319,12 @@ void DiscordHandler::SendPresense()
     if ( config::g_isEnabled )
     {
         Discord_UpdatePresence( &presenceData_.presence );
+        hasPresence_ = true;
     }
     else
     {
         Discord_ClearPresence();
+        hasPresence_ = false;
     }
     Discord_RunCallbacks();
 }
@@ -263,6 +332,8 @@ void DiscordHandler::SendPresense()
 void DiscordHandler::ClearPresence()
 {
     Discord_ClearPresence();
+    hasPresence_ = false;
+
     Discord_RunCallbacks();
 }
 

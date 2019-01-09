@@ -53,10 +53,19 @@ CDialogPref::CDialogPref( preferences_page_callback::ptr callback )
     : callback_( callback )
     , configs_( {
           config::g_isEnabled,
-          config::g_imageSettings,
+          config::g_largeImageSettings,
+          config::g_smallImageSettings,
           config::g_timeSettings,
           config::g_stateQuery,
           config::g_detailsQuery,
+          
+          config::g_discordAppToken,
+          config::g_largeImageId_Light,
+          config::g_largeImageId_Dark,
+          config::g_playingImageId_Light,
+          config::g_playingImageId_Dark,
+          config::g_pausedImageId_Light,
+          config::g_pausedImageId_Dark,
       } )
 {
 }
@@ -149,15 +158,15 @@ void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
     {
         if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT ) )
         {
-            g_imageSettings = static_cast<uint8_t>( ImageSetting::Light );
+            g_largeImageSettings = static_cast<uint8_t>( ImageSetting::Light );
         }
         else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK ) )
         {
-            g_imageSettings = static_cast<uint8_t>( ImageSetting::Dark );
+            g_largeImageSettings = static_cast<uint8_t>( ImageSetting::Dark );
         }
         else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED ) )
         {
-            g_imageSettings = static_cast<uint8_t>( ImageSetting::Disabled );
+            g_largeImageSettings = static_cast<uint8_t>( ImageSetting::Disabled );
         }
         break;
     }
@@ -198,7 +207,7 @@ void CDialogPref::UpdateUiFromCfg()
     uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_STATE, g_stateQuery.GetCurrentValue() );
     uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_DETAILS, g_detailsQuery.GetCurrentValue() );
 
-    const auto imageSettings = static_cast<ImageSetting>( g_imageSettings.GetCurrentValue() );
+    const auto imageSettings = static_cast<ImageSetting>( g_largeImageSettings.GetCurrentValue() );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT, ImageSetting::Light == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK, ImageSetting::Dark == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED, ImageSetting::Disabled == imageSettings );

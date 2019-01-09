@@ -14,10 +14,16 @@ struct PresenceData
     bool operator==( const PresenceData& other );
     bool operator!=( const PresenceData& other );
 
+private:
+    void CopyData( const PresenceData& other );
+
+public:
     DiscordRichPresence presence;
     metadb_handle_ptr metadb;
     pfc::string8_fast state;
     pfc::string8_fast details;
+    pfc::string8_fast largeImageKey;
+    pfc::string8_fast smallImageKey;
     double trackLength = 0;
 };
 
@@ -37,6 +43,7 @@ public:
     ~PresenceModifier();
 
     void UpdateImage();
+    void UpdateSmallImage();
     void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateDuration( double time );
     void DisableDuration();
@@ -70,6 +77,7 @@ public:
     drp::PresenceModifier GetPresenceModifier();
 
 private:
+    bool HasPresence() const;
     void SendPresense();
     void ClearPresence();
 
@@ -81,6 +89,8 @@ private:
     static void OnErrored( int errorCode, const char* message );
 
 private:
+    bool hasPresence_ = false;
+    pfc::string8_fast appToken_;
     drp::internal::PresenceData presenceData_;
 };
 

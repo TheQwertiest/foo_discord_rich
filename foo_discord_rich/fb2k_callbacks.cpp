@@ -19,7 +19,10 @@ public:
     }
     void on_playback_new_track( metadb_handle_ptr track ) override
     {
-        on_playback_changed( track );
+        //on_playback_changed( track );
+        auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
+        pm.UpdateTrack( track );
+        pm.UpdateSmallImage();
     }
     void on_playback_stop( play_control::t_stop_reason reason ) override
     {
@@ -47,6 +50,7 @@ public:
         {
             auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
             pm.UpdateTrack();
+            pm.UpdateSmallImage();
         }
         else
         { // resuming playback may take some time, thus on_playback_time is needed
@@ -70,6 +74,7 @@ public:
         {
             auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
             pm.UpdateTrack();
+            pm.UpdateSmallImage();
 
             needPresenceRefresh_ = false;
         }
