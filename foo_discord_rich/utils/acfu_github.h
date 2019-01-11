@@ -16,12 +16,12 @@ using n_json = nlohmann::json;
 
 struct github_conf
 {
-    static const char* get_owner()
+    static pfc::string get_owner()
     {
         throw pfc::exception_not_implemented( "implement get_owner() in derived class" );
     }
 
-    static const char* get_repo()
+    static pfc::string get_repo()
     {
         throw pfc::exception_not_implemented( "implement get_repo() in derived class" );
     }
@@ -47,10 +47,16 @@ class github_releases
     : public ::acfu::request
 {
 public:
-    virtual void run( file_info& info, abort_callback& abort )
+    void run( file_info& info, abort_callback& abort ) override
     {
         pfc::string8 url = form_releases_url();
         http_request::ptr request = t_github_conf::create_http_request();
+
+        service_enum_t<::acfu::authorization> e;
+        for ( service_ptr_t<::acfu::authorization> auth; e.next( auth ); )
+        {
+            auth->authorize( url.get_ptr(), request, abort );
+        }
 
         file::ptr response = request->run_ex( url.get_ptr(), abort );
         pfc::array_t<uint8_t> data;
@@ -169,7 +175,7 @@ class github_latest_release
     : public github_releases<t_github_conf>
 {
 protected:
-    virtual pfc::string8 form_releases_url()
+    pfc::string8 form_releases_url() override
     {
         pfc::string8 url;
         url << "https://api.github.com/repos/" << t_github_conf::get_owner()
@@ -177,7 +183,7 @@ protected:
         return url;
     }
 
-    virtual void process_response( const n_json& json, file_info& info )
+    void process_response( const n_json& json, file_info& info ) override
     {
         ACFU_EXPECT_JSON( json.is_object() );
         if ( t_github_conf::is_acceptable_release( json ) )
