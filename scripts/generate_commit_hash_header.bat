@@ -14,7 +14,7 @@ if not exist "%GENERATED_DIR%" mkdir "%GENERATED_DIR%"
 
 echo #pragma once>> "%HASH_HEADER%"
 echo.>> "%HASH_HEADER%"
-echo #define SMP_COMMIT_HASH \>> "%HASH_HEADER%"
+echo #define DRP_COMMIT_HASH \>> "%HASH_HEADER%"
 
 call git rev-parse --short HEAD>> "%HASH_HEADER%"
 if errorlevel 1 goto fail
