@@ -114,7 +114,8 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ui\ui_pref.cpp" />
+    <ClCompile Include="ui\ui_pref_tab_main.cpp" />
+    <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
     <ClCompile Include="utils\string_helpers.cpp" />
     <ClCompile Include="utils\version_helpers.cpp" />
   </ItemGroup>
@@ -125,15 +126,15 @@
     <ClInclude Include="discord_impl.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="ui\ui_pref.h" />
+    <ClInclude Include="ui\ui_itab.h" />
+    <ClInclude Include="ui\ui_pref_tab_main.h" />
+    <ClInclude Include="ui\ui_pref_tab_manager.h" />
     <ClInclude Include="utils\acfu_github.h" />
     <ClInclude Include="utils\cfg_wrap.h" />
     <ClInclude Include="utils\string_helpers.h" />
     <ClInclude Include="utils\version_helpers.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\CHANGELOG.md" />
-    <None Include="..\README.md" />
     <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>

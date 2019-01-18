@@ -66,10 +66,10 @@ public:
     template <typename ArgT, class = typename std::enable_if_t<std::is_convertible_v<ArgT, InnerT>>>
     void SetValue( const ArgT& value )
     {
+        hasChanged_ = ( cachedConfValue_ != value );
         if ( curValue_ != value )
         {
             curValue_ = value;
-            hasChanged_ = true;
         }
     }
     void Apply() override

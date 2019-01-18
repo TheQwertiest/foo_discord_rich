@@ -1,0 +1,64 @@
+#pragma once
+
+#include <ui/ui_itab.h>
+#include <utils/cfg_wrap.h>
+#include <component_defines.h>
+#include <resource.h>
+
+#include <array>
+
+namespace drp::ui
+{
+
+class PreferenceTabMain;
+
+class PreferenceTabManager
+    : public CDialogImpl<PreferenceTabManager>
+    , public CWinDataExchange<PreferenceTabManager>
+    , public preferences_page_instance
+{
+public:
+    enum
+    {
+        IDD = IDD_PREFS_TAB_HOST
+    };
+
+    BEGIN_MSG_MAP( PreferenceTabManager )
+    MSG_WM_INITDIALOG( OnInitDialog )
+    MSG_WM_PARENTNOTIFY( OnParentNotify )
+    MESSAGE_HANDLER( WM_WINDOWPOSCHANGED, OnWindowPosChanged )
+    NOTIFY_HANDLER_EX( IDC_TAB1, TCN_SELCHANGE, OnSelectionChanged )
+    END_MSG_MAP()
+
+public:
+    PreferenceTabManager( preferences_page_callback::ptr callback );
+    ~PreferenceTabManager() override;
+
+    void OnDataChanged();
+
+    // preferences_page_instance
+    HWND get_wnd() override;
+    t_uint32 get_state() override;
+    void apply() override;
+    void reset() override;
+
+private:
+    BOOL OnInitDialog( HWND hwndFocus, LPARAM lParam );
+    void OnParentNotify( UINT message, UINT nChildID, LPARAM lParam );
+    LRESULT OnWindowPosChanged( UINT, WPARAM, LPARAM lp, BOOL& bHandled );
+    LRESULT OnSelectionChanged( LPNMHDR pNmhdr );
+
+    void CreateTab();
+    void DestroyTab();
+
+private:
+    preferences_page_callback::ptr callback_;
+
+    HWND hTabs_ = nullptr;
+    HWND hChild_ = nullptr;
+
+    size_t activeTabIdx_ = 0;
+    std::vector<std::unique_ptr<ITab>> tabs_;
+};
+
+} // namespace drp::ui

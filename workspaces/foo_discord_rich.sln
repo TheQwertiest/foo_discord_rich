@@ -13,6 +13,25 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foo_discord_rich", "..\foo_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "discord-rpc", "..\submodules\discord-rpc\src\discord-rpc.vcxproj", "{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{84900D01-0673-48C4-AD17-635F2DA60810}"
+	ProjectSection(SolutionItems) = preProject
+		..\CHANGELOG.md = ..\CHANGELOG.md
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+		..\THIRD_PARTY_NOTICES.md = ..\THIRD_PARTY_NOTICES.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rd-party SDK", "3rd-party SDK", "{FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "licenses", "licenses", "{65871DB1-F490-47DD-8F69-8F279BB6A149}"
+	ProjectSection(SolutionItems) = preProject
+		..\component\licenses\Discord RPC.txt = ..\component\licenses\Discord RPC.txt
+		..\component\licenses\foobar2000 SDK.txt = ..\component\licenses\foobar2000 SDK.txt
+		..\component\licenses\JSON for Modern C++.txt = ..\component\licenses\JSON for Modern C++.txt
+		..\component\licenses\PFC.txt = ..\component\licenses\PFC.txt
+		..\component\licenses\WTL.txt = ..\component\licenses\WTL.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,8 +62,15 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
+		{E8091321-D79D-4575-86EF-064EA1A4A20D} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
+		{71AD2674-065B-48F5-B8B0-E1F9D3892081} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
+		{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
+		{65871DB1-F490-47DD-8F69-8F279BB6A149} = {84900D01-0673-48C4-AD17-635F2DA60810}
+	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionNewStyle = 1
 		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
+		SolutionNewStyle = 1
 	EndGlobalSection
 EndGlobal

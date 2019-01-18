@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utils/cfg_wrap.h>
+#include <ui/ui_itab.h>
 #include <component_defines.h>
 #include <resource.h>
 
@@ -9,18 +10,20 @@
 namespace drp::ui
 {
 
-class CDialogPref
-    : public CDialogImpl<CDialogPref>
-    , public CWinDataExchange<CDialogPref>
-    , public preferences_page_instance
+class PreferenceTabManager;
+
+class PreferenceTabMain
+    : public CDialogImpl<PreferenceTabMain>
+    , public CWinDataExchange<PreferenceTabMain>
+    , public ITab
 {
 public:
     enum
     {
-        IDD = IDD_DIALOG_PREFERENCE
+        IDD = IDD_PREFS_MAIN_TAB
     };
 
-    BEGIN_MSG_MAP( CDialogPref )
+    BEGIN_MSG_MAP( PreferenceTabMain )
     MSG_WM_INITDIALOG( OnInitDialog )
     COMMAND_HANDLER_EX( IDC_CHECK_IS_ENABLED, BN_CLICKED, OnEditChange )
     COMMAND_HANDLER_EX( IDC_TEXTBOX_STATE, EN_CHANGE, OnEditChange )
@@ -34,11 +37,12 @@ public:
     END_MSG_MAP()
 
 public:
-    CDialogPref( preferences_page_callback::ptr callback );
-    ~CDialogPref() override;
-
-    // preferences_page_instance
-    HWND get_wnd() override;
+    PreferenceTabMain( PreferenceTabManager* pParent );
+    ~PreferenceTabMain() override;
+    
+    // IUiTab
+    HWND CreateTab( HWND hParent ) override;
+    const char* Name() const override;
     t_uint32 get_state() override;
     void apply() override;
     void reset() override;
@@ -50,7 +54,7 @@ private:
     void UpdateUiFromCfg();
 
 private:
-    preferences_page_callback::ptr callback_;
+    PreferenceTabManager* pParent_ = nullptr;
     std::array<std::reference_wrapper<utils::ICfgWrap>, 13> configs_;
 };
 

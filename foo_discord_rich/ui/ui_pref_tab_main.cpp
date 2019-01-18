@@ -1,56 +1,17 @@
 #include <stdafx.h>
-#include "ui_pref.h"
+#include "ui_pref_tab_main.h"
 
+#include <ui/ui_pref_tab_manager.h>
 #include <discord_impl.h>
 #include <config.h>
-
-namespace
-{
-
-class preferences_page_impl
-    : public preferences_page_v3
-{
-public:
-    const char* get_name() override
-    {
-        return DRP_NAME;
-    }
-
-    GUID get_guid() override
-    {
-        return g_guid_drp_ui_pref;
-    }
-
-    GUID get_parent_guid() override
-    {
-        return preferences_page::guid_tools;
-    }
-
-    bool get_help_url( pfc::string_base& p_out ) override
-    {
-        p_out = "https://github.com/TheQwertiest/foo_discord_rich";
-        return true;
-    }
-
-    preferences_page_instance::ptr instantiate( HWND parent, preferences_page_callback::ptr callback ) override
-    {
-        auto p = fb2k::service_new<drp::ui::CDialogPref>( callback );
-        p->Create( parent );
-        return p;
-    }
-};
-
-preferences_page_factory_t<preferences_page_impl> g_pref;
-
-} // namespace
 
 namespace drp::ui
 {
 
 using namespace config;
 
-CDialogPref::CDialogPref( preferences_page_callback::ptr callback )
-    : callback_( callback )
+PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
+    : pParent_( pParent )
     , configs_( {
           config::g_isEnabled,
           config::g_largeImageSettings,
@@ -70,7 +31,7 @@ CDialogPref::CDialogPref( preferences_page_callback::ptr callback )
 {
 }
 
-CDialogPref::~CDialogPref()
+PreferenceTabMain::~PreferenceTabMain()
 {
     for ( auto& config : configs_ )
     {
@@ -78,12 +39,17 @@ CDialogPref::~CDialogPref()
     }
 }
 
-HWND CDialogPref::get_wnd()
+HWND PreferenceTabMain::CreateTab( HWND hParent )
 {
-    return m_hWnd;
+    return Create(hParent);
 }
 
-t_uint32 CDialogPref::get_state()
+const char* PreferenceTabMain::Name() const
+{
+    return "Main";
+}
+
+t_uint32 PreferenceTabMain::get_state()
 {
     const bool hasChanged =
         configs_.cend() != std::find_if( configs_.cbegin(), configs_.cend(), []( const auto& config ) {
@@ -93,18 +59,15 @@ t_uint32 CDialogPref::get_state()
     return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
 }
 
-void CDialogPref::apply()
+void PreferenceTabMain::apply()
 {
     for ( auto& config : configs_ )
     {
         config.get().Apply();
     }
-
-    OnChanged();
-    drp::DiscordHandler::GetInstance().OnSettingsChanged();
 }
 
-void CDialogPref::reset()
+void PreferenceTabMain::reset()
 {
     for ( auto& config : configs_ )
     {
@@ -112,18 +75,16 @@ void CDialogPref::reset()
     }
 
     UpdateUiFromCfg();
-
-    OnChanged();
 }
 
-BOOL CDialogPref::OnInitDialog( HWND hwndFocus, LPARAM lParam )
+BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
     UpdateUiFromCfg();
 
     return TRUE; // set focus to default control
 }
 
-void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
+void PreferenceTabMain::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
     auto getDlgItemText = [&wndCtl]() {
         CString tmp;
@@ -195,13 +156,18 @@ void CDialogPref::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
     OnChanged();
 }
 
-void CDialogPref::OnChanged()
+void PreferenceTabMain::OnChanged()
 {
-    callback_->on_state_changed();
+    pParent_->OnDataChanged();
 }
 
-void CDialogPref::UpdateUiFromCfg()
+void PreferenceTabMain::UpdateUiFromCfg()
 {
+    if ( !this->m_hWnd )
+    {
+        return;
+    }
+
     uButton_SetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED, g_isEnabled.GetCurrentValue() );
 
     uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_STATE, g_stateQuery.GetCurrentValue() );
