@@ -2,6 +2,7 @@
 #include "ui_pref_tab_manager.h"
 
 #include <ui/ui_pref_tab_main.h>
+#include <ui/ui_pref_tab_advanced.h>
 #include <discord_impl.h>
 #include <config.h>
 
@@ -54,6 +55,7 @@ PreferenceTabManager::PreferenceTabManager( preferences_page_callback::ptr callb
     : callback_( callback )
 {
     tabs_.emplace_back( std::make_unique<PreferenceTabMain>( this ) );
+    tabs_.emplace_back( std::make_unique<PreferenceTabAdvanced>( this ) );
 }
 
 PreferenceTabManager::~PreferenceTabManager()
@@ -104,17 +106,14 @@ void PreferenceTabManager::reset()
 
 BOOL PreferenceTabManager::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
-    hTabs_ = GetDlgItem( IDC_TAB1 );
+    cTabs_ = GetDlgItem( IDC_TAB1 );
 
-    for ( const auto& tab : tabs_ )
+    for ( size_t i = 0; i < tabs_.size(); ++i )
     {
-        uTCITEM tabs{};
-        tabs.mask = TCIF_TEXT;
-        tabs.pszText = const_cast<char*>( tab->Name() );
-        uTabCtrl_InsertItem( hTabs_, 0, &tabs );
+        cTabs_.InsertItem( i, tabs_[i]->Name() );
     }
 
-    TabCtrl_SetCurSel( hTabs_, activeTabIdx_ );
+    cTabs_.SetCurSel( activeTabIdx_ );
     CreateTab();
 
     return TRUE; // set focus to default control
@@ -122,9 +121,9 @@ BOOL PreferenceTabManager::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 
 void PreferenceTabManager::OnParentNotify( UINT message, UINT nChildID, LPARAM lParam )
 {
-    if ( WM_DESTROY == message && reinterpret_cast<HWND>(lParam) == hChild_ )
+    if ( WM_DESTROY == message && pcCurTab_ && reinterpret_cast<HWND>( lParam ) == static_cast<HWND>( *pcCurTab_ ) )
     {
-        hChild_ = nullptr;
+        pcCurTab_ = nullptr;
     }
 }
 
@@ -145,7 +144,7 @@ LRESULT PreferenceTabManager::OnWindowPosChanged( UINT, WPARAM, LPARAM lp, BOOL&
     {
         DestroyTab();
     }
-    else if ( lpwp->flags & SWP_SHOWWINDOW && !hChild_ )
+    else if ( lpwp->flags & SWP_SHOWWINDOW && !pcCurTab_ )
     {
         CreateTab();
     }
@@ -159,36 +158,36 @@ void PreferenceTabManager::CreateTab()
 {
     DestroyTab();
 
-    RECT tab;
+    RECT tabRc;
 
-    ::GetWindowRect( hTabs_, &tab );
-    ::MapWindowPoints( HWND_DESKTOP, m_hWnd, (LPPOINT)&tab, 2 );
+    cTabs_.GetWindowRect( &tabRc );
+    ::MapWindowPoints( HWND_DESKTOP, m_hWnd, (LPPOINT)&tabRc, 2 );
 
-    TabCtrl_AdjustRect( hTabs_, FALSE, &tab );
+    cTabs_.AdjustRect( FALSE, &tabRc );
 
     if ( activeTabIdx_ >= tabs_.size() )
     {
         activeTabIdx_ = 0;
     }
 
-    hChild_ = tabs_[activeTabIdx_]->CreateTab( m_hWnd );
-    assert( hChild_ );
+    auto& pCurTab = tabs_[activeTabIdx_];
+    pcCurTab_ = &pCurTab->Dialog();
+    pCurTab->CreateTab( m_hWnd );
     
-    EnableThemeDialogTexture( hChild_, ETDT_ENABLETAB );
+    EnableThemeDialogTexture( static_cast<HWND>( *pcCurTab_ ), ETDT_ENABLETAB );
 
-    ::SetWindowPos( hChild_, nullptr, tab.left, tab.top, tab.right - tab.left, tab.bottom - tab.top, SWP_NOZORDER );
-    ::SetWindowPos( hTabs_, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE );
+    pcCurTab_->SetWindowPos( nullptr, tabRc.left, tabRc.top, tabRc.right - tabRc.left, tabRc.bottom - tabRc.top, SWP_NOZORDER );
+    cTabs_.SetWindowPos( HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE );
 
-    ::ShowWindow( hChild_, SW_SHOWNORMAL );
+    pcCurTab_->ShowWindow( SW_SHOWNORMAL );
 }
 
 void PreferenceTabManager::DestroyTab()
 {
-    if ( hChild_ )
+    if ( pcCurTab_ && static_cast<HWND>( *pcCurTab_ ) )
     {
-        ::ShowWindow( hChild_, SW_HIDE );
-        ::DestroyWindow( hChild_ );
-        hChild_ = nullptr;
+        pcCurTab_->ShowWindow( SW_HIDE );
+        pcCurTab_->DestroyWindow();
     }
 }
 

@@ -134,8 +134,8 @@ void PresenceModifier::UpdateSmallImage()
     auto pc = playback_control::get();
 
     auto setImageKey = [&pd]( const pfc::string8_fast& imageKey ) {
-        pd.largeImageKey = imageKey;
-        pd.presence.largeImageKey = pd.largeImageKey.length() ? pd.largeImageKey.c_str() : nullptr;
+        pd.smallImageKey = imageKey;
+        pd.presence.smallImageKey = pd.smallImageKey.length() ? pd.smallImageKey.c_str() : nullptr;
     };
 
     switch ( static_cast<config::ImageSetting>( config::g_smallImageSettings.GetSavedValue() ) )

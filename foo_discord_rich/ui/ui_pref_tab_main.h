@@ -31,6 +31,9 @@ public:
     COMMAND_HANDLER_EX( IDC_RADIO_IMG_LIGHT, BN_CLICKED, OnEditChange )
     COMMAND_HANDLER_EX( IDC_RADIO_IMG_DARK, BN_CLICKED, OnEditChange )
     COMMAND_HANDLER_EX( IDC_RADIO_IMG_DISABLED, BN_CLICKED, OnEditChange )
+    COMMAND_HANDLER_EX( IDC_RADIO_PLAYBACK_IMG_LIGHT, BN_CLICKED, OnEditChange )
+    COMMAND_HANDLER_EX( IDC_RADIO_PLAYBACK_IMG_DARK, BN_CLICKED, OnEditChange )
+    COMMAND_HANDLER_EX( IDC_RADIO_PLAYBACK_IMG_DISABLED, BN_CLICKED, OnEditChange )
     COMMAND_HANDLER_EX( IDC_RADIO_TIME_ELAPSED, BN_CLICKED, OnEditChange )
     COMMAND_HANDLER_EX( IDC_RADIO_TIME_REMAINING, BN_CLICKED, OnEditChange )
     COMMAND_HANDLER_EX( IDC_RADIO_TIME_DISABLED, BN_CLICKED, OnEditChange )
@@ -42,7 +45,8 @@ public:
     
     // IUiTab
     HWND CreateTab( HWND hParent ) override;
-    const char* Name() const override;
+    CDialogImplBase& Dialog() override;
+    const wchar_t* Name() const override;
     t_uint32 get_state() override;
     void apply() override;
     void reset() override;
@@ -55,7 +59,7 @@ private:
 
 private:
     PreferenceTabManager* pParent_ = nullptr;
-    std::array<std::reference_wrapper<utils::ICfgWrap>, 13> configs_;
+    std::array<std::reference_wrapper<utils::ICfgWrap>, 6> configs_;
 };
 
 } // namespace drp::ui

@@ -15,7 +15,8 @@ public:
     virtual ~ITab() = default;
 
     virtual HWND CreateTab( HWND hParent ) = 0;
-    virtual const char* Name() const = 0;
+    virtual CDialogImplBase& Dialog() = 0;
+    virtual const wchar_t* Name() const = 0;
 
     // preferences_page_instance 
 

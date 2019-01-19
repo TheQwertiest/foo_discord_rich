@@ -45,6 +45,9 @@
     <ClCompile Include="ui\ui_pref_tab_main.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="ui\ui_pref_tab_advanced.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h">
@@ -84,6 +87,9 @@
       <Filter>ui</Filter>
     </ClInclude>
     <ClInclude Include="ui\ui_pref_tab_main.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\ui_pref_tab_advanced.h">
       <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>

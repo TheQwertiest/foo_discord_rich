@@ -54,8 +54,8 @@ private:
 private:
     preferences_page_callback::ptr callback_;
 
-    HWND hTabs_ = nullptr;
-    HWND hChild_ = nullptr;
+    CTabCtrl cTabs_;
+    CDialogImplBase* pcCurTab_ = nullptr;
 
     size_t activeTabIdx_ = 0;
     std::vector<std::unique_ptr<ITab>> tabs_;

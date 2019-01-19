@@ -18,15 +18,7 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
           config::g_smallImageSettings,
           config::g_timeSettings,
           config::g_stateQuery,
-          config::g_detailsQuery,
-          
-          config::g_discordAppToken,
-          config::g_largeImageId_Light,
-          config::g_largeImageId_Dark,
-          config::g_playingImageId_Light,
-          config::g_playingImageId_Dark,
-          config::g_pausedImageId_Light,
-          config::g_pausedImageId_Dark,
+          config::g_detailsQuery
       } )
 {
 }
@@ -41,12 +33,17 @@ PreferenceTabMain::~PreferenceTabMain()
 
 HWND PreferenceTabMain::CreateTab( HWND hParent )
 {
-    return Create(hParent);
+    return Create( hParent );
 }
 
-const char* PreferenceTabMain::Name() const
+CDialogImplBase& PreferenceTabMain::Dialog()
 {
-    return "Main";
+    return *this;
+}
+
+const wchar_t* PreferenceTabMain::Name() const
+{
+    return L"Main";
 }
 
 t_uint32 PreferenceTabMain::get_state()
@@ -92,8 +89,7 @@ void PreferenceTabMain::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl 
         {
             tmp = "";
         }
-        const pfc::string8_fast str8 = pfc::stringcvt::string_utf8_from_wide( tmp.GetBuffer() );
-        return str8;
+        return pfc::string8_fast{ pfc::stringcvt::string_utf8_from_wide( tmp.GetBuffer() ) };
     };
 
     switch ( nID )
@@ -128,6 +124,24 @@ void PreferenceTabMain::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl 
         else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED ) )
         {
             g_largeImageSettings = static_cast<uint8_t>( ImageSetting::Disabled );
+        }
+        break;
+    }
+    case IDC_RADIO_PLAYBACK_IMG_LIGHT:
+    case IDC_RADIO_PLAYBACK_IMG_DARK:
+    case IDC_RADIO_PLAYBACK_IMG_DISABLED:
+    {
+        if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_LIGHT ) )
+        {
+            g_smallImageSettings = static_cast<uint8_t>( ImageSetting::Light );
+        }
+        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DARK ) )
+        {
+            g_smallImageSettings = static_cast<uint8_t>( ImageSetting::Dark );
+        }
+        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DISABLED ) )
+        {
+            g_smallImageSettings = static_cast<uint8_t>( ImageSetting::Disabled );
         }
         break;
     }
@@ -177,6 +191,11 @@ void PreferenceTabMain::UpdateUiFromCfg()
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT, ImageSetting::Light == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK, ImageSetting::Dark == imageSettings );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED, ImageSetting::Disabled == imageSettings );
+
+    const auto smallImageSettings = static_cast<ImageSetting>( g_smallImageSettings.GetCurrentValue() );
+    uButton_SetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_LIGHT, ImageSetting::Light == smallImageSettings );
+    uButton_SetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DARK, ImageSetting::Dark == smallImageSettings );
+    uButton_SetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DISABLED, ImageSetting::Disabled == smallImageSettings );
 
     const auto timeSettings = static_cast<TimeSetting>( g_timeSettings.GetCurrentValue() );
     uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_ELAPSED, TimeSetting::Elapsed == timeSettings );

@@ -114,6 +114,7 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ui\ui_pref_tab_advanced.cpp" />
     <ClCompile Include="ui\ui_pref_tab_main.cpp" />
     <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
     <ClCompile Include="utils\string_helpers.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ui\ui_itab.h" />
+    <ClInclude Include="ui\ui_pref_tab_advanced.h" />
     <ClInclude Include="ui\ui_pref_tab_main.h" />
     <ClInclude Include="ui\ui_pref_tab_manager.h" />
     <ClInclude Include="utils\acfu_github.h" />

@@ -8,7 +8,7 @@ namespace drp::config
 
 utils::CfgWrap<cfg_bool, bool> g_isEnabled( g_guid_drp_conf_is_enabled, true );
 utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> g_largeImageSettings( g_guid_drp_conf_large_image_settings, static_cast<uint8_t>( ImageSetting::Light ) );
-utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> g_smallImageSettings( g_guid_drp_conf_small_image_settings, static_cast<uint8_t>( ImageSetting::Disabled ) );
+utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> g_smallImageSettings( g_guid_drp_conf_small_image_settings, static_cast<uint8_t>( ImageSetting::Light ) );
 utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> g_timeSettings( g_guid_drp_conf_time_settings, static_cast<uint8_t>( TimeSetting::Elapsed ) );
 utils::CfgWrap<cfg_string, pfc::string8_fast> g_stateQuery( g_guid_drp_conf_state_query, "[%title%]" );
 utils::CfgWrap<cfg_string, pfc::string8_fast> g_detailsQuery( g_guid_drp_conf_details_query, "[%album artist%[: %album%]]" );

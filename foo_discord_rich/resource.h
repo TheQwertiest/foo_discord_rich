@@ -4,6 +4,7 @@
 //
 #define IDD_PREFS_MAIN_TAB              107
 #define IDD_PREFS_TAB_HOST              116
+#define IDD_PREFS_ADVANCED_TAB          121
 #define IDC_TEXTBOX_DETAILS             1068
 #define IDC_TEXTBOX_STATE               1069
 #define IDC_TEXTBOX_PARTYID             1070
@@ -15,6 +16,16 @@
 #define IDC_CHECK_IS_ENABLED            1076
 #define IDC_RADIO_TIME_DISABLED         1077
 #define IDC_TAB1                        1078
+#define IDC_TEXTBOX_LARGE_LIGHT_ID      1079
+#define IDC_TEXTBOX_LARGE_DARK_ID       1080
+#define IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID 1081
+#define IDC_TEXTBOX_SMALL_PLAYING_DARK_ID 1083
+#define IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID 1084
+#define IDC_TEXTBOX_SMALL_PAUSED_DARK_ID 1085
+#define IDC_TEXTBOX_APP_TOKEN           1086
+#define IDC_RADIO_PLAYBACK_IMG_LIGHT    1087
+#define IDC_RADIO_PLAYBACK_IMG_DARK     1088
+#define IDC_RADIO_PLAYBACK_IMG_DISABLED 1089
 #ifndef IDC_STATIC
 #define IDC_STATIC                      -1
 #endif
@@ -23,9 +34,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        120
+#define _APS_NEXT_RESOURCE_VALUE        123
 #define _APS_NEXT_COMMAND_VALUE         40012
-#define _APS_NEXT_CONTROL_VALUE         1079
+#define _APS_NEXT_CONTROL_VALUE         1090
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
