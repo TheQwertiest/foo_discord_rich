@@ -12,15 +12,13 @@ using namespace config;
 
 PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
     : pParent_( pParent )
-    , configs_( {
-          config::g_discordAppToken,
-          config::g_largeImageId_Light,
-          config::g_largeImageId_Dark,
-          config::g_playingImageId_Light,
-          config::g_playingImageId_Dark,
-          config::g_pausedImageId_Light,
-          config::g_pausedImageId_Dark,
-      } )
+    , configs_( { CreateUiCfgWrap( config::g_discordAppToken, IDC_TEXTBOX_APP_TOKEN ),
+                  CreateUiCfgWrap( config::g_largeImageId_Light, IDC_TEXTBOX_LARGE_LIGHT_ID ),
+                  CreateUiCfgWrap( config::g_largeImageId_Dark, IDC_TEXTBOX_LARGE_DARK_ID ),
+                  CreateUiCfgWrap( config::g_playingImageId_Light, IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID ),
+                  CreateUiCfgWrap( config::g_playingImageId_Dark, IDC_TEXTBOX_SMALL_PLAYING_DARK_ID ),
+                  CreateUiCfgWrap( config::g_pausedImageId_Light, IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
+                  CreateUiCfgWrap( config::g_pausedImageId_Dark, IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ) } )
 {
 }
 
@@ -28,13 +26,13 @@ PreferenceTabAdvanced::~PreferenceTabAdvanced()
 {
     for ( auto& config : configs_ )
     {
-        config.get().Revert();
+        config->GetCfg().Revert();
     }
 }
 
 HWND PreferenceTabAdvanced::CreateTab( HWND hParent )
 {
-    return Create(hParent);
+    return Create( hParent );
 }
 
 CDialogImplBase& PreferenceTabAdvanced::Dialog()
@@ -51,7 +49,7 @@ t_uint32 PreferenceTabAdvanced::get_state()
 {
     const bool hasChanged =
         configs_.cend() != std::find_if( configs_.cbegin(), configs_.cend(), []( const auto& config ) {
-            return config.get().HasChanged();
+            return config->GetCfg().HasChanged();
         } );
 
     return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
@@ -61,7 +59,7 @@ void PreferenceTabAdvanced::apply()
 {
     for ( auto& config : configs_ )
     {
-        config.get().Apply();
+        config->GetCfg().Apply();
     }
 }
 
@@ -69,7 +67,7 @@ void PreferenceTabAdvanced::reset()
 {
     for ( auto& config : configs_ )
     {
-        config.get().ResetToDefault();
+        config->GetCfg().ResetToDefault();
     }
 
     UpdateUiFromCfg();
@@ -77,6 +75,10 @@ void PreferenceTabAdvanced::reset()
 
 BOOL PreferenceTabAdvanced::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
+    for ( auto& config : configs_ )
+    {
+        config->SetHwnd( m_hWnd );
+    }
     UpdateUiFromCfg();
 
     return TRUE; // set focus to default control
@@ -84,54 +86,13 @@ BOOL PreferenceTabAdvanced::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 
 void PreferenceTabAdvanced::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
-    auto getDlgItemText = [&wndCtl]() {
-        CString tmp;
-        if ( !wndCtl.GetWindowText( tmp ) )
-        {
-            tmp = "";
-        }
-        return pfc::string8_fast{ pfc::stringcvt::string_utf8_from_wide( tmp.GetBuffer() ) };
-    };
+    auto it = std::find_if( configs_.begin(), configs_.end(), [nID]( auto& val ) {
+        return val->IsMatchingId( nID );
+    } );
 
-    switch ( nID )
+    if ( configs_.end() != it )
     {
-    case IDC_TEXTBOX_APP_TOKEN:
-    {
-        g_discordAppToken = getDlgItemText();
-        break;
-    }
-    case IDC_TEXTBOX_LARGE_LIGHT_ID:
-    {
-        g_largeImageId_Light = getDlgItemText();
-        break;
-    }
-    case IDC_TEXTBOX_LARGE_DARK_ID:
-    {
-        g_largeImageId_Dark = getDlgItemText();
-        break;
-    }
-    case IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID:
-    {
-        g_playingImageId_Light = getDlgItemText();
-        break;
-    }
-    case IDC_TEXTBOX_SMALL_PLAYING_DARK_ID:
-    {
-        g_playingImageId_Dark = getDlgItemText();
-        break;
-    }
-    case IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID:
-    {
-        g_pausedImageId_Light = getDlgItemText();
-        break;
-    }
-    case IDC_TEXTBOX_SMALL_PAUSED_DARK_ID:
-    {
-        g_pausedImageId_Dark = getDlgItemText();
-        break;
-    }
-    default:
-        break;
+        ( *it )->ReadFromUi();
     }
 
     OnChanged();
@@ -149,13 +110,10 @@ void PreferenceTabAdvanced::UpdateUiFromCfg()
         return;
     }
 
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_APP_TOKEN, g_discordAppToken.GetCurrentValue() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_LARGE_LIGHT_ID, g_largeImageId_Light.GetCurrentValue() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_LARGE_DARK_ID, g_largeImageId_Dark.GetCurrentValue() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID, g_playingImageId_Light.GetCurrentValue() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_SMALL_PLAYING_DARK_ID, g_playingImageId_Dark.GetCurrentValue() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID, g_pausedImageId_Light.GetCurrentValue() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_SMALL_PAUSED_DARK_ID, g_pausedImageId_Dark.GetCurrentValue() );
+    for ( auto& config : configs_ )
+    {
+        config->WriteToUi();
+    }
 }
 
 } // namespace drp::ui

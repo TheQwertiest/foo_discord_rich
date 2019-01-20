@@ -127,6 +127,7 @@
     <ClInclude Include="discord_impl.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="ui\internal\ui_cfg_wrap.h" />
     <ClInclude Include="ui\ui_itab.h" />
     <ClInclude Include="ui\ui_pref_tab_advanced.h" />
     <ClInclude Include="ui\ui_pref_tab_main.h" />

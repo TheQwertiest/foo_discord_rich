@@ -1,8 +1,7 @@
 #pragma once
 
-#include <utils/cfg_wrap.h>
 #include <ui/ui_itab.h>
-#include <component_defines.h>
+#include <ui/internal/ui_cfg_wrap.h>
 #include <resource.h>
 
 #include <array>
@@ -54,7 +53,7 @@ private:
 
 private:
     PreferenceTabManager* pParent_ = nullptr;
-    std::array<std::reference_wrapper<utils::ICfgWrap>, 7> configs_;
+    std::array<std::unique_ptr<IUiCfgWrap>, 7> configs_;
 };
 
 } // namespace drp::ui

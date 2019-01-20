@@ -7,31 +7,31 @@ namespace drp::config
 
 enum class ImageSetting : uint8_t
 {
-    Light,
+    Light = 0,
     Dark,
     Disabled
 };
 enum class TimeSetting : uint8_t
 {
-    Elapsed,
+    Elapsed = 0,
     Remaining,
     Disabled
 };
 
-extern utils::CfgWrap<cfg_bool, bool> g_isEnabled;
-extern utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> g_largeImageSettings;
-extern utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> g_smallImageSettings;
-extern utils::CfgWrap<cfg_int_t<uint8_t>, uint8_t> g_timeSettings;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_stateQuery;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_detailsQuery;
+extern utils::CfgWrapBool g_isEnabled;
+extern utils::CfgWrapUint8 g_largeImageSettings;
+extern utils::CfgWrapUint8 g_smallImageSettings;
+extern utils::CfgWrapUint8 g_timeSettings;
+extern utils::CfgWrapString8 g_stateQuery;
+extern utils::CfgWrapString8 g_detailsQuery;
 
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_discordAppToken;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_largeImageId_Light;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_largeImageId_Dark;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_playingImageId_Light;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_playingImageId_Dark;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_pausedImageId_Dark;
-extern utils::CfgWrap<cfg_string, pfc::string8_fast> g_pausedImageId_Light;
+extern utils::CfgWrapString8 g_discordAppToken;
+extern utils::CfgWrapString8 g_largeImageId_Light;
+extern utils::CfgWrapString8 g_largeImageId_Dark;
+extern utils::CfgWrapString8 g_playingImageId_Light;
+extern utils::CfgWrapString8 g_playingImageId_Dark;
+extern utils::CfgWrapString8 g_pausedImageId_Dark;
+extern utils::CfgWrapString8 g_pausedImageId_Light;
 
 void InitializeConfig();
 

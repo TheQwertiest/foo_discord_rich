@@ -10,6 +10,9 @@
     <Filter Include="z_core">
       <UniqueIdentifier>{29a62391-d80b-4934-87d0-b385d169877e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ui\internal">
+      <UniqueIdentifier>{0f5bf5d1-b6fb-4b5e-a9fe-cfad57f5fa1f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="discord_impl.cpp">
@@ -91,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="ui\ui_pref_tab_advanced.h">
       <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\internal\ui_cfg_wrap.h">
+      <Filter>ui\internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

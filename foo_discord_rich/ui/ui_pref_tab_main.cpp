@@ -13,12 +13,12 @@ using namespace config;
 PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     : pParent_( pParent )
     , configs_( {
-          config::g_isEnabled,
-          config::g_largeImageSettings,
-          config::g_smallImageSettings,
-          config::g_timeSettings,
-          config::g_stateQuery,
-          config::g_detailsQuery
+          CreateUiCfgWrap( config::g_isEnabled, IDC_CHECK_IS_ENABLED ),
+          CreateUiCfgWrap( config::g_stateQuery, IDC_TEXTBOX_STATE ),
+          CreateUiCfgWrap( config::g_detailsQuery, IDC_TEXTBOX_DETAILS ),
+          CreateUiCfgWrapRange( config::g_largeImageSettings, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
+          CreateUiCfgWrapRange( config::g_smallImageSettings, std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
+          CreateUiCfgWrapRange( config::g_timeSettings, std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
       } )
 {
 }
@@ -27,7 +27,7 @@ PreferenceTabMain::~PreferenceTabMain()
 {
     for ( auto& config : configs_ )
     {
-        config.get().Revert();
+        config->GetCfg().Revert();
     }
 }
 
@@ -50,7 +50,7 @@ t_uint32 PreferenceTabMain::get_state()
 {
     const bool hasChanged =
         configs_.cend() != std::find_if( configs_.cbegin(), configs_.cend(), []( const auto& config ) {
-            return config.get().HasChanged();
+            return config->GetCfg().HasChanged();
         } );
 
     return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
@@ -60,7 +60,7 @@ void PreferenceTabMain::apply()
 {
     for ( auto& config : configs_ )
     {
-        config.get().Apply();
+        config->GetCfg().Apply();
     }
 }
 
@@ -68,7 +68,7 @@ void PreferenceTabMain::reset()
 {
     for ( auto& config : configs_ )
     {
-        config.get().ResetToDefault();
+        config->GetCfg().ResetToDefault();
     }
 
     UpdateUiFromCfg();
@@ -76,6 +76,10 @@ void PreferenceTabMain::reset()
 
 BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
+    for ( auto& config : configs_ )
+    {
+        config->SetHwnd( m_hWnd );
+    }
     UpdateUiFromCfg();
 
     return TRUE; // set focus to default control
@@ -83,88 +87,13 @@ BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 
 void PreferenceTabMain::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
-    auto getDlgItemText = [&wndCtl]() {
-        CString tmp;
-        if ( !wndCtl.GetWindowText( tmp ) )
-        {
-            tmp = "";
-        }
-        return pfc::string8_fast{ pfc::stringcvt::string_utf8_from_wide( tmp.GetBuffer() ) };
-    };
+    auto it = std::find_if( configs_.begin(), configs_.end(), [nID]( auto& val ) {
+        return val->IsMatchingId( nID );
+    } );
 
-    switch ( nID )
+    if ( configs_.end() != it )
     {
-    case IDC_CHECK_IS_ENABLED:
-    {
-        g_isEnabled = uButton_GetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED );
-        break;
-    }
-    case IDC_TEXTBOX_STATE:
-    {
-        g_stateQuery = getDlgItemText();
-        break;
-    }
-    case IDC_TEXTBOX_DETAILS:
-    {
-        g_detailsQuery = getDlgItemText();
-        break;
-    }
-    case IDC_RADIO_IMG_LIGHT:
-    case IDC_RADIO_IMG_DARK:
-    case IDC_RADIO_IMG_DISABLED:
-    {
-        if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT ) )
-        {
-            g_largeImageSettings = static_cast<uint8_t>( ImageSetting::Light );
-        }
-        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK ) )
-        {
-            g_largeImageSettings = static_cast<uint8_t>( ImageSetting::Dark );
-        }
-        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED ) )
-        {
-            g_largeImageSettings = static_cast<uint8_t>( ImageSetting::Disabled );
-        }
-        break;
-    }
-    case IDC_RADIO_PLAYBACK_IMG_LIGHT:
-    case IDC_RADIO_PLAYBACK_IMG_DARK:
-    case IDC_RADIO_PLAYBACK_IMG_DISABLED:
-    {
-        if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_LIGHT ) )
-        {
-            g_smallImageSettings = static_cast<uint8_t>( ImageSetting::Light );
-        }
-        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DARK ) )
-        {
-            g_smallImageSettings = static_cast<uint8_t>( ImageSetting::Dark );
-        }
-        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DISABLED ) )
-        {
-            g_smallImageSettings = static_cast<uint8_t>( ImageSetting::Disabled );
-        }
-        break;
-    }
-    case IDC_RADIO_TIME_ELAPSED:
-    case IDC_RADIO_TIME_REMAINING:
-    case IDC_RADIO_TIME_DISABLED:
-    {
-        if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_TIME_ELAPSED ) )
-        {
-            g_timeSettings = static_cast<uint8_t>( TimeSetting::Elapsed );
-        }
-        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_TIME_REMAINING ) )
-        {
-            g_timeSettings = static_cast<uint8_t>( TimeSetting::Remaining );
-        }
-        else if ( uButton_GetCheck( this->m_hWnd, IDC_RADIO_TIME_DISABLED ) )
-        {
-            g_timeSettings = static_cast<uint8_t>( TimeSetting::Disabled );
-        }
-        break;
-    }
-    default:
-        break;
+        ( *it )->ReadFromUi();
     }
 
     OnChanged();
@@ -182,25 +111,10 @@ void PreferenceTabMain::UpdateUiFromCfg()
         return;
     }
 
-    uButton_SetCheck( this->m_hWnd, IDC_CHECK_IS_ENABLED, g_isEnabled.GetCurrentValue() );
-
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_STATE, g_stateQuery.GetCurrentValue() );
-    uSetDlgItemText( this->m_hWnd, IDC_TEXTBOX_DETAILS, g_detailsQuery.GetCurrentValue() );
-
-    const auto imageSettings = static_cast<ImageSetting>( g_largeImageSettings.GetCurrentValue() );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_LIGHT, ImageSetting::Light == imageSettings );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DARK, ImageSetting::Dark == imageSettings );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_IMG_DISABLED, ImageSetting::Disabled == imageSettings );
-
-    const auto smallImageSettings = static_cast<ImageSetting>( g_smallImageSettings.GetCurrentValue() );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_LIGHT, ImageSetting::Light == smallImageSettings );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DARK, ImageSetting::Dark == smallImageSettings );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_PLAYBACK_IMG_DISABLED, ImageSetting::Disabled == smallImageSettings );
-
-    const auto timeSettings = static_cast<TimeSetting>( g_timeSettings.GetCurrentValue() );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_ELAPSED, TimeSetting::Elapsed == timeSettings );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_REMAINING, TimeSetting::Remaining == timeSettings );
-    uButton_SetCheck( this->m_hWnd, IDC_RADIO_TIME_DISABLED, TimeSetting::Disabled == timeSettings );
+    for ( auto& config : configs_ )
+    {
+        config->WriteToUi();
+    }
 }
 
 } // namespace drp::ui

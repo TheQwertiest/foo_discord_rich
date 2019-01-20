@@ -3,10 +3,12 @@
 namespace utils
 {
 
+/// @brief cfg_var wrapper for preferences page.
+/// @details Provides `apply`, `revert` and `reset to default` functionality.
 class ICfgWrap
 {
 public:
-    ICfgWrap(){};
+    ICfgWrap() = default;
     virtual ~ICfgWrap() = default;
 
     virtual void Reread() = 0;
@@ -16,6 +18,8 @@ public:
     virtual void ResetToDefault() = 0;
 };
 
+/// @brief cfg_var wrapper for preferences page.
+/// @details Provides `apply`, `revert` and `reset to default` functionality.
 template <typename T, typename InnerT>
 class CfgWrap
     : public ICfgWrap
@@ -28,6 +32,7 @@ public:
         , cachedConfValue_( conf_ )
         , defValue_( defaultValue )
     {
+        static_assert( std::is_base_of_v<cfg_var, T> );
     }
     ~CfgWrap() override = default;
 
@@ -109,5 +114,9 @@ private:
     InnerT curValue_;
     const InnerT defValue_;
 };
+
+using CfgWrapString8 = CfgWrap<cfg_string, pfc::string8_fast>;
+using CfgWrapBool = CfgWrap<cfg_bool, bool>;
+using CfgWrapUint8 = CfgWrap<cfg_int_t<uint8_t>, uint8_t>;
 
 } // namespace utils
