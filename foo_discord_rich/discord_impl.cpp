@@ -307,6 +307,10 @@ void DiscordHandler::OnSettingsChanged()
     pm.UpdateImage();
     pm.UpdateSmallImage();
     pm.UpdateTrack();
+    if ( !config::g_isEnabled )
+    {
+        pm.Clear();
+    }
 }
 
 bool DiscordHandler::HasPresence() const

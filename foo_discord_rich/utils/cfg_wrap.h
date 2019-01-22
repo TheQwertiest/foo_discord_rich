@@ -81,14 +81,7 @@ public:
     {
         if ( hasChanged_ )
         {
-            if constexpr ( std::is_same_v<T, cfg_string> )
-            {
-                conf_ = curValue_.c_str();
-            }
-            else
-            {
-                conf_ = curValue_;
-            }
+            conf_ = curValue_;
             cachedConfValue_ = conf_;
             hasChanged_ = false;
         }
