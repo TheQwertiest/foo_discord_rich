@@ -14,7 +14,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{2512D1C5-90F3-45D2-83E6-65C6FBBAB7B7}</ProjectGuid>
     <RootNamespace>foodiscordrich</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <!-- 14.22 is broken: https://developercommunity.visualstudio.com/content/problem/663321/ice-error-c1001-when-using-precompiled-header.html -->
   <Import Project="$(SolutionDir)\..\props\Microsoft.VCToolsVersion.14.21.props" />
@@ -22,7 +22,7 @@
   <PropertyGroup Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
     <UseOfMfc>false</UseOfMfc>

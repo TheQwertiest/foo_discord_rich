@@ -35,7 +35,7 @@ max_jobs: 1
 #---------------------------------#
 
 # Build worker image (VM template)
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 # this is how to allow failing jobs in the matrix
 matrix:
