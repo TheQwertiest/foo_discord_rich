@@ -15,13 +15,14 @@
 *.userprefs
 
 # Build results
-_result
+/_*
 *.fb2k-component
-*.idl
 [Dd]ebug/
 [Dd]ebugPublic/
+[Dd]ebug FB2K/
 [Rr]elease/
 [Rr]eleases/
+[Rr]elease FB2K/
 x64/
 x86/
 bld/
