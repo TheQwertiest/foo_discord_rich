@@ -4,7 +4,8 @@
 #include <commit_hash.h>
 
 #define DRP_NAME "Discord Rich Presense"
-#define DRP_DLL_NAME "foo_discord_rich.dll"
+#define DRP_UNDERSCORE_NAME "foo_discord_rich"
+#define DRP_DLL_NAME DRP_UNDERSCORE_NAME ".dll"
 
 #define DRP_STRINGIFY_HELPER( x ) #x
 #define DRP_STRINGIFY( x ) DRP_STRINGIFY_HELPER( x )

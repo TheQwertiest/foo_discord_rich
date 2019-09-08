@@ -64,8 +64,8 @@ void PresenceData::CopyData( const PresenceData& other )
     memcpy( &presence, &other.presence, sizeof( presence ) );
     presence.state = state.c_str();
     presence.details = details.c_str();
-    presence.largeImageKey = largeImageKey.length() ? largeImageKey.c_str() : nullptr;
-    presence.smallImageKey = smallImageKey.length() ? smallImageKey.c_str() : nullptr;
+    presence.largeImageKey = largeImageKey.empty() ? nullptr : largeImageKey.c_str();
+    presence.smallImageKey = smallImageKey.empty() ? nullptr : smallImageKey.c_str();
 }
 
 } // namespace drp::internal
@@ -88,7 +88,7 @@ PresenceModifier::~PresenceModifier()
         parent_.presenceData_ = presenceData_;
     }
 
-    if ( parent_.HasPresence() && isCleared_ )
+    if ( parent_.HasPresence() && isDisabled_ )
     {
         parent_.ClearPresence();
     }
@@ -102,27 +102,27 @@ void PresenceModifier::UpdateImage()
 {
     auto& pd = presenceData_;
 
-    auto setImageKey = [&pd]( const pfc::string8_fast& imageKey )
+    auto setImageKey = [&pd]( const std::u8string& imageKey )
     {
         pd.largeImageKey = imageKey;
-        pd.presence.largeImageKey = pd.largeImageKey.length() ? pd.largeImageKey.c_str() : nullptr;
+        pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
 
     switch ( static_cast<config::ImageSetting>( config::g_largeImageSettings.GetSavedValue() ) )
     {
     case config::ImageSetting::Light:
     {
-        setImageKey( static_cast<pfc::string8_fast>( config::g_largeImageId_Light ) );
+        setImageKey( config::g_largeImageId_Light );
         break;
     }
     case config::ImageSetting::Dark:
     {
-        setImageKey( static_cast<pfc::string8_fast>( config::g_largeImageId_Dark ) );
+        setImageKey( config::g_largeImageId_Dark );
         break;
     }
     case config::ImageSetting::Disabled:
     {
-        setImageKey( pfc::string8_fast{} );
+        setImageKey( std::u8string{} );
         break;
     }
     }
@@ -133,9 +133,9 @@ void PresenceModifier::UpdateSmallImage()
     auto& pd = presenceData_;
     auto pc = playback_control::get();
 
-    auto setImageKey = [&pd]( const pfc::string8_fast& imageKey ) {
+    auto setImageKey = [&pd]( const std::u8string& imageKey ) {
         pd.smallImageKey = imageKey;
-        pd.presence.smallImageKey = pd.smallImageKey.length() ? pd.smallImageKey.c_str() : nullptr;
+        pd.presence.smallImageKey = pd.smallImageKey.empty() ? nullptr : pd.smallImageKey.c_str();
     };
 
     switch ( static_cast<config::ImageSetting>( config::g_smallImageSettings.GetSavedValue() ) )
@@ -144,11 +144,11 @@ void PresenceModifier::UpdateSmallImage()
     {
         if ( pc->is_paused() )
         {
-            setImageKey( static_cast<pfc::string8_fast>( config::g_pausedImageId_Light ) );
+            setImageKey( config::g_pausedImageId_Light );
         }
         else
         {
-            setImageKey( static_cast<pfc::string8_fast>( config::g_playingImageId_Light ) );
+            setImageKey( config::g_playingImageId_Light );
         }
         break;
     }
@@ -156,17 +156,17 @@ void PresenceModifier::UpdateSmallImage()
     {
         if ( pc->is_paused() )
         {
-            setImageKey( static_cast<pfc::string8_fast>( config::g_pausedImageId_Dark ) );
+            setImageKey( config::g_pausedImageId_Dark );
         }
         else
         {
-            setImageKey( static_cast<pfc::string8_fast>( config::g_playingImageId_Dark ) );
+            setImageKey( config::g_playingImageId_Dark );
         }
         break;
     }
     case config::ImageSetting::Disabled:
     {
-        setImageKey( pfc::string8_fast{} );
+        setImageKey( std::u8string{} );
         break;
     }
     }
@@ -176,8 +176,8 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
 {
     auto& pd = presenceData_;
 
-    pd.state.reset();
-    pd.details.reset();
+    pd.state.clear();
+    pd.details.clear();
     pd.trackLength = 0;
 
     if ( metadb.is_valid() )
@@ -186,9 +186,9 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     }
 
     auto pc = playback_control::get();
-    auto queryData = [&pc, metadb = pd.metadb]( const pfc::string8_fast& query ) {
+    auto queryData = [&pc, metadb = pd.metadb]( const std::u8string& query ) -> std::u8string {
         titleformat_object::ptr tf;
-        titleformat_compiler::get()->compile_safe( tf, query );
+        titleformat_compiler::get()->compile_safe( tf, query.c_str() );
         pfc::string8_fast result;
 
         if ( pc->is_playing() )
@@ -201,22 +201,22 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
             metadb->format_title( nullptr, result, tf, nullptr );
         }
 
-        return result;
+        return result.c_str();
     };
 
     pd.state = queryData( config::g_stateQuery );
-    pd.state.truncate( 127 );
+    pd.state.resize( 127 );
     pd.details = queryData( config::g_detailsQuery );
-    pd.details.truncate( 127 );
+    pd.details.resize( 127 );
 
-    pfc::string8_fast lengthStr = queryData( "[%length_seconds_fp%]" );
-    pd.trackLength = ( lengthStr.is_empty() ? 0 : stold( std::string( lengthStr ) ) );
+    const std::u8string lengthStr = queryData( "[%length_seconds_fp%]" );
+    pd.trackLength = ( lengthStr.empty() ? 0 : stold( lengthStr ) );
 
-    pfc::string8_fast durationStr = queryData( "[%playback_time_seconds%]" );
+    const std::u8string durationStr = queryData( "[%playback_time_seconds%]" );
 
     pd.presence.state = pd.state.c_str();
     pd.presence.details = pd.details.c_str();
-    UpdateDuration( durationStr.is_empty() ? 0 : stold( std::string( durationStr ) ) );
+    UpdateDuration( durationStr.empty() ? 0 : stold( durationStr ) );
 }
 
 void PresenceModifier::UpdateDuration( double time )
@@ -259,9 +259,9 @@ void PresenceModifier::DisableDuration()
     pd.presence.endTimestamp = 0;
 }
 
-void PresenceModifier::Clear()
+void PresenceModifier::Disable()
 {
-    isCleared_ = true;
+    isDisabled_ = true;
 }
 
 DiscordHandler& DiscordHandler::GetInstance()
@@ -286,7 +286,7 @@ void DiscordHandler::Initialize()
 
     auto pm = GetPresenceModifier();
     pm.UpdateImage();
-    pm.Clear(); ///< we don't want to activate presence yet
+    pm.Disable(); ///< we don't want to activate presence yet
 }
 
 void DiscordHandler::Finalize()
@@ -309,7 +309,7 @@ void DiscordHandler::OnSettingsChanged()
     pm.UpdateTrack();
     if ( !config::g_isEnabled )
     {
-        pm.Clear();
+        pm.Disable();
     }
 }
 

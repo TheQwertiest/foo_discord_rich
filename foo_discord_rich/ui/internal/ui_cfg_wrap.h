@@ -3,6 +3,8 @@
 #include <utils/cfg_wrap.h>
 #include <resource.h>
 
+#include <nonstd/span.hpp>
+
 #include <initializer_list>
 #include <vector>
 
@@ -28,7 +30,7 @@ public:
 
 /// @brief utils::ICfgWrap wrapper for communication with UI elements.
 /// @details CfgWrapString8 - uGetDlgItemText//uSetDlgItemText
-///          CfgWrapBool - uButton_GetCheck//uButton_SerCheck
+///          CfgWrapBool - uButton_GetCheck//uButton_SetCheck
 template <typename T>
 class UiCfgWrap
     : public IUiCfgWrap
@@ -65,11 +67,7 @@ public:
         }
         else if constexpr ( std::is_same_v<T, utils::CfgWrapString8> )
         {
-            pfc::string8_fast tmp;
-            if ( uGetDlgItemText( hWnd_, controlId_, tmp ) )
-            {
-                cfgWrap_ = tmp;
-            }
+            cfgWrap_ = drp::pfc_x::uGetDlgItemText<char8_t>( hWnd_, controlId_ );
         }
         else
         {
@@ -89,7 +87,7 @@ public:
         }
         else if constexpr ( std::is_same_v<T, utils::CfgWrapString8> )
         {
-            uSetDlgItemText( hWnd_, controlId_, cfgWrap_.GetCurrentValue() );
+            uSetDlgItemText( hWnd_, controlId_, cfgWrap_.GetCurrentValue().c_str() );
         }
         else
         {
@@ -118,9 +116,9 @@ class UiCfgWrapRange
     : public IUiCfgWrap
 {
 public:
-    UiCfgWrapRange( utils::CfgWrapUint8& cfgWrap, std::initializer_list<int> controlIdList )
+    UiCfgWrapRange( utils::CfgWrapUint8& cfgWrap, nonstd::span<const int> controlIdList )
         : cfgWrap_( cfgWrap )
-        , controlIdList_( controlIdList )
+        , controlIdList_( controlIdList.begin(), controlIdList.end() )
     {
     }
     ~UiCfgWrapRange() override = default;
@@ -186,7 +184,7 @@ std::unique_ptr<IUiCfgWrap> CreateUiCfgWrap( T& cfgWrap, int controlId )
 }
 
 template <typename T>
-std::unique_ptr<IUiCfgWrap> CreateUiCfgWrapRange( T& cfgWrap, std::initializer_list<int> controlIdList )
+std::unique_ptr<IUiCfgWrap> CreateUiCfgWrapRange( T& cfgWrap, nonstd::span<const int> controlIdList )
 {
     static_assert( std::is_base_of_v<utils::ICfgWrap, T> );
     return std::make_unique<UiCfgWrapRange>( cfgWrap, controlIdList );

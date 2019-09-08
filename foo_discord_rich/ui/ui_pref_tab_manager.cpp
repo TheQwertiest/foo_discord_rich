@@ -20,7 +20,7 @@ public:
 
     GUID get_guid() override
     {
-        return g_guid_drp_ui_pref;
+        return drp::guid::ui_pref;
     }
 
     GUID get_parent_guid() override

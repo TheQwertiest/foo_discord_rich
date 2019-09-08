@@ -18,7 +18,7 @@ public:
         switch ( p_index )
         {
         case 0:
-            return g_guid_drp_mainmenu_cmd_enable;
+            return drp::guid::mainmenu_cmd_enable;
         default:
             uBugCheck();
         }

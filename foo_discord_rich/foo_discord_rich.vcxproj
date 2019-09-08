@@ -38,24 +38,33 @@
     <Import Project="$(SolutionDir)\..\props\BuildEnvCpp.props" />
     <Import Project="$(SolutionDir)\..\props\DynamicRuntime.props" />
     <Import Project="$(SolutionDir)\..\props\submodules.props" />
-    <Import Project="$(SolutionDir)\..\props\discord.props" />
-    <Import Project="$(SolutionDir)\..\props\json.props" />
-    <Import Project="$(SolutionDir)\..\props\foobar2000_sdk.props" />
-    <Import Project="$(SolutionDir)\..\props\pfc.props" />
-    <Import Project="$(SolutionDir)\..\props\wtl.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\discord.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\fmt.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\foobar2000_sdk.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\json.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\range.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\pfc.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\span_lite.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\wtl.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup>
+    <CAExcludePath>$(IncludePath);$(CAExcludePath)</CAExcludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir);$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm200 /experimental:preprocessor /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <DisableSpecificWarnings>5105</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
@@ -119,8 +128,11 @@
     <ClCompile Include="ui\ui_pref_tab_advanced.cpp" />
     <ClCompile Include="ui\ui_pref_tab_main.cpp" />
     <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
+    <ClCompile Include="utils\pfc_helpers_cfg.cpp" />
+    <ClCompile Include="utils\pfc_helpers_stream.cpp" />
+    <ClCompile Include="utils\semantic_version.cpp" />
     <ClCompile Include="utils\string_helpers.cpp" />
-    <ClCompile Include="utils\version_helpers.cpp" />
+    <ClCompile Include="utils\unicode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h" />
@@ -136,8 +148,12 @@
     <ClInclude Include="ui\ui_pref_tab_manager.h" />
     <ClInclude Include="utils\acfu_github.h" />
     <ClInclude Include="utils\cfg_wrap.h" />
+    <ClInclude Include="utils\pfc_helpers_cfg.h" />
+    <ClInclude Include="utils\pfc_helpers_stream.h" />
+    <ClInclude Include="utils\pfc_helpers_ui.h" />
+    <ClInclude Include="utils\semantic_version.h" />
     <ClInclude Include="utils\string_helpers.h" />
-    <ClInclude Include="utils\version_helpers.h" />
+    <ClInclude Include="utils\unicode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />

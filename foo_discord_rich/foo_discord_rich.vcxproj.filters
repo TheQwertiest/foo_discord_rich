@@ -24,9 +24,6 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>z_core</Filter>
     </ClCompile>
-    <ClCompile Include="utils\version_helpers.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="utils\string_helpers.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -51,6 +48,18 @@
     <ClCompile Include="ui\ui_pref_tab_advanced.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="utils\semantic_version.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\unicode.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\pfc_helpers_stream.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\pfc_helpers_cfg.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h">
@@ -63,9 +72,6 @@
       <Filter>z_core</Filter>
     </ClInclude>
     <ClInclude Include="utils\string_helpers.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\version_helpers.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\acfu_github.h">
@@ -97,6 +103,21 @@
     </ClInclude>
     <ClInclude Include="ui\internal\ui_cfg_wrap.h">
       <Filter>ui\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\pfc_helpers_stream.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\semantic_version.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\unicode.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\pfc_helpers_ui.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\pfc_helpers_cfg.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

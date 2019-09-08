@@ -20,10 +20,10 @@ private:
 public:
     DiscordRichPresence presence;
     metadb_handle_ptr metadb;
-    pfc::string8_fast state;
-    pfc::string8_fast details;
-    pfc::string8_fast largeImageKey;
-    pfc::string8_fast smallImageKey;
+    std::u8string state;
+    std::u8string details;
+    std::u8string largeImageKey;
+    std::u8string smallImageKey;
     double trackLength = 0;
 };
 
@@ -50,7 +50,7 @@ public:
 
     /// @brief Disables Discord Rich Presence
     /// @details The updated data will still be transferred to parent
-    void Clear();
+    void Disable();
 
 private:
     PresenceModifier( DiscordHandler& parent,
@@ -59,7 +59,7 @@ private:
 private:
     DiscordHandler& parent_;
 
-    bool isCleared_ = false;
+    bool isDisabled_ = false;
     drp::internal::PresenceData presenceData_;
 };
 
@@ -90,7 +90,7 @@ private:
 
 private:
     bool hasPresence_ = false;
-    pfc::string8_fast appToken_;
+    std::u8string appToken_;
     drp::internal::PresenceData presenceData_;
 };
 

@@ -29,7 +29,7 @@ public:
         if ( play_control::t_stop_reason::stop_reason_starting_another != reason )
         {
             auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
-            pm.Clear();
+            pm.Disable();
         }
     }
     void on_playback_seek( double time ) override
