@@ -15,7 +15,6 @@ class SmpSource
 {
 public:
     static std::string FetchVersion()
-    {
         componentversion::ptr cv;
         service_enum_t<componentversion> e;
         for ( service_ptr_t<componentversion> ptr; e.next( ptr ); )
