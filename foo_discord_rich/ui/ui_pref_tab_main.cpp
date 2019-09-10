@@ -84,6 +84,10 @@ BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
     }
     UpdateUiFromCfg();
 
+    helpUrl_.SetHyperLinkExtendedStyle( HLINK_UNDERLINED | HLINK_COMMANDBUTTON );
+    helpUrl_.SetToolTipText( L"Title formatting help" );
+    helpUrl_.SubclassWindow( GetDlgItem( IDC_LINK_FORMAT_HELP ) );
+
     return TRUE; // set focus to default control
 }
 
@@ -99,6 +103,11 @@ void PreferenceTabMain::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl 
     }
 
     OnChanged();
+}
+
+void PreferenceTabMain::OnHelpUrlClick( UINT uNotifyCode, int nID, CWindow wndCtl )
+{
+    standard_commands::main_titleformat_help();
 }
 
 void PreferenceTabMain::OnChanged()

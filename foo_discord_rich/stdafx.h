@@ -17,6 +17,7 @@
 #include <atlframe.h>
 #include <atldlgs.h>
 #include <atlctrls.h>
+#include <atlctrlx.h>
 #include <atlddx.h>
 #include <atlcrack.h>
 #include <atltheme.h>

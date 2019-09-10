@@ -32,6 +32,7 @@ public:
         COMMAND_RANGE_CODE_HANDLER_EX( IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_DISABLED, BN_CLICKED, OnEditChange )
         COMMAND_HANDLER_EX( IDC_CHECK_DISABLE_WHEN_PAUSED, BN_CLICKED, OnEditChange )
         COMMAND_HANDLER_EX( IDC_CHECK_SWAP_STATUS, BN_CLICKED, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_LINK_FORMAT_HELP, BN_CLICKED, OnHelpUrlClick )
     END_MSG_MAP()
 
 public:
@@ -49,12 +50,15 @@ public:
 private:
     BOOL OnInitDialog( HWND hwndFocus, LPARAM lParam );
     void OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl );
+    void OnHelpUrlClick( UINT uNotifyCode, int nID, CWindow wndCtl );
     void OnChanged();
     void UpdateUiFromCfg();
 
 private:
     PreferenceTabManager* pParent_ = nullptr;
     std::array<std::unique_ptr<IUiCfgWrap>, 8> configs_;
+
+    CHyperLink helpUrl_;
 };
 
 } // namespace drp::ui
