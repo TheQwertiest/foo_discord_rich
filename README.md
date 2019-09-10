@@ -1,7 +1,7 @@
 # Discord Rich Presence Integration
 [![version][version_badge]][changelog] [![Build status][appveyor_badge]](https://ci.appveyor.com/project/TheQwertiest/foo-discord-rich/branch/master) [![CodeFactor][codefactor_badge]](https://www.codefactor.io/repository/github/theqwertiest/foo_discord_rich/overview/master) [![Codacy Badge][codacy_badge]](https://app.codacy.com/app/qwertiest/foo_discord_rich?utm_source=github.com&utm_medium=referral&utm_content=TheQwertiest/foo_discord_rich&utm_campaign=Badge_Grade_Dashboard) 
 
-![foo_discord_rich](https://i.imgur.com/J3LY1rf.png)
+![foo_discord_rich](https://i.imgur.com/OPLvsku.png)
 
 This is a component for the [foobar2000](https://www.foobar2000.org) audio player, which displays currently played track data via Discord Rich Presence.
 
