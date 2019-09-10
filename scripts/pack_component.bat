@@ -20,7 +20,7 @@ set COMPONENT_NAME=foo_discord_rich
 set COMPONENT_DIR_NO_SLASH=%ROOT_DIR%component
 set RESULT_CONFIGURATION_DIR=%ROOT_DIR%_result\Win32_%CONFIGURATION%\
 set DOC_DIR_NO_SLASH=%ROOT_DIR%_result\html
-set COMPONENT_LICENSE=%ROOT_DIR%LICENSE
+set COMPONENT_TXT_FILES=%ROOT_DIR%LICENSE %ROOT_DIR%CHANGELOG.md
 set COMPONENT_DLL=%RESULT_CONFIGURATION_DIR%\bin\%COMPONENT_NAME%.dll
 set COMPONENT_PDB=%RESULT_CONFIGURATION_DIR%\dbginfo\%COMPONENT_NAME%.pdb
 
@@ -35,8 +35,10 @@ if exist "%COMPONENT_OUT_DIR_NO_SLASH%" rmdir /s/q "%COMPONENT_OUT_DIR_NO_SLASH%
 mkdir "%COMPONENT_OUT_DIR_NO_SLASH%"
 xcopy /r/y/s/q/i "%COMPONENT_DIR_NO_SLASH%" "%COMPONENT_OUT_DIR_NO_SLASH%"
 if errorlevel 1 goto fail
-xcopy /r/y/q "%COMPONENT_LICENSE%" "%COMPONENT_OUT_DIR%"
-if errorlevel 1 goto fail
+for %%i in (%COMPONENT_TXT_FILES%) do (
+	xcopy /r/y/q "%%i" "%COMPONENT_OUT_DIR%"
+	if errorlevel 1 goto fail
+)
 xcopy /r/y/q "%COMPONENT_DLL%" "%COMPONENT_OUT_DIR%"
 if errorlevel 1 goto fail
 if '%CONFIGURATION%'=='Debug' (
