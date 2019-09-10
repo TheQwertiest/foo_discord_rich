@@ -33,6 +33,9 @@ extern utils::CfgWrapString8 g_playingImageId_Dark;
 extern utils::CfgWrapString8 g_pausedImageId_Dark;
 extern utils::CfgWrapString8 g_pausedImageId_Light;
 
+extern utils::CfgWrapBool g_disableWhenPaused;
+extern utils::CfgWrapBool g_swapSmallImages;
+
 void InitializeConfig();
 
 }; // namespace drp::config

@@ -26,6 +26,8 @@
 #define IDC_RADIO_PLAYBACK_IMG_LIGHT    1087
 #define IDC_RADIO_PLAYBACK_IMG_DARK     1088
 #define IDC_RADIO_PLAYBACK_IMG_DISABLED 1089
+#define IDC_CHECK_DISABLE_WHEN_PAUSED   1090
+#define IDC_CHECK_SWAP_STATUS           1091
 #ifndef IDC_STATIC
 #define IDC_STATIC                      -1
 #endif
@@ -36,7 +38,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        123
 #define _APS_NEXT_COMMAND_VALUE         40012
-#define _APS_NEXT_CONTROL_VALUE         1090
+#define _APS_NEXT_CONTROL_VALUE         1092
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

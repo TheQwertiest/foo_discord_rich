@@ -19,6 +19,8 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
           CreateUiCfgWrapRange( config::g_largeImageSettings, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
           CreateUiCfgWrapRange( config::g_smallImageSettings, std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
           CreateUiCfgWrapRange( config::g_timeSettings, std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
+          CreateUiCfgWrap( config::g_disableWhenPaused, IDC_CHECK_DISABLE_WHEN_PAUSED ),
+          CreateUiCfgWrap( config::g_swapSmallImages, IDC_CHECK_SWAP_STATUS ),
       } )
 {
 }

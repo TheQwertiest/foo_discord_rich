@@ -89,7 +89,7 @@ private:
     static void OnErrored( int errorCode, const char* message );
 
 private:
-    bool hasPresence_ = false;
+    bool hasPresence_ = true;
     std::u8string appToken_;
     drp::internal::PresenceData presenceData_;
 };

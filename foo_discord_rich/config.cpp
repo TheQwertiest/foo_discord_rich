@@ -21,6 +21,9 @@ utils::CfgWrapString8 g_playingImageId_Dark( drp::guid::conf_playing_image_id_da
 utils::CfgWrapString8 g_pausedImageId_Light( drp::guid::conf_paused_image_id_light, "paused" );
 utils::CfgWrapString8 g_pausedImageId_Dark( drp::guid::conf_paused_image_id_dark, "paused-dark" );
 
+utils::CfgWrapBool g_disableWhenPaused( drp::guid::conf_disable_when_paused, false );
+utils::CfgWrapBool g_swapSmallImages( drp::guid::conf_swap_small_images, false );
+
 void InitializeConfig()
 {
     g_isEnabled.Reread();
@@ -37,6 +40,9 @@ void InitializeConfig()
     g_playingImageId_Dark.Reread();
     g_pausedImageId_Light.Reread();
     g_pausedImageId_Dark.Reread();
+
+    g_disableWhenPaused.Reread();
+    g_swapSmallImages.Reread();
 }
 
 } // namespace drp::config

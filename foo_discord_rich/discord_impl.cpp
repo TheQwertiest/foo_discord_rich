@@ -88,7 +88,9 @@ PresenceModifier::~PresenceModifier()
         parent_.presenceData_ = presenceData_;
     }
 
-    if ( parent_.HasPresence() && isDisabled_ )
+    if ( parent_.HasPresence()
+         && ( isDisabled_
+              || ( playback_control::get()->is_paused() && config::g_disableWhenPaused ) ) )
     {
         parent_.ClearPresence();
     }
@@ -101,9 +103,9 @@ PresenceModifier::~PresenceModifier()
 void PresenceModifier::UpdateImage()
 {
     auto& pd = presenceData_;
+    auto pc = playback_control::get();
 
-    auto setImageKey = [&pd]( const std::u8string& imageKey )
-    {
+    auto setImageKey = [&pd]( const std::u8string& imageKey ) {
         pd.largeImageKey = imageKey;
         pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
@@ -138,30 +140,18 @@ void PresenceModifier::UpdateSmallImage()
         pd.presence.smallImageKey = pd.smallImageKey.empty() ? nullptr : pd.smallImageKey.c_str();
     };
 
+    const bool usePausedImage = ( pc->is_paused() || config::g_swapSmallImages );
+
     switch ( static_cast<config::ImageSetting>( config::g_smallImageSettings.GetSavedValue() ) )
     {
     case config::ImageSetting::Light:
     {
-        if ( pc->is_paused() )
-        {
-            setImageKey( config::g_pausedImageId_Light );
-        }
-        else
-        {
-            setImageKey( config::g_playingImageId_Light );
-        }
+        setImageKey( usePausedImage ? config::g_pausedImageId_Light : config::g_playingImageId_Light );
         break;
     }
     case config::ImageSetting::Dark:
     {
-        if ( pc->is_paused() )
-        {
-            setImageKey( config::g_pausedImageId_Dark );
-        }
-        else
-        {
-            setImageKey( config::g_playingImageId_Dark );
-        }
+        setImageKey( usePausedImage ? config::g_pausedImageId_Dark : config::g_playingImageId_Dark );
         break;
     }
     case config::ImageSetting::Disabled:
@@ -283,6 +273,8 @@ void DiscordHandler::Initialize()
 
     Discord_Initialize( appToken_.c_str(), &handlers, 1, nullptr );
     Discord_RunCallbacks();
+
+    hasPresence_ = true; ///< Discord may use default app handler, which we need to override
 
     auto pm = GetPresenceModifier();
     pm.UpdateImage();
