@@ -19,7 +19,7 @@ ___
   - Swap `paused` and `playing` images.
 - Added `advanced` Preferences tab with options to customize component:
   - Discord application key.
-  - Keys for corresponding images in the component.
+  - Resource IDs for corresponding images in the component.
 - Added a link to the title formatting help in `main` Preferences tab.
 
 ### Changed
