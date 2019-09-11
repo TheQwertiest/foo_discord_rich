@@ -176,7 +176,7 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     }
 
     auto pc = playback_control::get();
-    auto queryData = [&pc, metadb = pd.metadb]( const std::u8string& query ) -> std::u8string {
+    const auto queryData = [&pc, metadb = pd.metadb]( const std::u8string& query ) -> std::u8string {
         titleformat_object::ptr tf;
         titleformat_compiler::get()->compile_safe( tf, query.c_str() );
         pfc::string8_fast result;
@@ -193,11 +193,21 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
 
         return result.c_str();
     };
+    const auto fixStringLength = []( std::u8string& str ) {
+        if ( str.length() == 1 )
+        { // minimum allowed non-zero string length is 2, so we need to pad it
+            str += ' ';
+        }
+        else if ( str.length() > 127 )
+        { // maximum allowed length is 127
+            str.resize( 127 );
+        }
+    };
 
     pd.state = queryData( config::g_stateQuery );
-    pd.state.resize( 127 );
+    fixStringLength( pd.state );
     pd.details = queryData( config::g_detailsQuery );
-    pd.details.resize( 127 );
+    fixStringLength( pd.details );
 
     const std::u8string lengthStr = queryData( "[%length_seconds_fp%]" );
     pd.trackLength = ( lengthStr.empty() ? 0 : stold( lengthStr ) );
