@@ -87,3 +87,73 @@ diff --git a/submodules/pfc/pfc.vcxproj b/submodules/pfc/pfc.vcxproj
    </PropertyGroup>
    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
      <ClCompile>
+@@ -140,7 +135,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+@@ -165,7 +160,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+@@ -190,7 +185,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+@@ -213,7 +208,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+@@ -239,6 +234,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+       <AdditionalOptions>/d2notypeopt %(AdditionalOptions)</AdditionalOptions>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+@@ -266,6 +262,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+       <AdditionalOptions>/d2notypeopt %(AdditionalOptions)</AdditionalOptions>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+@@ -293,7 +290,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+       <AdditionalOptions>/d2notypeopt %(AdditionalOptions)</AdditionalOptions>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+@@ -320,7 +317,7 @@
+       <WarningLevel>Level3</WarningLevel>
+       <SuppressStartupBanner>true</SuppressStartupBanner>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+       <AdditionalOptions>/d2notypeopt %(AdditionalOptions)</AdditionalOptions>
+       <TreatSpecificWarningsAsErrors>4715</TreatSpecificWarningsAsErrors>
+       <MultiProcessorCompilation>true</MultiProcessorCompilation>

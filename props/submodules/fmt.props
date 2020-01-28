@@ -6,7 +6,6 @@
     <_PropertySheetDisplayName>fmt</_PropertySheetDisplayName>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(MainDir)submodules\fmt\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SubmodulesDirectory)fmt\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <ItemGroup />
 </Project>

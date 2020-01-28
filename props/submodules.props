@@ -5,8 +5,11 @@
   <PropertyGroup>
     <_PropertySheetDisplayName>submodules</_PropertySheetDisplayName>
   </PropertyGroup>
+  <PropertyGroup Label="UserMacros">
+    <SubmodulesDirectory>$(MainDir)submodules\</SubmodulesDirectory>
+  </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(MainDir)submodules\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SubmodulesDirectory);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemGroup />
 </Project>

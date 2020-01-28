@@ -7,14 +7,7 @@
   </PropertyGroup>
   <PropertyGroup Label="UserMacros">
     <PfcName>pfc</PfcName>
-    <PfcDirectory>$(MainDir)submodules\$(PfcName)\</PfcDirectory>
+    <PfcDirectory>$(SubmodulesDirectory)$(PfcName)\</PfcDirectory>
     <PfcResultDirectory>$(SolutionDir)$(Configuration) FB2K\$(PfcName)\</PfcResultDirectory>
   </PropertyGroup>
-  <ItemDefinitionGroup>
-    <Link>
-      <AdditionalLibraryDirectories>$(PfcResultDirectory);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(PfcName).lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemGroup />
 </Project>

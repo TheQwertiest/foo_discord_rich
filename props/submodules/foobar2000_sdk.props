@@ -6,13 +6,12 @@
     <_PropertySheetDisplayName>foobar2000-sdk</_PropertySheetDisplayName>
   </PropertyGroup>
   <PropertyGroup Label="UserMacros">
-    <Fb2kSdkDirectory>$(MainDir)submodules\foobar2000\</Fb2kSdkDirectory>
+    <Fb2kSdkDirectory>$(SubmodulesDirectory)foobar2000\</Fb2kSdkDirectory>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalLibraryDirectories>$(Fb2kSdkDirectory)shared\;$(Fb2kSdkDirectory)SDK\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>      
+      <AdditionalLibraryDirectories>$(Fb2kSdkDirectory)shared\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>      
       <AdditionalDependencies>shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup />
 </Project>

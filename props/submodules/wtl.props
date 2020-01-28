@@ -6,7 +6,6 @@
     <_PropertySheetDisplayName>wtl</_PropertySheetDisplayName>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(MainDir)submodules\wtl\Include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SubmodulesDirectory)wtl\Include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <ItemGroup />
 </Project>

@@ -6,7 +6,6 @@
     <_PropertySheetDisplayName>json</_PropertySheetDisplayName>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(MainDir)submodules\json\single_include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SubmodulesDirectory)json\single_include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <ItemGroup />
 </Project>

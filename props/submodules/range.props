@@ -6,7 +6,6 @@
     <_PropertySheetDisplayName>range-v3</_PropertySheetDisplayName>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(MainDir)submodules\range\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SubmodulesDirectory)range\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <ItemGroup />
 </Project>

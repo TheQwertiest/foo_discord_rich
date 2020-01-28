@@ -2,8 +2,6 @@
 
 #include <string>
 #include <string_view>
-#include <optional>
-#include <charconv>
 
 namespace drp::unicode
 {
@@ -11,4 +9,4 @@ namespace drp::unicode
 std::wstring ToWide( const std::u8string_view& src );
 std::u8string ToU8( const std::wstring_view& src );
 
-} // namespace drp::string
+} // namespace drp::unicode

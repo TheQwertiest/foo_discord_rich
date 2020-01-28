@@ -35,10 +35,6 @@
 // range v3
 #include <range/v3/all.hpp>
 
-// span
-// nonstd::span uses (signed) std::ptrdiff_t by default, which is incorrect
-#define span_CONFIG_INDEX_TYPE size_t
-
 // Some macros defined by windowsx.h should be removed
 #ifdef _INC_WINDOWSX
 #undef SubclassWindow
@@ -56,13 +52,13 @@ using u8string_view = basic_string_view<char8_t>;
 } // namespace std
 #endif
 
+// Unicode converters
+#include <utils/unicode.h>
+
 // Additional PFC wrappers
 #include <utils/pfc_helpers_cfg.h>
 #include <utils/pfc_helpers_stream.h>
 #include <utils/pfc_helpers_ui.h>
-
-// Unicode converters
-#include <utils/unicode.h>
 
 #include <component_defines.h>
 #include <component_guids.h>

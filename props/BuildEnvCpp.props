@@ -4,7 +4,7 @@
   </ImportGroup>
   <PropertyGroup >
     <_ProjectFileVersion>11.0.51106.1</_ProjectFileVersion>
-    <_PropertySheetDisplayName>basic</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>cpp_basic</_PropertySheetDisplayName>
     <IntDir>$(PlatformConfigurationDir)temp\$(Configuration)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -44,9 +44,10 @@
     <Midl>
       <AdditionalIncludeDirectories>$(MainDir)idl/interface;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TypeLibraryName>$(TlbDir)$(ProjectName).tlb</TypeLibraryName>
+      <OutputDirectory>$(ProjectGeneratedDir)</OutputDirectory>
     </Midl>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(MainDir);$(IndependentGeneratedDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MainDir);$(IndependentGeneratedDir);$(GeneratedDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(TargetExt)'!='.exe'">

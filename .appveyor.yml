@@ -13,10 +13,12 @@ branches:
     - gh-pages
 
 # Skipping commits affecting specific files (GitHub only). More details here: /docs/appveyor-yml
-# Disabled skips, since it prevents tag build from triggering, if last commit contains only skipped files
-#skip_commits:
-#  files:
-#     - README.md
+skip_commits:
+  # Default `skip` messages are applied even on tag builds with APPVEYOR_IGNORE_COMMIT_FILTERING_ON_TAG==true 
+  message: /\[_skip ci_\]|\[_ci skip_\]|\[_skip_ci_\]|\[_ci_skip_\]/
+  files:
+    - README.md
+    - THIRD_PARTY_NOTICES.md
 #    - docs/*
 #    - '**/*.png'
 #    - '**/*.jpg'
@@ -37,13 +39,34 @@ max_jobs: 1
 # Build worker image (VM template)
 image: Visual Studio 2019
 
+# environment variables
+environment:
+  APPVEYOR_IGNORE_COMMIT_FILTERING_ON_TAG: true
+  git_user_email: qwertiest@mail.ru
+  git_user_name: TheQwertiest
+  GITHUB_ACCESS_TOKEN:
+    secure: gBfHQnRcGcTS0yQXWOHhKfDkTZfIBwPIDjTsCQOGmOSPkRqs1QPYBX47BjCvJKim
+
 # this is how to allow failing jobs in the matrix
 matrix:
   fast_finish: true     # set this flag to immediately finish build once one of the jobs fails.
 
+for:
+  -
+    matrix:
+      only:
+        - configuration: Release
+    cache:
+      - workspaces\packages -> **\packages.config
+      - _result\Win32_Release\bin\foo_discord_rich.ipdb
+      - _result\Win32_Release\bin\foo_discord_rich.iobj
+
+cache:
+  - workspaces\packages -> **\packages.config
+
 # scripts that run after cloning repository
 install:
-  - scripts\setup.bat %cd%\
+  - py scripts\setup.py
 
 #---------------------------------#
 #       build configuration       #
@@ -61,14 +84,15 @@ configuration:
 # Build settings, not to be confused with "before_build" and "after_build".
 # "project" is relative to the original build directory and not influenced by directory changes in "before_build".
 build:
-  parallel: true                              # enable MSBuild parallel builds
-  project: workspaces\$(APPVEYOR_PROJECT_NAME).sln    # path to Visual Studio solution or project
+  parallel: true                  # enable MSBuild parallel builds
+  project: workspaces\foo_discord_rich.sln      # path to Visual Studio solution or project
 
   # MSBuild verbosity level
   verbosity: normal
 
 # scripts to run before build
 before_build:
+  - nuget restore workspaces\foo_discord_rich.sln
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
@@ -79,13 +103,11 @@ after_build:
 # scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
 before_package:
   - if '%configuration%' == 'Debug' (
-      call scripts\pack_component.bat %cd%\ --debug
+      py scripts\pack_component.py --debug &&
+      ren "_result\%platform%_%configuration%\foo_discord_rich.fb2k-component" "foo_discord_rich.fb2k-component_debug"
     )
     else (
-      call scripts\pack_component.bat %cd%\
-    )
-  - if '%configuration%' == 'Debug' (
-      ren "_result\%platform%_%configuration%\%APPVEYOR_PROJECT_NAME%.fb2k-component" "%APPVEYOR_PROJECT_NAME%.fb2k-component_debug"
+      py scripts\pack_component.py
     )
 
 # to disable automatic builds
@@ -97,12 +119,12 @@ before_package:
 
 artifacts:
   # pushing a single file with environment variable in path and "Deployment name" specified
-  - path: _result\$(platform)_$(configuration)\$(APPVEYOR_PROJECT_NAME).fb2k-component
-    name: Component package (Release)
-  - path: _result\$(platform)_$(configuration)\$(APPVEYOR_PROJECT_NAME)_pdb.zip
-    name: Component PDB package (Release)
-  - path: _result\$(platform)_$(configuration)\$(APPVEYOR_PROJECT_NAME).fb2k-component_debug
-    name: Component package (Debug)
+  - path: _result\$(platform)_$(configuration)\foo_discord_rich.fb2k-component
+    name: DRP package (Release)
+  - path: _result\$(platform)_$(configuration)\foo_discord_rich_pdb.zip
+    name: DRP PDB package (Release)
+  - path: _result\$(platform)_$(configuration)\foo_discord_rich.fb2k-component_debug
+    name: DRP package (Debug)
 
 #---------------------------------#
 #     deployment configuration    #
@@ -113,9 +135,8 @@ artifacts:
 deploy:
   description: 'Dummy description'
   provider: GitHub
-  auth_token:
-    secure: gBfHQnRcGcTS0yQXWOHhKfDkTZfIBwPIDjTsCQOGmOSPkRqs1QPYBX47BjCvJKim # your encrypted token from GitHub
-  artifact: /$(APPVEYOR_PROJECT_NAME).*/           # upload all NuGet packages to release assets
+  auth_token: $(GITHUB_ACCESS_TOKEN)
+  artifact: /foo_discord_rich.*/           # upload all NuGet packages to release assets
   prerelease: true
   on:
     branch: master                 # release from master branch only

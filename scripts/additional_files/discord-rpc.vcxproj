@@ -33,13 +33,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <OutDir>$(ProjectDir)..\_result\</OutDir>
-    <NMakeOutput>$(OutDir)lib\discord-rpc.lib</NMakeOutput>
+    <NMakeOutput>$(ProjectDir)..\_result\lib\discord-rpc.lib</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup>
     <NMakeBuildCommandLine>cd "$(ProjectDir)"..\
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=..\_result
+cmake .. -DCMAKE_INSTALL_PREFIX=..\_result -DCMAKE_GENERATOR_INSTANCE="$(CurrentVsInstallRoot)" -DCMAKE_GENERATOR_PLATFORM=Win32 -DUSE_STATIC_CRT=ON
 cmake --build ..\build --config $(Configuration) --target install</NMakeBuildCommandLine>
     <ExecutablePath>$(DevEnvDir)CommonExtensions\Microsoft\CMake\CMake\bin;$(ExecutablePath)</ExecutablePath>
     <NMakeCleanCommandLine>rmdir /s/q "$(ProjectDir)"..\build

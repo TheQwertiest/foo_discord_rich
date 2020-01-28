@@ -2,6 +2,9 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets">
   </ImportGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>common</_PropertySheetDisplayName>
+  </PropertyGroup>
   <PropertyGroup Label="UserMacros">
     <MainDir>$(SolutionDir)..\</MainDir>
     <ResultDir>$(MainDir)_result\</ResultDir>
@@ -11,6 +14,6 @@
     <LibDir>$(PlatformConfigurationDir)lib\</LibDir>
     <TlbDir>$(ProjectGeneratedDir)tlb\</TlbDir>
     <PlatformIndependentDir>$(ResultDir)AllPlatforms\</PlatformIndependentDir>
-    <IndependentGeneratedDir>$(PlatformIndependentDir)generated</IndependentGeneratedDir>
+    <IndependentGeneratedDir>$(PlatformIndependentDir)generated\</IndependentGeneratedDir>
   </PropertyGroup>
 </Project>
