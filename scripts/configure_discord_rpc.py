@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import shutil
-import subprocess
 from pathlib import Path
 
 import call_wrapper
@@ -16,7 +15,7 @@ def configure():
 
 if __name__ == '__main__':
     call_wrapper.final_call_decorator(
-        "Configuring Discord RPC", 
-        "Configuring Discord RPC: success", 
+        "Configuring Discord RPC",
+        "Configuring Discord RPC: success",
         "Configuring Discord RPC: failure!"
     )(configure)()

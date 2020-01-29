@@ -14,7 +14,7 @@ branches:
 
 # Skipping commits affecting specific files (GitHub only). More details here: /docs/appveyor-yml
 skip_commits:
-  # Default `skip` messages are applied even on tag builds with APPVEYOR_IGNORE_COMMIT_FILTERING_ON_TAG==true 
+  # Default `skip` messages are applied even on tag builds with APPVEYOR_IGNORE_COMMIT_FILTERING_ON_TAG==true
   message: /\[_skip ci_\]|\[_ci skip_\]|\[_skip_ci_\]|\[_ci_skip_\]/
   files:
     - README.md

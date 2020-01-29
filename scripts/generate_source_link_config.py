@@ -15,32 +15,32 @@ def generate_config_custom( base_dir: PathLike,
                             output_dir: PathLike,
                             repo: str = "theqwertiest/foo_discord_rich",
                             commit_hash: str = ""):
-    if (not len(commit_hash)):
+    if (not commit_hash):
         commit_hash = subprocess.check_output("git rev-parse --short HEAD", shell=True).decode('ascii').strip()
-    
+
     base_dir = Path(base_dir).resolve()
     assert(base_dir.exists() and base_dir.is_dir())
-    
+
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     output_file = output_dir/'source_link.json'
     output_file.unlink(missing_ok=True)
-    
+
     data = {}
     data['documents'] = { f'{PureWindowsPath(base_dir)}*': f'https://raw.githubusercontent.com/{repo}/{commit_hash}/*' }
-    
+
     with open(output_file, 'w') as output:
         json.dump(data, output)
-    
+
     print(f"Generated file: {output_file}")
 
 def generate_config():
     cur_dir = Path(__file__).parent.absolute()
     root_dir = cur_dir.parent
     output_dir = root_dir/"_result"/"AllPlatforms"/"generated"
-    
-    generate_config_custom(root_dir, output_dir);
+
+    generate_config_custom(root_dir, output_dir)
 
 if __name__ == '__main__':
     cur_dir = Path(__file__).parent.absolute()
@@ -54,10 +54,10 @@ if __name__ == '__main__':
     parser.add_argument('--commit_hash', default="")
 
     args = parser.parse_args()
-    
+
     call_wrapper.final_call_decorator(
-        "Generating source link configuration file", 
-        "Source link configuration file was successfully generated!", 
+        "Generating source link configuration file",
+        "Source link configuration file was successfully generated!",
         "Source link configuration file failed!"
     )(
     generate_config_custom

@@ -11,12 +11,12 @@ def patch():
     patches = [cur_dir/"patches"/p for p in ["foobar2000.patch", "pfc.patch" ]]
     for p in patches:
         assert(p.exists() and p.is_file())
-    
+
     subprocess.check_call(f"git apply --ignore-whitespace {' '.join(str(p) for p in patches)}", cwd=root_dir, shell=True)
 
 if __name__ == '__main__':
     call_wrapper.final_call_decorator(
-        "Patching submodules", 
-        "Patching submodules: success", 
+        "Patching submodules",
+        "Patching submodules: success",
         "Patching submodules: failure!"
     )(patch)()
