@@ -1,7 +1,10 @@
 #pragma once
 
+#include <fb2k/config.h>
+#include <qwr/fb2k_config_ui_option.h>
+#include <qwr/ui_ddx_option.h>
 #include <ui/ui_itab.h>
-#include <ui/internal/ui_cfg_wrap.h>
+
 #include <resource.h>
 
 #include <array>
@@ -23,20 +26,20 @@ public:
     };
 
     BEGIN_MSG_MAP( PreferenceTabAdvanced )
-    MSG_WM_INITDIALOG( OnInitDialog )
-    COMMAND_HANDLER_EX( IDC_TEXTBOX_APP_TOKEN, EN_CHANGE, OnEditChange )
-    COMMAND_HANDLER_EX( IDC_TEXTBOX_LARGE_LIGHT_ID, EN_CHANGE, OnEditChange )
-    COMMAND_HANDLER_EX( IDC_TEXTBOX_LARGE_DARK_ID, EN_CHANGE, OnEditChange )
-    COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID, EN_CHANGE, OnEditChange )
-    COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PLAYING_DARK_ID, EN_CHANGE, OnEditChange )
-    COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID, EN_CHANGE, OnEditChange )
-    COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PAUSED_DARK_ID, EN_CHANGE, OnEditChange )
+        MSG_WM_INITDIALOG( OnInitDialog )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_APP_TOKEN, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_LARGE_LIGHT_ID, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_LARGE_DARK_ID, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PLAYING_DARK_ID, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PAUSED_DARK_ID, EN_CHANGE, OnEditChange )
     END_MSG_MAP()
 
 public:
     PreferenceTabAdvanced( PreferenceTabManager* pParent );
     ~PreferenceTabAdvanced() override;
-    
+
     // IUiTab
     HWND CreateTab( HWND hParent ) override;
     CDialogImplBase& Dialog() override;
@@ -53,7 +56,17 @@ private:
 
 private:
     PreferenceTabManager* pParent_ = nullptr;
-    std::array<std::unique_ptr<IUiCfgWrap>, 7> configs_;
+
+    qwr::ui::UiOptionTuple<
+        decltype( config::g_discordAppToken ),
+        decltype( config::g_largeImageId_Light ),
+        decltype( config::g_largeImageId_Dark ),
+        decltype( config::g_playingImageId_Light ),
+        decltype( config::g_playingImageId_Dark ),
+        decltype( config::g_pausedImageId_Light ),
+        decltype( config::g_pausedImageId_Dark )>
+        options_;
+    std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 7> ddxOptions_;
 };
 
 } // namespace drp::ui

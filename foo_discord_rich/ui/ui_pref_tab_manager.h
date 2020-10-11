@@ -1,11 +1,8 @@
 #pragma once
 
 #include <ui/ui_itab.h>
-#include <utils/cfg_wrap.h>
-#include <component_defines.h>
-#include <resource.h>
 
-#include <array>
+#include <resource.h>
 
 namespace drp::ui
 {
@@ -24,10 +21,10 @@ public:
     };
 
     BEGIN_MSG_MAP( PreferenceTabManager )
-    MSG_WM_INITDIALOG( OnInitDialog )
-    MSG_WM_PARENTNOTIFY( OnParentNotify )
-    MESSAGE_HANDLER( WM_WINDOWPOSCHANGED, OnWindowPosChanged )
-    NOTIFY_HANDLER_EX( IDC_TAB1, TCN_SELCHANGE, OnSelectionChanged )
+        MSG_WM_INITDIALOG( OnInitDialog )
+        MSG_WM_PARENTNOTIFY( OnParentNotify )
+        MESSAGE_HANDLER( WM_WINDOWPOSCHANGED, OnWindowPosChanged )
+        NOTIFY_HANDLER_EX( IDC_TAB1, TCN_SELCHANGE, OnSelectionChanged )
     END_MSG_MAP()
 
 public:

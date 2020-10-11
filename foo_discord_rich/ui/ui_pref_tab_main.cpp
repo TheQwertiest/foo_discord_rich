@@ -1,9 +1,10 @@
 #include <stdafx.h>
+
 #include "ui_pref_tab_main.h"
 
-#include <ui/ui_pref_tab_manager.h>
 #include <discord/discord_impl.h>
-#include <fb2k/config.h>
+#include <qwr/fb2k_config_ui_option.h>
+#include <ui/ui_pref_tab_manager.h>
 
 namespace drp::ui
 {
@@ -12,24 +13,33 @@ using namespace config;
 
 PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     : pParent_( pParent )
-    , configs_( {
-          CreateUiCfgWrap( config::g_isEnabled, IDC_CHECK_IS_ENABLED ),
-          CreateUiCfgWrap( config::g_stateQuery, IDC_TEXTBOX_STATE ),
-          CreateUiCfgWrap( config::g_detailsQuery, IDC_TEXTBOX_DETAILS ),
-          CreateUiCfgWrapRange( config::g_largeImageSettings, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
-          CreateUiCfgWrapRange( config::g_smallImageSettings, std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
-          CreateUiCfgWrapRange( config::g_timeSettings, std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
-          CreateUiCfgWrap( config::g_disableWhenPaused, IDC_CHECK_DISABLE_WHEN_PAUSED ),
-          CreateUiCfgWrap( config::g_swapSmallImages, IDC_CHECK_SWAP_STATUS ),
+    , options_(
+          config::g_isEnabled,
+          config::g_stateQuery,
+          config::g_detailsQuery,
+          config::g_largeImageSettings,
+          config::g_smallImageSettings,
+          config::g_timeSettings,
+          config::g_disableWhenPaused,
+          config::g_swapSmallImages )
+    , ddxOptions_( {
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( std::get<0>( options_ ), IDC_CHECK_IS_ENABLED ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<1>( options_ ), IDC_TEXTBOX_STATE ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<2>( options_ ), IDC_TEXTBOX_DETAILS ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( std::get<3>( options_ ), std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( std::get<4>( options_ ), std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( std::get<5>( options_ ), std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( std::get<6>( options_ ), IDC_CHECK_DISABLE_WHEN_PAUSED ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( std::get<7>( options_ ), IDC_CHECK_SWAP_STATUS ),
       } )
 {
 }
 
 PreferenceTabMain::~PreferenceTabMain()
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->GetCfg().Revert();
+        ddxOpt->Option().Revert();
     }
 }
 
@@ -51,8 +61,8 @@ const wchar_t* PreferenceTabMain::Name() const
 t_uint32 PreferenceTabMain::get_state()
 {
     const bool hasChanged =
-        configs_.cend() != std::find_if( configs_.cbegin(), configs_.cend(), []( const auto& config ) {
-            return config->GetCfg().HasChanged();
+        ddxOptions_.cend() != std::find_if( ddxOptions_.cbegin(), ddxOptions_.cend(), []( const auto& ddxOpt ) {
+            return ddxOpt->Option().HasChanged();
         } );
 
     return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
@@ -60,17 +70,17 @@ t_uint32 PreferenceTabMain::get_state()
 
 void PreferenceTabMain::apply()
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->GetCfg().Apply();
+        ddxOpt->Option().Apply();
     }
 }
 
 void PreferenceTabMain::reset()
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->GetCfg().ResetToDefault();
+        ddxOpt->Option().ResetToDefault();
     }
 
     UpdateUiFromCfg();
@@ -78,9 +88,9 @@ void PreferenceTabMain::reset()
 
 BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->SetHwnd( m_hWnd );
+        ddxOpt->Ddx().SetHwnd( m_hWnd );
     }
     UpdateUiFromCfg();
 
@@ -93,13 +103,13 @@ BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 
 void PreferenceTabMain::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
-    auto it = std::find_if( configs_.begin(), configs_.end(), [nID]( auto& val ) {
-        return val->IsMatchingId( nID );
+    auto it = std::find_if( ddxOptions_.begin(), ddxOptions_.end(), [nID]( auto& val ) {
+        return val->Ddx().IsMatchingId( nID );
     } );
 
-    if ( configs_.end() != it )
+    if ( ddxOptions_.end() != it )
     {
-        ( *it )->ReadFromUi();
+        ( *it )->Ddx().ReadFromUi();
     }
 
     OnChanged();
@@ -122,9 +132,9 @@ void PreferenceTabMain::UpdateUiFromCfg()
         return;
     }
 
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->WriteToUi();
+        ddxOpt->Ddx().WriteToUi();
     }
 }
 

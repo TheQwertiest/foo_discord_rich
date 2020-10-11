@@ -1,7 +1,10 @@
 #pragma once
 
+#include <fb2k/config.h>
+#include <qwr/fb2k_config_ui_option.h>
+#include <qwr/ui_ddx_option.h>
 #include <ui/ui_itab.h>
-#include <ui/internal/ui_cfg_wrap.h>
+
 #include <resource.h>
 
 #include <array>
@@ -56,7 +59,18 @@ private:
 
 private:
     PreferenceTabManager* pParent_ = nullptr;
-    std::array<std::unique_ptr<IUiCfgWrap>, 8> configs_;
+
+    qwr::ui::UiOptionTuple<
+        decltype( config::g_isEnabled ),
+        decltype( config::g_stateQuery ),
+        decltype( config::g_detailsQuery ),
+        decltype( config::g_largeImageSettings ),
+        decltype( config::g_smallImageSettings ),
+        decltype( config::g_timeSettings ),
+        decltype( config::g_disableWhenPaused ),
+        decltype( config::g_swapSmallImages )>
+        options_;
+    std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 8> ddxOptions_;
 
     CHyperLink helpUrl_;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utils/cfg_wrap.h>
+#include <qwr/fb2k_config.h>
 
 namespace drp::config
 {
@@ -18,24 +18,22 @@ enum class TimeSetting : uint8_t
     Disabled
 };
 
-extern utils::CfgWrapBool g_isEnabled;
-extern utils::CfgWrapUint8 g_largeImageSettings;
-extern utils::CfgWrapUint8 g_smallImageSettings;
-extern utils::CfgWrapUint8 g_timeSettings;
-extern utils::CfgWrapString8 g_stateQuery;
-extern utils::CfgWrapString8 g_detailsQuery;
+extern qwr::fb2k::ConfigBool g_isEnabled;
+extern qwr::fb2k::ConfigUint8Enum<ImageSetting> g_largeImageSettings;
+extern qwr::fb2k::ConfigUint8Enum<ImageSetting> g_smallImageSettings;
+extern qwr::fb2k::ConfigUint8Enum<TimeSetting> g_timeSettings;
+extern qwr::fb2k::ConfigString g_stateQuery;
+extern qwr::fb2k::ConfigString g_detailsQuery;
 
-extern utils::CfgWrapString8 g_discordAppToken;
-extern utils::CfgWrapString8 g_largeImageId_Light;
-extern utils::CfgWrapString8 g_largeImageId_Dark;
-extern utils::CfgWrapString8 g_playingImageId_Light;
-extern utils::CfgWrapString8 g_playingImageId_Dark;
-extern utils::CfgWrapString8 g_pausedImageId_Dark;
-extern utils::CfgWrapString8 g_pausedImageId_Light;
+extern qwr::fb2k::ConfigString g_discordAppToken;
+extern qwr::fb2k::ConfigString g_largeImageId_Light;
+extern qwr::fb2k::ConfigString g_largeImageId_Dark;
+extern qwr::fb2k::ConfigString g_playingImageId_Light;
+extern qwr::fb2k::ConfigString g_playingImageId_Dark;
+extern qwr::fb2k::ConfigString g_pausedImageId_Dark;
+extern qwr::fb2k::ConfigString g_pausedImageId_Light;
 
-extern utils::CfgWrapBool g_disableWhenPaused;
-extern utils::CfgWrapBool g_swapSmallImages;
-
-void InitializeConfig();
+extern qwr::fb2k::ConfigBool g_disableWhenPaused;
+extern qwr::fb2k::ConfigBool g_swapSmallImages;
 
 }; // namespace drp::config

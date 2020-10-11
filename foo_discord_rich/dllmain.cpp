@@ -18,7 +18,6 @@ class ComponentInitQuit : public initquit
 public:
     void on_init() override
     {
-        drp::config::InitializeConfig();
         drp::DiscordHandler::GetInstance().Initialize();
     }
 

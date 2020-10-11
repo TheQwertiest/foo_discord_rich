@@ -1,4 +1,5 @@
 #include <stdafx.h>
+
 #include "discord_impl.h"
 
 #include <fb2k/config.h>
@@ -110,7 +111,7 @@ void PresenceModifier::UpdateImage()
         pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
 
-    switch ( static_cast<config::ImageSetting>( config::g_largeImageSettings.GetSavedValue() ) )
+    switch ( config::g_largeImageSettings )
     {
     case config::ImageSetting::Light:
     {
@@ -142,7 +143,7 @@ void PresenceModifier::UpdateSmallImage()
 
     const bool usePausedImage = ( pc->is_paused() || config::g_swapSmallImages );
 
-    switch ( static_cast<config::ImageSetting>( config::g_smallImageSettings.GetSavedValue() ) )
+    switch ( config::g_smallImageSettings )
     {
     case config::ImageSetting::Light:
     {
@@ -224,7 +225,7 @@ void PresenceModifier::UpdateDuration( double time )
     auto& pd = presenceData_;
     auto pc = playback_control::get();
     const config::TimeSetting timeSetting = ( ( pd.trackLength && pc->is_playing() && !pc->is_paused() )
-                                                  ? static_cast<config::TimeSetting>( config::g_timeSettings.GetSavedValue() )
+                                                  ? config::g_timeSettings
                                                   : config::TimeSetting::Disabled );
     switch ( timeSetting )
     {
@@ -299,7 +300,7 @@ void DiscordHandler::Finalize()
 
 void DiscordHandler::OnSettingsChanged()
 {
-    if ( appToken_ != config::g_discordAppToken )
+    if ( appToken_ != static_cast<std::string>( config::g_discordAppToken ) )
     {
         Finalize();
         Initialize();

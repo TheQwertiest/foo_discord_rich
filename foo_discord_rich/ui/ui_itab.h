@@ -1,11 +1,5 @@
 #pragma once
 
-#include <utils/cfg_wrap.h>
-#include <component_defines.h>
-#include <resource.h>
-
-#include <array>
-
 namespace drp::ui
 {
 
@@ -18,7 +12,7 @@ public:
     virtual CDialogImplBase& Dialog() = 0;
     virtual const wchar_t* Name() const = 0;
 
-    // preferences_page_instance 
+    // preferences_page_instance
 
     //! @returns a combination of preferences_state constants.
     virtual uint32_t get_state() = 0;

@@ -107,6 +107,9 @@
     <ProjectReference Include="..\submodules\discord-rpc\src\discord-rpc.vcxproj">
       <Project>{fd83c8ca-35c7-4f67-ade3-2fd99c91b230}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\submodules\fb2k_utils\src\fb2k_utils.vcxproj">
+      <Project>{ee3bf4f9-2014-4cff-96c8-44cfb85e0571}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\submodules\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
       <Project>{71ad2674-065b-48f5-b8b0-e1f9d3892081}</Project>
     </ProjectReference>
@@ -121,7 +124,7 @@
     <ClCompile Include="discord\discord_impl.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
-    <ClCompile Include="fb2k\fb2k_callbacks.cpp" />
+    <ClCompile Include="fb2k\playback.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fb2k\mainmenu.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -130,11 +133,6 @@
     <ClCompile Include="ui\ui_pref_tab_advanced.cpp" />
     <ClCompile Include="ui\ui_pref_tab_main.cpp" />
     <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
-    <ClCompile Include="utils\pfc_helpers_cfg.cpp" />
-    <ClCompile Include="utils\pfc_helpers_stream.cpp" />
-    <ClCompile Include="utils\semantic_version.cpp" />
-    <ClCompile Include="utils\string_helpers.cpp" />
-    <ClCompile Include="utils\unicode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h" />
@@ -143,19 +141,11 @@
     <ClInclude Include="fb2k\config.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="ui\internal\ui_cfg_wrap.h" />
     <ClInclude Include="ui\ui_itab.h" />
     <ClInclude Include="ui\ui_pref_tab_advanced.h" />
     <ClInclude Include="ui\ui_pref_tab_main.h" />
     <ClInclude Include="ui\ui_pref_tab_manager.h" />
     <ClInclude Include="utils\acfu_github.h" />
-    <ClInclude Include="utils\cfg_wrap.h" />
-    <ClInclude Include="utils\pfc_helpers_cfg.h" />
-    <ClInclude Include="utils\pfc_helpers_stream.h" />
-    <ClInclude Include="utils\pfc_helpers_ui.h" />
-    <ClInclude Include="utils\semantic_version.h" />
-    <ClInclude Include="utils\string_helpers.h" />
-    <ClInclude Include="utils\unicode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

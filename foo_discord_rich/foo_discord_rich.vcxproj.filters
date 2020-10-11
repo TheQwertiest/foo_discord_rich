@@ -7,20 +7,17 @@
     <Filter Include="ui">
       <UniqueIdentifier>{f4bb6562-042d-4ef7-a9f2-942b014da39d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ui\internal">
-      <UniqueIdentifier>{0f5bf5d1-b6fb-4b5e-a9fe-cfad57f5fa1f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="fb2k">
       <UniqueIdentifier>{abc073cb-2992-4a6e-8e40-9bf7360888df}</UniqueIdentifier>
     </Filter>
     <Filter Include="discord">
       <UniqueIdentifier>{99a9de41-701f-4a5b-aa0a-d1abe5ff68e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{be01d18f-b5d4-4cbd-bfef-8bb55e89465e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="utils\string_helpers.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="ui\ui_pref_tab_manager.cpp">
       <Filter>ui</Filter>
     </ClCompile>
@@ -29,21 +26,6 @@
     </ClCompile>
     <ClCompile Include="ui\ui_pref_tab_advanced.cpp">
       <Filter>ui</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\semantic_version.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\unicode.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\pfc_helpers_stream.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\pfc_helpers_cfg.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="fb2k\fb2k_callbacks.cpp">
-      <Filter>fb2k</Filter>
     </ClCompile>
     <ClCompile Include="fb2k\mainmenu.cpp">
       <Filter>fb2k</Filter>
@@ -59,18 +41,12 @@
     </ClCompile>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="fb2k\playback.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="utils\string_helpers.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="utils\acfu_github.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>ui</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\cfg_wrap.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="ui\ui_pref_tab_manager.h">
@@ -85,24 +61,6 @@
     <ClInclude Include="ui\ui_pref_tab_advanced.h">
       <Filter>ui</Filter>
     </ClInclude>
-    <ClInclude Include="ui\internal\ui_cfg_wrap.h">
-      <Filter>ui\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\pfc_helpers_stream.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\semantic_version.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\unicode.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\pfc_helpers_ui.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\pfc_helpers_cfg.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="discord\discord_impl.h">
       <Filter>discord</Filter>
     </ClInclude>
@@ -112,13 +70,16 @@
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="component_guids.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="foo_discord_rich.rc">
-      <Filter>ui</Filter>
+      <Filter>resources</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -1,9 +1,11 @@
 #include <stdafx.h>
+
 #include "ui_pref_tab_advanced.h"
 
-#include <ui/ui_pref_tab_manager.h>
 #include <discord/discord_impl.h>
 #include <fb2k/config.h>
+#include <qwr/fb2k_config_ui_option.h>
+#include <ui/ui_pref_tab_manager.h>
 
 namespace drp::ui
 {
@@ -12,21 +14,31 @@ using namespace config;
 
 PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
     : pParent_( pParent )
-    , configs_( { CreateUiCfgWrap( config::g_discordAppToken, IDC_TEXTBOX_APP_TOKEN ),
-                  CreateUiCfgWrap( config::g_largeImageId_Light, IDC_TEXTBOX_LARGE_LIGHT_ID ),
-                  CreateUiCfgWrap( config::g_largeImageId_Dark, IDC_TEXTBOX_LARGE_DARK_ID ),
-                  CreateUiCfgWrap( config::g_playingImageId_Light, IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID ),
-                  CreateUiCfgWrap( config::g_playingImageId_Dark, IDC_TEXTBOX_SMALL_PLAYING_DARK_ID ),
-                  CreateUiCfgWrap( config::g_pausedImageId_Light, IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
-                  CreateUiCfgWrap( config::g_pausedImageId_Dark, IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ) } )
+    , options_(
+          config::g_discordAppToken,
+          config::g_largeImageId_Light,
+          config::g_largeImageId_Dark,
+          config::g_playingImageId_Light,
+          config::g_playingImageId_Dark,
+          config::g_pausedImageId_Light,
+          config::g_pausedImageId_Dark )
+    , ddxOptions_( {
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<0>( options_ ), IDC_TEXTBOX_APP_TOKEN ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<1>( options_ ), IDC_TEXTBOX_LARGE_LIGHT_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<2>( options_ ), IDC_TEXTBOX_LARGE_DARK_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<3>( options_ ), IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<4>( options_ ), IDC_TEXTBOX_SMALL_PLAYING_DARK_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<5>( options_ ), IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<6>( options_ ), IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ),
+      } )
 {
 }
 
 PreferenceTabAdvanced::~PreferenceTabAdvanced()
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->GetCfg().Revert();
+        ddxOpt->Option().Revert();
     }
 }
 
@@ -48,8 +60,8 @@ const wchar_t* PreferenceTabAdvanced::Name() const
 t_uint32 PreferenceTabAdvanced::get_state()
 {
     const bool hasChanged =
-        configs_.cend() != std::find_if( configs_.cbegin(), configs_.cend(), []( const auto& config ) {
-            return config->GetCfg().HasChanged();
+        ddxOptions_.cend() != std::find_if( ddxOptions_.cbegin(), ddxOptions_.cend(), []( const auto& ddxOpt ) {
+            return ddxOpt->Option().HasChanged();
         } );
 
     return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
@@ -57,17 +69,17 @@ t_uint32 PreferenceTabAdvanced::get_state()
 
 void PreferenceTabAdvanced::apply()
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->GetCfg().Apply();
+        ddxOpt->Option().Apply();
     }
 }
 
 void PreferenceTabAdvanced::reset()
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->GetCfg().ResetToDefault();
+        ddxOpt->Option().ResetToDefault();
     }
 
     UpdateUiFromCfg();
@@ -75,9 +87,9 @@ void PreferenceTabAdvanced::reset()
 
 BOOL PreferenceTabAdvanced::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->SetHwnd( m_hWnd );
+        ddxOpt->Ddx().SetHwnd( m_hWnd );
     }
     UpdateUiFromCfg();
 
@@ -86,13 +98,13 @@ BOOL PreferenceTabAdvanced::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 
 void PreferenceTabAdvanced::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
-    auto it = std::find_if( configs_.begin(), configs_.end(), [nID]( auto& val ) {
-        return val->IsMatchingId( nID );
+    auto it = std::find_if( ddxOptions_.begin(), ddxOptions_.end(), [nID]( auto& val ) {
+        return val->Ddx().IsMatchingId( nID );
     } );
 
-    if ( configs_.end() != it )
+    if ( ddxOptions_.end() != it )
     {
-        ( *it )->ReadFromUi();
+        ( *it )->Ddx().ReadFromUi();
     }
 
     OnChanged();
@@ -110,9 +122,9 @@ void PreferenceTabAdvanced::UpdateUiFromCfg()
         return;
     }
 
-    for ( auto& config : configs_ )
+    for ( auto& ddxOpt: ddxOptions_ )
     {
-        config->WriteToUi();
+        ddxOpt->Ddx().WriteToUi();
     }
 }
 

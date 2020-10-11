@@ -1,4 +1,5 @@
 #include <stdafx.h>
+
 #include "config.h"
 
 #include <discord/discord_impl.h>
@@ -6,43 +7,23 @@
 namespace drp::config
 {
 
-utils::CfgWrapBool g_isEnabled( drp::guid::conf_is_enabled, true );
-utils::CfgWrapUint8 g_largeImageSettings( drp::guid::conf_large_image_settings, static_cast<uint8_t>( ImageSetting::Light ) );
-utils::CfgWrapUint8 g_smallImageSettings( drp::guid::conf_small_image_settings, static_cast<uint8_t>( ImageSetting::Light ) );
-utils::CfgWrapUint8 g_timeSettings( drp::guid::conf_time_settings, static_cast<uint8_t>( TimeSetting::Elapsed ) );
-utils::CfgWrapString8 g_stateQuery( drp::guid::conf_state_query, "[%title%]" );
-utils::CfgWrapString8 g_detailsQuery( drp::guid::conf_details_query, "[%album artist%[: %album%]]" );
+qwr::fb2k::ConfigBool g_isEnabled( guid::conf_is_enabled, true );
+qwr::fb2k::ConfigUint8Enum<ImageSetting> g_largeImageSettings( guid::conf_large_image_settings, ImageSetting::Light );
+qwr::fb2k::ConfigUint8Enum<ImageSetting> g_smallImageSettings( guid::conf_small_image_settings, ImageSetting::Light );
+qwr::fb2k::ConfigUint8Enum<TimeSetting> g_timeSettings( guid::conf_time_settings, TimeSetting::Elapsed );
 
-utils::CfgWrapString8 g_discordAppToken( drp::guid::conf_app_token, "507982587416018945" );
-utils::CfgWrapString8 g_largeImageId_Light( drp::guid::conf_large_image_id_light, "foobar2000" );
-utils::CfgWrapString8 g_largeImageId_Dark( drp::guid::conf_large_image_id_dark, "foobar2000-dark" );
-utils::CfgWrapString8 g_playingImageId_Light( drp::guid::conf_playing_image_id_light, "playing" );
-utils::CfgWrapString8 g_playingImageId_Dark( drp::guid::conf_playing_image_id_dark, "playing-dark" );
-utils::CfgWrapString8 g_pausedImageId_Light( drp::guid::conf_paused_image_id_light, "paused" );
-utils::CfgWrapString8 g_pausedImageId_Dark( drp::guid::conf_paused_image_id_dark, "paused-dark" );
+qwr::fb2k::ConfigString g_stateQuery( guid::conf_state_query, "[%title%]" );
+qwr::fb2k::ConfigString g_detailsQuery( guid::conf_details_query, "[%album artist%[: %album%]]" );
 
-utils::CfgWrapBool g_disableWhenPaused( drp::guid::conf_disable_when_paused, false );
-utils::CfgWrapBool g_swapSmallImages( drp::guid::conf_swap_small_images, false );
+qwr::fb2k::ConfigString g_discordAppToken( guid::conf_app_token, "507982587416018945" );
+qwr::fb2k::ConfigString g_largeImageId_Light( guid::conf_large_image_id_light, "foobar2000" );
+qwr::fb2k::ConfigString g_largeImageId_Dark( guid::conf_large_image_id_dark, "foobar2000-dark" );
+qwr::fb2k::ConfigString g_playingImageId_Light( guid::conf_playing_image_id_light, "playing" );
+qwr::fb2k::ConfigString g_playingImageId_Dark( guid::conf_playing_image_id_dark, "playing-dark" );
+qwr::fb2k::ConfigString g_pausedImageId_Light( guid::conf_paused_image_id_light, "paused" );
+qwr::fb2k::ConfigString g_pausedImageId_Dark( guid::conf_paused_image_id_dark, "paused-dark" );
 
-void InitializeConfig()
-{
-    g_isEnabled.Reread();
-    g_largeImageSettings.Reread();
-    g_smallImageSettings.Reread();
-    g_timeSettings.Reread();
-    g_stateQuery.Reread();
-    g_detailsQuery.Reread();
-
-    g_discordAppToken.Reread();
-    g_largeImageId_Light.Reread();
-    g_largeImageId_Dark.Reread();
-    g_playingImageId_Light.Reread();
-    g_playingImageId_Dark.Reread();
-    g_pausedImageId_Light.Reread();
-    g_pausedImageId_Dark.Reread();
-
-    g_disableWhenPaused.Reread();
-    g_swapSmallImages.Reread();
-}
+qwr::fb2k::ConfigBool g_disableWhenPaused( guid::conf_disable_when_paused, false );
+qwr::fb2k::ConfigBool g_swapSmallImages( guid::conf_swap_small_images, false );
 
 } // namespace drp::config
