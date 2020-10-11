@@ -1,5 +1,8 @@
 #pragma once
 
+// clang-format off
+// !!! Include order is important here (esp. for Win headers) !!!
+
 #define _WIN32_WINNT _WIN32_WINNT_WIN7
 #define WINVER       _WIN32_WINNT_WIN7
 
@@ -11,6 +14,8 @@
 #include <algorithm>
 
 // ATL/WTL
+/// atlstr.h (includes atlbase.h) must be included first for CString to LPTSTR conversion to work.
+#include <atlstr.h>
 #include <atlapp.h>
 #include <atlcrack.h>
 #include <atlctrls.h>
@@ -18,7 +23,6 @@
 #include <atlddx.h>
 #include <atldlgs.h>
 #include <atlframe.h>
-#include <atlstr.h>
 #include <atltheme.h>
 #include <atltypes.h>
 #include <atlwin.h>
@@ -62,3 +66,5 @@ using u8string_view = basic_string_view<char8_t>;
 
 #include <component_defines.h>
 #include <component_guids.h>
+
+// clang-format on
