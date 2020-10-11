@@ -1,6 +1,6 @@
 #include <stdafx.h>
 
-#include <discord_impl.h>
+#include <discord/discord_impl.h>
 
 namespace
 {

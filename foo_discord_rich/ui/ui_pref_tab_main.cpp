@@ -2,8 +2,8 @@
 #include "ui_pref_tab_main.h"
 
 #include <ui/ui_pref_tab_manager.h>
-#include <discord_impl.h>
-#include <config.h>
+#include <discord/discord_impl.h>
+#include <fb2k/config.h>
 
 namespace drp::ui
 {

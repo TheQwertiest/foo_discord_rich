@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
-#include <discord_impl.h>
-#include <config.h>
+#include <discord/discord_impl.h>
+#include <fb2k/config.h>
 
 DECLARE_COMPONENT_VERSION(
     DRP_NAME,

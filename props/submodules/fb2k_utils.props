@@ -3,13 +3,13 @@
   <ImportGroup Label="PropertySheets">
   </ImportGroup>
   <PropertyGroup>
-    <_PropertySheetDisplayName>submodules</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>fb2k_utils</_PropertySheetDisplayName>
   </PropertyGroup>
   <PropertyGroup Label="UserMacros">
-    <SubmodulesDirectory>$(MainDir)submodules\</SubmodulesDirectory>
+    <QwrFb2kUtilsRootDir>$(SolutionDir)..\submodules\fb2k_utils\</QwrFb2kUtilsRootDir>
+    <QwrFb2kUtilsPropsDir>$(QwrFb2kUtilsRootDir)props\</QwrFb2kUtilsPropsDir>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(SubmodulesDirectory);$(IncludePath)</IncludePath>
+    <IncludePath>$(QwrFb2kUtilsRootDir)src\;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <ItemGroup />
 </Project>

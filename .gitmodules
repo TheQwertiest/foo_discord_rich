@@ -26,3 +26,6 @@
 [submodule "submodules/range"]
 	path = submodules/range
 	url = https://github.com/ericniebler/range-v3.git
+[submodule "submodules/fb2k_utils"]
+	path = submodules/fb2k_utils
+	url = https://github.com/TheQwertiest/fb2k_utils.git

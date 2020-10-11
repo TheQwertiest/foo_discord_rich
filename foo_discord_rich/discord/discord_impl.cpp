@@ -1,7 +1,7 @@
 #include <stdafx.h>
 #include "discord_impl.h"
 
-#include <config.h>
+#include <fb2k/config.h>
 
 #include <ctime>
 

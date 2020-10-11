@@ -1,7 +1,7 @@
 #include <stdafx.h>
 #include "config.h"
 
-#include <discord_impl.h>
+#include <discord/discord_impl.h>
 
 namespace drp::config
 {

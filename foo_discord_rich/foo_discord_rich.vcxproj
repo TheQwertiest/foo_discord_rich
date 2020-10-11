@@ -35,18 +35,19 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)\..\props\BuildEnvCommon.props" />
-    <Import Project="$(SolutionDir)\..\props\BuildEnvCpp.props" />
-    <Import Project="$(SolutionDir)\..\props\StaticRuntime.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\discord.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\fmt.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\foobar2000_sdk.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\json.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\range.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\pfc.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\span_lite.props" />
-    <Import Project="$(SolutionDir)\..\props\submodules\wtl.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\submodules.props" />
+    <Import Project="$(SolutionDir)\..\props\submodules\fb2k_utils.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)env\BuildEnvCommon.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)env\BuildEnvCpp.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)env\StaticRuntime.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)submodules\fmt.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)submodules\foobar2000_sdk.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)submodules\json.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)submodules\range.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)submodules\pfc.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)submodules\span.props" />
+    <Import Project="$(QwrFb2kUtilsPropsDir)submodules\wtl.props" />
+    <Import Project="$(SolutionDir)\..\props\local_dependencies\discord.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -59,7 +60,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir);$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalOptions>/Zm200 /experimental:preprocessor /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm200 /Zc:__cplusplus /Zc:preprocessor /experimental:newLambdaProcessor %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <DisableSpecificWarnings>5105</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -105,7 +106,6 @@
   <ItemGroup>
     <ProjectReference Include="..\submodules\discord-rpc\src\discord-rpc.vcxproj">
       <Project>{fd83c8ca-35c7-4f67-ade3-2fd99c91b230}</Project>
-      <Private>false</Private>
     </ProjectReference>
     <ProjectReference Include="..\submodules\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
       <Project>{71ad2674-065b-48f5-b8b0-e1f9d3892081}</Project>
@@ -118,12 +118,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="acfu_integration.cpp" />
-    <ClCompile Include="config.cpp" />
-    <ClCompile Include="discord_impl.cpp" />
-    <ClCompile Include="fb2k_callbacks.cpp" />
-    <ClCompile Include="foo_discord_rich.cpp" />
-    <ClCompile Include="mainmenu.cpp" />
+    <ClCompile Include="discord\discord_impl.cpp" />
+    <ClCompile Include="fb2k\acfu_integration.cpp" />
+    <ClCompile Include="fb2k\config.cpp" />
+    <ClCompile Include="fb2k\fb2k_callbacks.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="fb2k\mainmenu.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -139,8 +139,8 @@
   <ItemGroup>
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="component_guids.h" />
-    <ClInclude Include="config.h" />
-    <ClInclude Include="discord_impl.h" />
+    <ClInclude Include="discord\discord_impl.h" />
+    <ClInclude Include="fb2k\config.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ui\internal\ui_cfg_wrap.h" />
@@ -158,7 +158,6 @@
     <ClInclude Include="utils\unicode.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".clang-format" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

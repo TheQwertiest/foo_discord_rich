@@ -19,21 +19,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 		..\THIRD_PARTY_NOTICES.md = ..\THIRD_PARTY_NOTICES.md
+		..\VERSION = ..\VERSION
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rd-party SDK", "3rd-party SDK", "{FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "licenses", "licenses", "{65871DB1-F490-47DD-8F69-8F279BB6A149}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C81E6059-F23E-42D6-8952-CED0CE1BC80A}"
 	ProjectSection(SolutionItems) = preProject
-		..\component\licenses\Discord RPC.txt = ..\component\licenses\Discord RPC.txt
-		..\component\licenses\fmt.txt = ..\component\licenses\fmt.txt
-		..\component\licenses\foobar2000 SDK.txt = ..\component\licenses\foobar2000 SDK.txt
-		..\component\licenses\JSON for Modern C++.txt = ..\component\licenses\JSON for Modern C++.txt
-		..\component\licenses\PFC.txt = ..\component\licenses\PFC.txt
-		..\component\licenses\range-v3.txt = ..\component\licenses\range-v3.txt
-		..\component\licenses\span lite.txt = ..\component\licenses\span lite.txt
-		..\component\licenses\WTL.txt = ..\component\licenses\WTL.txt
+		..\foo_discord_rich\.clang-format = ..\foo_discord_rich\.clang-format
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fb2k_utils", "..\submodules\fb2k_utils\src\fb2k_utils.vcxproj", "{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +57,10 @@ Global
 		{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230}.Debug|Win32.Build.0 = Debug|Win32
 		{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230}.Release|Win32.ActiveCfg = Release|Win32
 		{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230}.Release|Win32.Build.0 = Release|Win32
+		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}.Debug|Win32.Build.0 = Debug|Win32
+		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}.Release|Win32.ActiveCfg = Release|Win32
+		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,10 +70,9 @@ Global
 		{E8091321-D79D-4575-86EF-064EA1A4A20D} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 		{71AD2674-065B-48F5-B8B0-E1F9D3892081} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 		{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
-		{65871DB1-F490-47DD-8F69-8F279BB6A149} = {84900D01-0673-48C4-AD17-635F2DA60810}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
 		SolutionNewStyle = 1
+		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
 	EndGlobalSection
 EndGlobal

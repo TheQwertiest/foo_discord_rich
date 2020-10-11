@@ -3,9 +3,12 @@
   <ImportGroup Label="PropertySheets">
   </ImportGroup>
   <PropertyGroup>
-    <_PropertySheetDisplayName>wtl</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>submodules</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <PropertyGroup Label="UserMacros">
+    <SubmodulesDirectory>$(SolutionDir)..\submodules\</SubmodulesDirectory>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(SubmodulesDirectory)wtl\Include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SubmodulesDirectory);$(IncludePath)</IncludePath>
   </PropertyGroup>
 </Project>

@@ -1,14 +1,12 @@
-Discord Rich Presence Integration uses third-party libraries or other resources that may
-be distributed under licenses different than the Discord Rich Presence Integration software.
-
+Discord Rich Presense Integration uses third-party libraries or other resources that may
+be distributed under licenses different than the Discord Rich Presense Integration software.
 The linked notices are provided for information only.
 
-- [Discord RPC - MIT](component/licenses/Discord%20RPC.txt)
-- [foobar2000 SDK - other](component/licenses/foobar2000%20SDK.txt)
-- [fmt - other](component/licenses/fmt.txt)
-- [JSON for Modern C++ - MIT](component/licenses/JSON%20for%20Modern%20C%2B%2B.txt)
-- [range-v3 - BSL-1.0](component/licenses/range-v3.txt)
-- [PFC - zlib](component/licenses/PFC.txt)
-- [span lite - BSL-1.0](component/licenses/span%20lite.txt)
-- [PFC - zlib](component/licenses/PFC.txt)
-- [WTL - MS-PL](component/licenses/WTL.txt)
+- [Discord RPC - MIT](licenses/Discord%20RPC.txt)
+- [fmt - other](licenses/fmt.txt)
+- [foobar2000 SDK - other](licenses/foobar2000%20SDK.txt)
+- [JSON for Modern C++ - MIT](licenses/JSON%20for%20Modern%20C%2B%2B.txt)
+- [PFC - zlib](licenses/PFC.txt)
+- [range-v3 - BSL-1.0](licenses/range-v3.txt)
+- [span lite - BSL-1.0](licenses/span%20lite.txt)
+- [WTL - MS-PL](licenses/WTL.txt)

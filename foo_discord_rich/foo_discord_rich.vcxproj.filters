@@ -7,37 +7,19 @@
     <Filter Include="ui">
       <UniqueIdentifier>{f4bb6562-042d-4ef7-a9f2-942b014da39d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="z_core">
-      <UniqueIdentifier>{29a62391-d80b-4934-87d0-b385d169877e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ui\internal">
       <UniqueIdentifier>{0f5bf5d1-b6fb-4b5e-a9fe-cfad57f5fa1f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="fb2k">
+      <UniqueIdentifier>{abc073cb-2992-4a6e-8e40-9bf7360888df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="discord">
+      <UniqueIdentifier>{99a9de41-701f-4a5b-aa0a-d1abe5ff68e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="discord_impl.cpp">
-      <Filter>z_core</Filter>
-    </ClCompile>
-    <ClCompile Include="foo_discord_rich.cpp">
-      <Filter>z_core</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>z_core</Filter>
-    </ClCompile>
     <ClCompile Include="utils\string_helpers.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="acfu_integration.cpp">
-      <Filter>z_core</Filter>
-    </ClCompile>
-    <ClCompile Include="mainmenu.cpp">
-      <Filter>z_core</Filter>
-    </ClCompile>
-    <ClCompile Include="config.cpp">
-      <Filter>z_core</Filter>
-    </ClCompile>
-    <ClCompile Include="fb2k_callbacks.cpp">
-      <Filter>z_core</Filter>
     </ClCompile>
     <ClCompile Include="ui\ui_pref_tab_manager.cpp">
       <Filter>ui</Filter>
@@ -60,17 +42,25 @@
     <ClCompile Include="utils\pfc_helpers_cfg.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="fb2k\fb2k_callbacks.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="fb2k\mainmenu.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="discord\discord_impl.cpp">
+      <Filter>discord</Filter>
+    </ClCompile>
+    <ClCompile Include="fb2k\config.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="fb2k\acfu_integration.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="component_defines.h">
-      <Filter>z_core</Filter>
-    </ClInclude>
-    <ClInclude Include="discord_impl.h">
-      <Filter>z_core</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>z_core</Filter>
-    </ClInclude>
     <ClInclude Include="utils\string_helpers.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -82,12 +72,6 @@
     </ClInclude>
     <ClInclude Include="utils\cfg_wrap.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="config.h">
-      <Filter>z_core</Filter>
-    </ClInclude>
-    <ClInclude Include="component_guids.h">
-      <Filter>z_core</Filter>
     </ClInclude>
     <ClInclude Include="ui\ui_pref_tab_manager.h">
       <Filter>ui</Filter>
@@ -119,9 +103,17 @@
     <ClInclude Include="utils\pfc_helpers_cfg.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="discord\discord_impl.h">
+      <Filter>discord</Filter>
+    </ClInclude>
+    <ClInclude Include="fb2k\config.h">
+      <Filter>fb2k</Filter>
+    </ClInclude>
+    <ClInclude Include="component_defines.h" />
+    <ClInclude Include="component_guids.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".clang-format" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
