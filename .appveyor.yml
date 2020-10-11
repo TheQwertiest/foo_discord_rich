@@ -44,7 +44,7 @@ environment:
   APPVEYOR_IGNORE_COMMIT_FILTERING_ON_TAG: true
   git_user_email: qwertiest@mail.ru
   git_user_name: TheQwertiest
-  GITHUB_ACCESS_TOKEN:
+  GITHUB_TOKEN:
     secure: gBfHQnRcGcTS0yQXWOHhKfDkTZfIBwPIDjTsCQOGmOSPkRqs1QPYBX47BjCvJKim
 
 # this is how to allow failing jobs in the matrix
@@ -66,7 +66,14 @@ cache:
 
 # scripts that run after cloning repository
 install:
-  - py scripts\setup.py
+  # GitHub CLI
+  - choco install gh -y
+  - refreshenv
+  - gh config set -h github.com git_protocol https
+  # PIP
+  - py -3 -m pip install semver
+  # Component
+  - py -u scripts\setup.py
 
 #---------------------------------#
 #       build configuration       #
@@ -135,7 +142,7 @@ artifacts:
 deploy:
   description: 'Dummy description'
   provider: GitHub
-  auth_token: $(GITHUB_ACCESS_TOKEN)
+  auth_token: $(GITHUB_TOKEN)
   artifact: /foo_discord_rich.*/           # upload all NuGet packages to release assets
   prerelease: true
   on:
@@ -161,6 +168,28 @@ deploy_script:
 
 # on successful build
 on_success:
+  # issues clean up
+  - ps: |
+        If ($env:APPVEYOR_REPO_TAG -eq $true -and $env:CONFIGURATION -eq "Release")
+        {
+          py -u submodules\fb2k_utils\scripts\close_gh_issues.py
+        }
+  # gh-pages
+  - ps: |
+        If ($env:APPVEYOR_REPO_TAG -eq $true -and $env:CONFIGURATION -eq "Release")
+        {
+          git config --global credential.helper store
+          Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GITHUB_TOKEN):x-oauth-basic@github.com`n"
+          git config --global user.email $env:git_user_email
+          git config --global user.name $env:git_user_name
+          git clone -q --depth=1 -b gh-pages https://github.com/$($env:APPVEYOR_REPO_NAME).git gh-pages
+          py -u scripts\update_gh_pages.py
+          cd gh-pages
+          git add -A 2>&1
+          git commit -q -m "Updated documentation: $env:APPVEYOR_REPO_TAG_NAME ($env:APPVEYOR_REPO_COMMIT)"
+          git push -q origin gh-pages
+          cd $env:APPVEYOR_BUILD_FOLDER
+        }
 
 # on build failure
 on_failure:

@@ -36,7 +36,7 @@ def pack(is_debug = False):
     component_zip.unlink(missing_ok=True)
 
     with ZipFile(component_zip, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-        zipdir(z, root_dir/"component", "")
+        zipdir(z, root_dir/'licenses', 'licenses')
 
         z.write(*path_basename_tuple(root_dir/"LICENSE"))
         z.write(*path_basename_tuple(root_dir/"CHANGELOG.md"))
