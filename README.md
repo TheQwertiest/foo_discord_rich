@@ -5,27 +5,7 @@
 
 This is a component for the [foobar2000](https://www.foobar2000.org) audio player, which displays currently played track data via Discord Rich Presence.
 
-Features:
-- Text fields configuration via [title formatting queries](http://wiki.hydrogenaud.io/index.php?title=Foobar2000:Title_Formatting_Reference).
-- [foo_acfu](https://acfu.3dyd.com) integration.
-
-## Prerequisites
-
-- Windows 7 or later.
-- foobar2000 v1.3.17 or later.
-
-## Installation
-
-1. Download the [latest release](https://github.com/TheQwertiest/foo_discord_rich/releases/latest) (you only need `foo_discord_rich.fb2k-component`).
-1. Install the component using the [following instructions](http://wiki.hydrogenaud.io/index.php?title=Foobar2000:How_to_install_a_component).
-
-## Links
-[Support thread](https://hydrogenaud.io/index.php/topic,116860.new.html)  
-[Changelog][changelog]  
-[Nightly build](https://ci.appveyor.com/api/projects/theqwertiest/foo-discord-rich/artifacts/_result%2FWin32_Release%2Ffoo_discord_rich.fb2k-component?branch=master&job=Configuration%3A%20Release)
-
-## Credits
-- [Respective authors](THIRD_PARTY_NOTICES.md) of the code being used in this project.
+Visit [component homepage](https://theqwertiest.github.io/foo_discord_rich/) for more info.
 
 [changelog]: CHANGELOG.md
 [version_badge]: https://img.shields.io/github/release/theqwertiest/foo_discord_rich.svg
