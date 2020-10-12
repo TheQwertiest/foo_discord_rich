@@ -89,15 +89,22 @@ PresenceModifier::~PresenceModifier()
         parent_.presenceData_ = presenceData_;
     }
 
-    if ( parent_.HasPresence()
-         && ( isDisabled_
-              || ( playback_control::get()->is_paused() && config::g_disableWhenPaused ) ) )
+    const bool needsToBeDisabled = ( isDisabled_
+                                     || !playback_control::get()->is_playing()
+                                     || ( playback_control::get()->is_paused() && config::g_disableWhenPaused ) );
+    if ( needsToBeDisabled )
     {
-        parent_.ClearPresence();
+        if ( parent_.HasPresence() )
+        {
+            parent_.ClearPresence();
+        }
     }
-    else if ( !parent_.HasPresence() || hasChanged )
+    else
     {
-        parent_.SendPresense();
+        if ( !parent_.HasPresence() || hasChanged )
+        {
+            parent_.SendPresense();
+        }
     }
 }
 
