@@ -13,24 +13,32 @@ using namespace config;
 
 PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     : pParent_( pParent )
-    , options_(
-          config::g_isEnabled,
-          config::g_stateQuery,
-          config::g_detailsQuery,
-          config::g_largeImageSettings,
-          config::g_smallImageSettings,
-          config::g_timeSettings,
-          config::g_disableWhenPaused,
-          config::g_swapSmallImages )
+    , opt0_( config::g_isEnabled )
+    , opt1_( config::g_stateQuery )
+    , opt2_( config::g_detailsQuery )
+    , opt3_( config::g_largeImageSettings,
+             { { ImageSetting::Light, IDC_RADIO_IMG_LIGHT },
+               { ImageSetting::Dark, IDC_RADIO_IMG_DARK },
+               { ImageSetting::Disabled, IDC_RADIO_IMG_DISABLED } } )
+    , opt4_( config::g_smallImageSettings,
+             { { ImageSetting::Light, IDC_RADIO_PLAYBACK_IMG_LIGHT },
+               { ImageSetting::Dark, IDC_RADIO_PLAYBACK_IMG_DARK },
+               { ImageSetting::Disabled, IDC_RADIO_PLAYBACK_IMG_DISABLED } } )
+    , opt5_( config::g_timeSettings,
+             { { TimeSetting::Elapsed, IDC_RADIO_TIME_ELAPSED },
+               { TimeSetting::Remaining, IDC_RADIO_TIME_REMAINING },
+               { TimeSetting::Disabled, IDC_RADIO_TIME_DISABLED } } )
+    , opt6_( config::g_disableWhenPaused )
+    , opt7_( config::g_swapSmallImages )
     , ddxOptions_( {
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( std::get<0>( options_ ), IDC_CHECK_IS_ENABLED ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<1>( options_ ), IDC_TEXTBOX_STATE ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<2>( options_ ), IDC_TEXTBOX_DETAILS ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( std::get<3>( options_ ), std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( std::get<4>( options_ ), std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( std::get<5>( options_ ), std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( std::get<6>( options_ ), IDC_CHECK_DISABLE_WHEN_PAUSED ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( std::get<7>( options_ ), IDC_CHECK_SWAP_STATUS ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( opt0_, IDC_CHECK_IS_ENABLED ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt1_, IDC_TEXTBOX_STATE ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt2_, IDC_TEXTBOX_DETAILS ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( opt3_, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( opt4_, std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( opt5_, std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( opt6_, IDC_CHECK_DISABLE_WHEN_PAUSED ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( opt7_, IDC_CHECK_SWAP_STATUS ),
       } )
 {
 }

@@ -60,16 +60,14 @@ private:
 private:
     PreferenceTabManager* pParent_ = nullptr;
 
-    qwr::ui::UiOptionTuple<
-        decltype( config::g_isEnabled ),
-        decltype( config::g_stateQuery ),
-        decltype( config::g_detailsQuery ),
-        decltype( config::g_largeImageSettings ),
-        decltype( config::g_smallImageSettings ),
-        decltype( config::g_timeSettings ),
-        decltype( config::g_disableWhenPaused ),
-        decltype( config::g_swapSmallImages )>
-        options_;
+    qwr::ui::UiOption<decltype( config::g_isEnabled )> opt0_;
+    qwr::ui::UiOption<decltype( config::g_stateQuery )> opt1_;
+    qwr::ui::UiOption<decltype( config::g_detailsQuery )> opt2_;
+    qwr::ui::UiOption<decltype( config::g_largeImageSettings )> opt3_;
+    qwr::ui::UiOption<decltype( config::g_smallImageSettings )> opt4_;
+    qwr::ui::UiOption<decltype( config::g_timeSettings )> opt5_;
+    qwr::ui::UiOption<decltype( config::g_disableWhenPaused )> opt6_;
+    qwr::ui::UiOption<decltype( config::g_swapSmallImages )> opt7_;
     std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 8> ddxOptions_;
 
     CHyperLink helpUrl_;

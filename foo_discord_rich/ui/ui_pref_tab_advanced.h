@@ -57,15 +57,13 @@ private:
 private:
     PreferenceTabManager* pParent_ = nullptr;
 
-    qwr::ui::UiOptionTuple<
-        decltype( config::g_discordAppToken ),
-        decltype( config::g_largeImageId_Light ),
-        decltype( config::g_largeImageId_Dark ),
-        decltype( config::g_playingImageId_Light ),
-        decltype( config::g_playingImageId_Dark ),
-        decltype( config::g_pausedImageId_Light ),
-        decltype( config::g_pausedImageId_Dark )>
-        options_;
+    qwr::ui::UiOption<decltype( config::g_discordAppToken )> opt0_;
+    qwr::ui::UiOption<decltype( config::g_largeImageId_Light )> opt1_;
+    qwr::ui::UiOption<decltype( config::g_largeImageId_Dark )> opt2_;
+    qwr::ui::UiOption<decltype( config::g_playingImageId_Light )> opt3_;
+    qwr::ui::UiOption<decltype( config::g_playingImageId_Dark )> opt4_;
+    qwr::ui::UiOption<decltype( config::g_pausedImageId_Light )> opt5_;
+    qwr::ui::UiOption<decltype( config::g_pausedImageId_Dark )> opt6_;
     std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 7> ddxOptions_;
 };
 

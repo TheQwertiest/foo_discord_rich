@@ -14,22 +14,21 @@ using namespace config;
 
 PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
     : pParent_( pParent )
-    , options_(
-          config::g_discordAppToken,
-          config::g_largeImageId_Light,
-          config::g_largeImageId_Dark,
-          config::g_playingImageId_Light,
-          config::g_playingImageId_Dark,
-          config::g_pausedImageId_Light,
-          config::g_pausedImageId_Dark )
+    , opt0_( config::g_discordAppToken )
+    , opt1_( config::g_largeImageId_Light )
+    , opt2_( config::g_largeImageId_Dark )
+    , opt3_( config::g_playingImageId_Light )
+    , opt4_( config::g_playingImageId_Dark )
+    , opt5_( config::g_pausedImageId_Light )
+    , opt6_( config::g_pausedImageId_Dark )
     , ddxOptions_( {
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<0>( options_ ), IDC_TEXTBOX_APP_TOKEN ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<1>( options_ ), IDC_TEXTBOX_LARGE_LIGHT_ID ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<2>( options_ ), IDC_TEXTBOX_LARGE_DARK_ID ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<3>( options_ ), IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<4>( options_ ), IDC_TEXTBOX_SMALL_PLAYING_DARK_ID ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<5>( options_ ), IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( std::get<6>( options_ ), IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt0_, IDC_TEXTBOX_APP_TOKEN ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt1_, IDC_TEXTBOX_LARGE_LIGHT_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt2_, IDC_TEXTBOX_LARGE_DARK_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt3_, IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt4_, IDC_TEXTBOX_SMALL_PLAYING_DARK_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt5_, IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( opt6_, IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ),
       } )
 {
 }
