@@ -64,14 +64,14 @@ GUID MainMenuCommandsImpl::get_parent()
 
 void MainMenuCommandsImpl::execute( t_uint32 p_index, service_ptr_t<service_base> p_callback )
 {
-    drp::config::g_isEnabled = !drp::config::g_isEnabled;
+    drp::config::isEnabled = !drp::config::isEnabled;
     drp::DiscordHandler::GetInstance().OnSettingsChanged();
 }
 
 bool MainMenuCommandsImpl::get_display( t_uint32 p_index, pfc::string_base& p_out, t_uint32& p_flags )
 {
     get_name( p_index, p_out );
-    p_flags = sort_priority_dontcare | ( drp::config::g_isEnabled ? mainmenu_commands::flag_checked : 0 );
+    p_flags = sort_priority_dontcare | ( drp::config::isEnabled ? mainmenu_commands::flag_checked : 0 );
     return true;
 }
 

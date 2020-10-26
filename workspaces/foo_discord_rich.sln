@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foo_discord_rich", "..\foo_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "discord-rpc", "..\submodules\discord-rpc\src\discord-rpc.vcxproj", "{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{84900D01-0673-48C4-AD17-635F2DA60810}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{84900D01-0673-48C4-AD17-635F2DA60810}"
 	ProjectSection(SolutionItems) = preProject
 		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\LICENSE = ..\LICENSE
@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		..\VERSION = ..\VERSION
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rd-party SDK", "3rd-party SDK", "{FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "submodules", "submodules", "{FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C81E6059-F23E-42D6-8952-CED0CE1BC80A}"
 	ProjectSection(SolutionItems) = preProject
@@ -70,9 +70,10 @@ Global
 		{E8091321-D79D-4575-86EF-064EA1A4A20D} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 		{71AD2674-065B-48F5-B8B0-E1F9D3892081} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 		{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
+		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionNewStyle = 1
 		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
+		SolutionNewStyle = 1
 	EndGlobalSection
 EndGlobal

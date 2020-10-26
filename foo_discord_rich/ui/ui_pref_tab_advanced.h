@@ -2,6 +2,7 @@
 
 #include <fb2k/config.h>
 #include <qwr/fb2k_config_ui_option.h>
+#include <qwr/macros.h>
 #include <qwr/ui_ddx_option.h>
 #include <ui/ui_itab.h>
 
@@ -57,13 +58,23 @@ private:
 private:
     PreferenceTabManager* pParent_ = nullptr;
 
-    qwr::ui::UiOption<decltype( config::g_discordAppToken )> opt0_;
-    qwr::ui::UiOption<decltype( config::g_largeImageId_Light )> opt1_;
-    qwr::ui::UiOption<decltype( config::g_largeImageId_Dark )> opt2_;
-    qwr::ui::UiOption<decltype( config::g_playingImageId_Light )> opt3_;
-    qwr::ui::UiOption<decltype( config::g_playingImageId_Dark )> opt4_;
-    qwr::ui::UiOption<decltype( config::g_pausedImageId_Light )> opt5_;
-    qwr::ui::UiOption<decltype( config::g_pausedImageId_Dark )> opt6_;
+#define SPTF_DEFINE_UI_OPTION( name ) \
+    qwr::ui::UiOption<decltype( config::name )> name##_;
+
+#define SPTF_DEFINE_UI_OPTIONS( ... ) \
+    QWR_EXPAND( QWR_PASTE( SPTF_DEFINE_UI_OPTION, __VA_ARGS__ ) )
+
+    SPTF_DEFINE_UI_OPTIONS( discordAppToken,
+                            largeImageId_Light,
+                            largeImageId_Dark,
+                            playingImageId_Light,
+                            playingImageId_Dark,
+                            pausedImageId_Light,
+                            pausedImageId_Dark )
+
+#undef SPTF_DEFINE_OPTIONS
+#undef SPTF_DEFINE_OPTION
+
     std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 7> ddxOptions_;
 };
 

@@ -65,8 +65,8 @@ void PresenceData::CopyData( const PresenceData& other )
     memcpy( &presence, &other.presence, sizeof( presence ) );
     presence.state = state.c_str();
     presence.details = details.c_str();
-    presence.largeImageKey = largeImageKey.empty() ? nullptr : largeImageKey.c_str();
-    presence.smallImageKey = smallImageKey.empty() ? nullptr : smallImageKey.c_str();
+    presence.largeImageKey = ( largeImageKey.empty() ? nullptr : largeImageKey.c_str() );
+    presence.smallImageKey = ( smallImageKey.empty() ? nullptr : smallImageKey.c_str() );
 }
 
 } // namespace drp::internal
@@ -91,7 +91,7 @@ PresenceModifier::~PresenceModifier()
 
     const bool needsToBeDisabled = ( isDisabled_
                                      || !playback_control::get()->is_playing()
-                                     || ( playback_control::get()->is_paused() && config::g_disableWhenPaused ) );
+                                     || ( playback_control::get()->is_paused() && config::disableWhenPaused ) );
     if ( needsToBeDisabled )
     {
         if ( parent_.HasPresence() )
@@ -118,16 +118,16 @@ void PresenceModifier::UpdateImage()
         pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
 
-    switch ( config::g_largeImageSettings )
+    switch ( config::largeImageSettings )
     {
     case config::ImageSetting::Light:
     {
-        setImageKey( config::g_largeImageId_Light );
+        setImageKey( config::largeImageId_Light );
         break;
     }
     case config::ImageSetting::Dark:
     {
-        setImageKey( config::g_largeImageId_Dark );
+        setImageKey( config::largeImageId_Dark );
         break;
     }
     case config::ImageSetting::Disabled:
@@ -148,18 +148,18 @@ void PresenceModifier::UpdateSmallImage()
         pd.presence.smallImageKey = pd.smallImageKey.empty() ? nullptr : pd.smallImageKey.c_str();
     };
 
-    const bool usePausedImage = ( pc->is_paused() || config::g_swapSmallImages );
+    const bool usePausedImage = ( pc->is_paused() || config::swapSmallImages );
 
-    switch ( config::g_smallImageSettings )
+    switch ( config::smallImageSettings )
     {
     case config::ImageSetting::Light:
     {
-        setImageKey( usePausedImage ? config::g_pausedImageId_Light : config::g_playingImageId_Light );
+        setImageKey( usePausedImage ? config::pausedImageId_Light : config::playingImageId_Light );
         break;
     }
     case config::ImageSetting::Dark:
     {
-        setImageKey( usePausedImage ? config::g_pausedImageId_Dark : config::g_playingImageId_Dark );
+        setImageKey( usePausedImage ? config::pausedImageId_Dark : config::playingImageId_Dark );
         break;
     }
     case config::ImageSetting::Disabled:
@@ -212,9 +212,9 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
         }
     };
 
-    pd.state = queryData( config::g_stateQuery );
+    pd.state = queryData( config::stateQuery );
     fixStringLength( pd.state );
-    pd.details = queryData( config::g_detailsQuery );
+    pd.details = queryData( config::detailsQuery );
     fixStringLength( pd.details );
 
     const std::u8string lengthStr = queryData( "[%length_seconds_fp%]" );
@@ -232,7 +232,7 @@ void PresenceModifier::UpdateDuration( double time )
     auto& pd = presenceData_;
     auto pc = playback_control::get();
     const config::TimeSetting timeSetting = ( ( pd.trackLength && pc->is_playing() && !pc->is_paused() )
-                                                  ? config::g_timeSettings
+                                                  ? config::timeSettings
                                                   : config::TimeSetting::Disabled );
     switch ( timeSetting )
     {
@@ -280,10 +280,9 @@ DiscordHandler& DiscordHandler::GetInstance()
 
 void DiscordHandler::Initialize()
 {
-    appToken_ = config::g_discordAppToken;
+    appToken_ = config::discordAppToken;
 
-    DiscordEventHandlers handlers;
-    memset( &handlers, 0, sizeof( handlers ) );
+    DiscordEventHandlers handlers{};
 
     handlers.ready = OnReady;
     handlers.disconnected = OnDisconnected;
@@ -307,7 +306,7 @@ void DiscordHandler::Finalize()
 
 void DiscordHandler::OnSettingsChanged()
 {
-    if ( appToken_ != static_cast<std::string>( config::g_discordAppToken ) )
+    if ( appToken_ != static_cast<std::string>( config::discordAppToken ) )
     {
         Finalize();
         Initialize();
@@ -317,7 +316,7 @@ void DiscordHandler::OnSettingsChanged()
     pm.UpdateImage();
     pm.UpdateSmallImage();
     pm.UpdateTrack();
-    if ( !config::g_isEnabled )
+    if ( !config::isEnabled )
     {
         pm.Disable();
     }
@@ -330,7 +329,7 @@ bool DiscordHandler::HasPresence() const
 
 void DiscordHandler::SendPresense()
 {
-    if ( config::g_isEnabled )
+    if ( config::isEnabled )
     {
         Discord_UpdatePresence( &presenceData_.presence );
         hasPresence_ = true;
