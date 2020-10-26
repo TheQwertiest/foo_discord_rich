@@ -148,6 +148,7 @@
     <ClInclude Include="utils\acfu_github.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="foo_discord_rich.rc2" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
