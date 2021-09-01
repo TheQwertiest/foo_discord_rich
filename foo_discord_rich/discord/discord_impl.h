@@ -78,7 +78,7 @@ public:
 
 private:
     bool HasPresence() const;
-    void SendPresense();
+    void SendPresence();
     void ClearPresence();
 
 private:

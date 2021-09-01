@@ -4,7 +4,7 @@
 #include <commit_hash.h>
 #include <version.h>
 
-#define DRP_NAME "Discord Rich Presense Integration"
+#define DRP_NAME "Discord Rich Presence Integration"
 #define DRP_UNDERSCORE_NAME "foo_discord_rich"
 #define DRP_DLL_NAME DRP_UNDERSCORE_NAME ".dll"
 

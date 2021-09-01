@@ -90,7 +90,7 @@ BEGIN
     CONTROL         "Remaining time",IDC_RADIO_TIME_REMAINING,"Button",BS_AUTORADIOBUTTON,227,136,64,10
     CONTROL         "Disabled",IDC_RADIO_TIME_DISABLED,"Button",BS_AUTORADIOBUTTON,227,149,43,10
     GROUPBOX        "Miscellaneous",IDC_STATIC,6,167,314,42
-    CONTROL         "Disable Rich Presense when paused",IDC_CHECK_DISABLE_WHEN_PAUSED,
+    CONTROL         "Disable Rich Presence when paused",IDC_CHECK_DISABLE_WHEN_PAUSED,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,180,128,10
     CONTROL         "Swap `paused` and `playing` images",IDC_CHECK_SWAP_STATUS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,193,135,10

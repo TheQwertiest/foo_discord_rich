@@ -103,7 +103,7 @@ PresenceModifier::~PresenceModifier()
     {
         if ( !parent_.HasPresence() || hasChanged )
         {
-            parent_.SendPresense();
+            parent_.SendPresence();
         }
     }
 }
@@ -327,7 +327,7 @@ bool DiscordHandler::HasPresence() const
     return hasPresence_;
 }
 
-void DiscordHandler::SendPresense()
+void DiscordHandler::SendPresence()
 {
     if ( config::isEnabled )
     {
