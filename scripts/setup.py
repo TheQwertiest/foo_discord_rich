@@ -79,7 +79,7 @@ def setup( skip_submodules_download,
         load_module(scripts_path/'generate_third_party.py').generate
     )(
         root_dir=root_dir,
-        component_name='Discord Rich Presense Integration'
+        component_name='Discord Rich Presence Integration'
     )
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
-Discord Rich Presense Integration uses third-party libraries or other resources that may
-be distributed under licenses different than the Discord Rich Presense Integration software.
+Discord Rich Presence Integration uses third-party libraries or other resources that may
+be distributed under licenses different than the Discord Rich Presence Integration software.
 The linked notices are provided for information only.
 
 - [Discord RPC - MIT](licenses/Discord%20RPC.txt)
