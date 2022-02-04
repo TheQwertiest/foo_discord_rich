@@ -35,7 +35,7 @@ Features:
 [Support thread](https://hydrogenaud.io/index.php/topic,116860.new.html)  
 [Changelog][changelog]  
 [Current tasks and plans][todo]  
-[Nightly build](https://ci.appveyor.com/api/projects/theqwertiest/foo-discord-rich/artifacts/_result%2FWin32_Release%2Ffoo_discord_rich.fb2k-component?branch=master&job=Configuration%3A%20Release)
+[Nightly build](https://ci.appveyor.com/api/projects/theqwertiest/foo-discord-rich/artifacts/_result%2FWin32_Release%2Ffoo_discord_rich.fb2k-component?branch=master&pr=false&job=Configuration%3A%20Release)
 
 ## Credits
 
