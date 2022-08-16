@@ -344,7 +344,7 @@ static service_factory_single_t<init_stage_callback_impl> g_init_stage_callback_
 static service_factory_single_t<initquit_impl> g_initquit_impl;
 
     
-static bool cover_url_set( const GUID & indexID, metadb_index_hash hash, const char * cover_url )
+bool cover_url_set( const GUID & indexID, metadb_index_hash hash, const char * cover_url )
 {
     auto rec = record_get(indexID, hash );
     bool bChanged = false;
