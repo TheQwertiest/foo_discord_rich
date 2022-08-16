@@ -44,6 +44,9 @@
     <ClCompile Include="fb2k\playback.cpp">
       <Filter>fb2k</Filter>
     </ClCompile>
+    <ClCompile Include="discord\uploader.cpp">
+      <Filter>discord</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\acfu_github.h">
@@ -72,6 +75,9 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="resource.h">
       <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="discord\uploader.h">
+      <Filter>discord</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

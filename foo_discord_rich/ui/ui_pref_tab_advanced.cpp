@@ -21,6 +21,8 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
     , playingImageId_Dark_( config::playingImageId_Dark )
     , pausedImageId_Light_( config::pausedImageId_Light )
     , pausedImageId_Dark_( config::pausedImageId_Dark )
+    , uploadCoverArt_(config::uploadCoverArt)
+    , uploadCoverArtCommand_(config::uploadCoverArtCommand)
     , ddxOptions_( {
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( discordAppToken_, IDC_TEXTBOX_APP_TOKEN ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( largeImageId_Light_, IDC_TEXTBOX_LARGE_LIGHT_ID ),
@@ -29,6 +31,8 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( playingImageId_Dark_, IDC_TEXTBOX_SMALL_PLAYING_DARK_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( pausedImageId_Light_, IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( pausedImageId_Dark_, IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( uploadCoverArt_, IDC_CHECK_UPLOAD_COVER_ART ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( uploadCoverArtCommand_, IDC_TEXTBOX_COVER_ART_COMMAND )
       } )
 {
 }

@@ -22,8 +22,10 @@ qwr::fb2k::ConfigString playingImageId_Light( guid::conf_playing_image_id_light,
 qwr::fb2k::ConfigString playingImageId_Dark( guid::conf_playing_image_id_dark, "playing-dark" );
 qwr::fb2k::ConfigString pausedImageId_Light( guid::conf_paused_image_id_light, "paused" );
 qwr::fb2k::ConfigString pausedImageId_Dark( guid::conf_paused_image_id_dark, "paused-dark" );
+qwr::fb2k::ConfigString uploadCoverArtCommand( guid::conf_upload_cover_command, "" );
 
 qwr::fb2k::ConfigBool disableWhenPaused( guid::conf_disable_when_paused, false );
 qwr::fb2k::ConfigBool swapSmallImages( guid::conf_swap_small_images, false );
+qwr::fb2k::ConfigBool uploadCoverArt( guid::conf_upload_cover_art, false );
 
 } // namespace drp::config

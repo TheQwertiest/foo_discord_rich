@@ -29,6 +29,8 @@
 #define IDC_CHECK_DISABLE_WHEN_PAUSED   1090
 #define IDC_CHECK_SWAP_STATUS           1091
 #define IDC_LINK_FORMAT_HELP            1092
+#define IDC_TEXTBOX_COVER_ART_COMMAND   1094
+#define IDC_CHECK_UPLOAD_COVER_ART      1095
 #ifndef IDC_STATIC
 #define IDC_STATIC -1
 #endif
@@ -39,7 +41,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        123
 #define _APS_NEXT_COMMAND_VALUE         40012
-#define _APS_NEXT_CONTROL_VALUE         1093
+#define _APS_NEXT_CONTROL_VALUE         1096
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

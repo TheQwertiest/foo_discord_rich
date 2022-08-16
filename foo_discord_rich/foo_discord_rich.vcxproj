@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="discord\discord_impl.cpp" />
+    <ClCompile Include="discord\uploader.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
     <ClCompile Include="fb2k\playback.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="component_guids.h" />
     <ClInclude Include="discord\discord_impl.h" />
+    <ClInclude Include="discord\uploader.h" />
     <ClInclude Include="fb2k\config.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
