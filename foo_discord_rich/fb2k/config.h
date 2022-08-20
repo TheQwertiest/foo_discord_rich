@@ -32,10 +32,10 @@ extern qwr::fb2k::ConfigString playingImageId_Light;
 extern qwr::fb2k::ConfigString playingImageId_Dark;
 extern qwr::fb2k::ConfigString pausedImageId_Dark;
 extern qwr::fb2k::ConfigString pausedImageId_Light;
-extern qwr::fb2k::ConfigString uploadCoverArtCommand;
+extern qwr::fb2k::ConfigString uploadArtworkCommand;
 
 extern qwr::fb2k::ConfigBool disableWhenPaused;
 extern qwr::fb2k::ConfigBool swapSmallImages;
-extern qwr::fb2k::ConfigBool uploadCoverArt;
+extern qwr::fb2k::ConfigBool uploadArtwork;
 
 }; // namespace drp::config

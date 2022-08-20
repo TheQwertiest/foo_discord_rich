@@ -138,16 +138,14 @@ void PresenceModifier::UpdateImage()
     bool gSuccess = false;
     metadb_index_hash hash;
 
-    // Check if we want to use cover art and it already exists
-    if (config::uploadCoverArt)
+    // Check if we want to use artwork and it already exists
+    if (config::uploadArtwork)
     {
         gSuccess = pc->get_now_playing(p_out);
         if (gSuccess)
         {
-            uploader::clientByGUID( guid::cover_art_url_index )->hashHandle( p_out, hash );
-            auto rec = uploader::record_get(
-                guid::cover_art_url_index,
-                hash );
+            uploader::clientByGUID( guid::artwork_url_index )->hashHandle( p_out, hash );
+            auto rec = uploader::record_get( hash );
 
             if ( rec.cover_url.get_length() > 0 )
             {
@@ -172,7 +170,7 @@ void PresenceModifier::UpdateImage()
     }
     }
 
-    if (config::uploadCoverArt && gSuccess)
+    if (config::uploadArtwork && gSuccess)
     {
         auto shared = std::make_shared<sharedData_t>();
         shared->pm = presenceData_;
@@ -182,21 +180,20 @@ void PresenceModifier::UpdateImage()
         fb2k::splitTask( [aborter, p_out, hash, shared]{
             // In worker thread!
             try {
-                const auto art = uploader::extractAlbumArt(p_out, aborter);
+                const auto art = uploader::extractAlbumArt(p_out, *aborter);
                 aborter->check();
                 if (art.success)
                 {
-                    auto cover_art = uploader::uploadAlbumArt(art, aborter);
+                    auto artwork = uploader::uploadAlbumArt(art, *aborter);
                     aborter->check();
-                    if (!cover_art.is_empty())
+                    if (!artwork.is_empty())
                     {
                         uploader::cover_url_set(
-                            guid::cover_art_url_index,
                             hash,
-                            cover_art
+                            artwork
                         );
 
-                        const auto imageKey = std::u8string( cover_art );
+                        const auto imageKey = std::u8string( artwork );
                         setImageKey(imageKey, shared->pm);
                         aborter->check();
                         shared->handler->MaybeUpdatePresence(shared->pm);

@@ -6,8 +6,72 @@
 
 #include <ctime>
 
+#include "foobar2000/SDK/component.h"
+
 namespace drp::uploader
 {
+
+threaded_process_artwork_uploader::threaded_process_artwork_uploader(
+    const pfc::map_t<metadb_index_hash, metadb_handle_ptr>& hashes) : hashes_(hashes)
+{}
+
+void threaded_process_artwork_uploader::on_init(ctx_t p_wnd) {}
+    
+void threaded_process_artwork_uploader::run(threaded_process_status & p_status,abort_callback & p_abort)
+{
+    pfc::list_t<metadb_index_hash> lstChanged; // Linear list of hashes that actually changed
+    const auto total_count = hashes_.get_count();
+    t_size currIdx = 0;
+    
+    for (auto iter = hashes_.first(); iter.is_valid(); ++iter) {
+        try
+        {
+            p_status.set_progress_float( currIdx / (double)total_count );
+            const auto kv = *iter;
+            
+            if (record_get( kv.m_key ).cover_url.get_length() > 0)
+            {
+                p_abort.check();
+                currIdx++;
+                continue;
+            }
+
+            auto artwork = extractAlbumArt( kv.m_value, p_abort );
+            p_abort.check();
+            if (artwork.success)
+            {
+                auto artwork_url = uploadAlbumArt( artwork, p_abort );
+                if ( artwork_url.get_length() > 0 && cover_url_set( kv.m_key, artwork_url.c_str() ) ) {
+                    lstChanged += kv.m_key;
+                }
+            }
+            
+            p_abort.check();
+        }
+        catch (exception_aborted)
+        {
+            return;
+        }
+        currIdx++;
+    }
+
+    p_status.set_progress_float(1);
+    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": " << lstChanged.get_count() << " entries updated";
+
+    // TODO This crashes for some unknown reason
+    // However it is only required for title formatting which is not currently configured for this metadb field
+    /**
+    if (lstChanged.get_count() > 0) {
+        // This gracefully tells everyone about what just changed, in one pass regardless of how many items got altered
+        metadb_index_manager::get()->dispatch_refresh(guid::artwork_url_index, lstChanged);
+    }
+    */
+}
+
+void threaded_process_artwork_uploader::on_done(ctx_t p_wnd,bool p_was_aborted)
+{
+    
+}
     
 
 metadb_index_client_impl::metadb_index_client_impl( const char * pinTo ) {
@@ -27,21 +91,37 @@ metadb_index_client_impl * clientByGUID( const GUID & guid ) {
     // This is somewhat ugly, operating on raw pointers instead of service_ptr, but OK for this purpose
     static metadb_index_client_impl * g_clientTrack = new service_impl_single_t<metadb_index_client_impl>("%album artist% - $if2([%album%],%title%) [ - %discnumber%]");
 
-    PFC_ASSERT( guid == guid::cover_art_url_index );
+    PFC_ASSERT( guid == guid::artwork_url_index );
     return g_clientTrack;
 }
 
-album_art_info extractAlbumArt( const metadb_handle_ptr track, std::shared_ptr<abort_callback> abort )
+album_art_info extractAlbumArt( const metadb_handle_ptr track, abort_callback &abort )
 {
     static_api_ptr_t<album_art_manager_v3> aam;
     auto extractor = aam->open(pfc::list_single_ref_t(track),
-                           pfc::list_single_ref_t(album_art_ids::cover_front), *abort);
+                           pfc::list_single_ref_t(album_art_ids::cover_front), abort);
 
     try {
-        abort->check();
+        abort.check();
         album_art_info info;
+
+        const auto paths = extractor->query_paths( album_art_ids::cover_front, abort );
+        if (paths->get_count() > 0)
+        {
+            info.path = paths->get_path(0);
+            auto loc = track->get_location().get_path();
+            // Artwork location same as file means artwork is embedded
+            if (strcmp(info.path, loc) == 0)
+            {
+                info.path = "";
+            }
+        }
+        else
+        {
+            info.path = "";
+        }
         
-        info.data = extractor->query(album_art_ids::cover_front, *abort);
+        info.data = extractor->query(album_art_ids::cover_front, abort);
         info.success = true;
 
         return info;
@@ -55,59 +135,79 @@ album_art_info extractAlbumArt( const metadb_handle_ptr track, std::shared_ptr<a
     }
 }
 
-pfc::string8 uploadAlbumArt(const album_art_info& art, std::shared_ptr<abort_callback> abort)
+pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
 {
     auto tempDir = core_api::pathInProfile(DRP_UNDERSCORE_NAME);
 
-    if (!filesystem::g_exists(tempDir.c_str(), *abort))
+    if (!filesystem::g_exists(tempDir.c_str(), abort))
     {
-        filesystem::g_create_directory(tempDir.c_str(), *abort);
+        filesystem::g_create_directory(tempDir.c_str(), abort);
     }
 
-    abort->check();
+    abort.check();
 
-    // Get the image mime type since we cannot deduce it otherwise from embedded cover art
-    auto api = fb2k::imageLoaderLite::tryGet();
-    std::string ext = "jpg";
-    if (api.is_valid())
+    pfc::string8 filepath;
+    
+    // Tempfile assigned later to make sure the actual cover art is not deleted after uploading
+    const char* tempFile = "";
+    
+    bool deleteFile = false;
+
+    // If cover art is not embedded just use that file as the input.
+    // No need to copy it to another folder
+    if (strlen(art.path) > 0)
     {
-        const auto info = api->getInfo(art.data->get_ptr(), art.data->get_size(), *abort);
-        abort->check();
-
-        const auto mime = std::string(info.mime);
-        // Use mime type extension for image/ mime types. Not perfect and will fail for some of the more exotic types like svg
-        if (mime.rfind("image/", 0) == 0)
+        filepath = pfc::string8(art.path);
+    }
+    else
+    {
+        // Get the image mime type since we cannot deduce it otherwise from embedded artwork
+        auto api = fb2k::imageLoaderLite::tryGet();
+        std::string ext = "jpg";
+        if (api.is_valid())
         {
-            ext = mime.substr(mime.find("/") + 1);
+            const auto info = api->getInfo(art.data->get_ptr(), art.data->get_size(), abort);
+            abort.check();
+
+            const auto mime = std::string(info.mime);
+            // Use mime type extension for image/ mime types. Not perfect and will fail for some of the more exotic types like svg
+            if (mime.rfind("image/", 0) == 0)
+            {
+                ext = mime.substr(mime.find("/") + 1);
+            }
+        }
+
+        // Take the last 10 digits of current time and use that for filename.
+        // Should be good enough for this purpose as the file is deleted after the operation or overwritten in the future
+        const auto ts = std::to_string(std::time(NULL));
+        auto filename = pfc::string((ts.substr(ts.size() - 10) + "." + ext).c_str());
+
+        tempDir.add_filename(filename.c_str());
+        filepath = tempDir;
+        deleteFile = true;
+
+        // UTF-8 might cause problems?
+        tempFile = filepath.c_str();
+        {
+            service_ptr_t<file> file_ptr;
+            // File gets released after file_ptr has been deleted
+            filesystem::g_open_write_new( file_ptr, tempFile, abort );
+            file_ptr->write( art.data->get_ptr(), art.data->get_size(), abort );
         }
     }
 
-    // Take the last 10 digits of current time and use that for filename.
-    // Should be good enough for this purpose as the file is deleted after the operation or overwritten in the future
-    const auto ts = std::to_string(std::time(NULL));
-    pfc::string filename = pfc::string((ts.substr(ts.size() - 10) + "." + ext).c_str());
-
-    tempDir.add_filename(filename.c_str());
-    if (tempDir.has_prefix("file://"))
+    if (filepath.has_prefix("file://"))
     {
-        // Remove file:// protocol since a normal path is easier to process
-        if (tempDir.replace_string("file://", "") > 1)
+        // Remove file:// protocol since the program expects a file path instead of a uri
+        if (filepath.replace_string("file://", "") > 1)
         {
             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Multiple instances of \"file://\" replaced during cover upload";
         }
     }
 
-    // UTF-8 might cause problems?
-    const auto tempFile = tempDir.c_str();
- 
-    {
-        service_ptr_t<file> file_ptr;
-        // File gets released after file_ptr has been deleted
-        filesystem::g_open_write_new(file_ptr, tempFile, *abort);
-        file_ptr->write(art.data->get_ptr(), art.data->get_size(), *abort);
-    }
+    const auto filepath_c = filepath.c_str();
 
-    abort->check();
+    abort.check();
    
     HANDLE g_hChildStd_IN_Rd = NULL;
     HANDLE g_hChildStd_IN_Wr = NULL;
@@ -153,12 +253,12 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, std::shared_ptr<abort_cal
 
          PROCESS_INFORMATION piProcInfo; 
          ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
-         auto commandString = config::uploadCoverArtCommand.GetValue();
+         auto commandString = config::uploadArtworkCommand.GetValue();
          
          // TODO Unicode will make this break completely
          LPSTR command = const_cast<char*>( commandString.c_str() );
 
-         abort->check();
+         abort.check();
 
          // Create the child process. Not unicode friendly and converting from u8string to w_chart* is a pain
          bool bSuccess = CreateProcessA(NULL, 
@@ -182,7 +282,7 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, std::shared_ptr<abort_cal
              try
              {
                  DWORD dwWritten;
-                 bool wSuccess = WriteFile(g_hChildStd_IN_Wr, tempFile, strlen( tempFile ), &dwWritten, NULL );
+                 bool wSuccess = WriteFile(g_hChildStd_IN_Wr, filepath_c, strlen( filepath_c ), &dwWritten, NULL );
                  CloseHandle( g_hChildStd_IN_Wr );
 
 
@@ -191,9 +291,9 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, std::shared_ptr<abort_cal
                  CHAR tempBuf[TEMP_BUF_SIZE];
                  DWORD peekedBytes;
                  auto now = std::chrono::high_resolution_clock::now();
-                 const auto timeout_s = std::chrono::seconds(5);
+                 const auto timeout_s = std::chrono::seconds(10);
 
-                 // Try to read output from the process. for 5 seconds
+                 // Try to read output from the process. for 10 seconds
                  while (!inputFound)
                  {
                      if (PeekNamedPipe( g_hChildStd_OUT_Rd, tempBuf, TEMP_BUF_SIZE, &peekedBytes, NULL, NULL ))
@@ -241,18 +341,25 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, std::shared_ptr<abort_cal
              CloseHandle( piProcInfo.hProcess );
              CloseHandle( piProcInfo.hThread );
 
-             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": cover art uploader exited with status: " << exit_code << " and url: " << cover_url;
+             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code << " and url: " << cover_url;
          }
      } catch (...)
      {
-         filesystem::g_remove(tempFile, *abort);
-         FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": cover art uploader threw an error";
+         if ( deleteFile )
+         {
+             filesystem::g_remove( tempFile, abort );
+         }
+         
+         FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader threw an error";
          throw;
      }
 
-    filesystem::g_remove(tempFile, *abort);
+    if ( deleteFile )
+    {
+        filesystem::g_remove(tempFile, abort);
+    }
 
-    abort->check();
+    abort.check();
     
     return cover_url;
 }
@@ -261,24 +368,24 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, std::shared_ptr<abort_cal
 // Cached because we'll be calling it a lot on per-track basis, let's not pass it everywhere to low level functions
 // Obtaining the pointer from core is reasonably efficient - log(n) to the number of known service classes, but not good enough for something potentially called hundreds of times
 static metadb_index_manager::ptr g_cachedAPI;
-static metadb_index_manager::ptr cover_api() {
+static metadb_index_manager::ptr cached_index_api() {
     auto ret = g_cachedAPI;
     if ( ret.is_empty() ) ret = metadb_index_manager::get(); // since fb2k SDK v1.4, core API interfaces have a static get() method
     return ret;
 }
     
-void record_set( const GUID & indexID, metadb_index_hash hash, const record_t & record) {
+void record_set( metadb_index_hash hash, const record_t & record) {
 
     stream_writer_formatter_simple< /* using bing endian data? nope */ false > writer;
     writer << record.cover_url;
 
-    cover_api()->set_user_data( indexID, hash, writer.m_buffer.get_ptr(), writer.m_buffer.get_size() );
+    cached_index_api()->set_user_data( guid::artwork_url_index, hash, writer.m_buffer.get_ptr(), writer.m_buffer.get_size() );
 }
 
     
-record_t record_get(const GUID & indexID, metadb_index_hash hash) {
+record_t record_get( metadb_index_hash hash) {
     mem_block_container_impl temp; // this will receive our BLOB
-    cover_api()->get_user_data( indexID, hash, temp );
+    cached_index_api()->get_user_data( guid::artwork_url_index, hash, temp );
     if ( temp.get_size() > 0 ) {
         try {
             // Parse the BLOB using stream formatters
@@ -318,11 +425,11 @@ public:
             // This will fail if the files holding our data are somehow corrupted.
             try
             {
-                api->add( clientByGUID( guid::cover_art_url_index ), guid::cover_art_url_index, system_time_periods::week * 4 );
+                api->add( clientByGUID( guid::artwork_url_index ), guid::artwork_url_index, system_time_periods::week * 4 );
             }
             catch ( std::exception const& e )
             {
-                api->remove( guid::cover_art_url_index );
+                api->remove( guid::artwork_url_index );
                 FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Critical initialization failure: " << e;
                 return;
             }
@@ -344,35 +451,64 @@ static service_factory_single_t<init_stage_callback_impl> g_init_stage_callback_
 static service_factory_single_t<initquit_impl> g_initquit_impl;
 
     
-bool cover_url_set( const GUID & indexID, metadb_index_hash hash, const char * cover_url )
+bool cover_url_set( metadb_index_hash hash, const char * cover_url )
 {
-    auto rec = record_get(indexID, hash );
+    auto rec = record_get( hash );
     bool bChanged = false;
     if ( ! rec.cover_url.equals( cover_url ) ) {
         rec.cover_url = cover_url;
-        record_set(indexID, hash, rec);
+        record_set( hash, rec );
         bChanged = true;
     }
 
     return bChanged;
 }
 
-// TODO: Not fully implemented
-static void generateUrls( const GUID & whichID, metadb_handle_list_cref tracks ) {
+    
+
+void generateUrls( metadb_handle_list_cref tracks ) {
     const size_t count = tracks.get_count();
     if (count == 0) return;
 
-    auto client = clientByGUID(whichID);
-
-    pfc::string8 coverUrl;
-
-    // Sorted/dedup'd set of all hashes of p_data items.
-    // pfc::avltree_t<> is pfc equivalent of std::set<>.
-    // We go the avltree_t<> route because more than one track in p_data might produce the same hash value, see metadb_index_client_impl / strPinTo
-    pfc::avltree_t<metadb_index_hash> allHashes;
+    auto client = clientByGUID(guid::artwork_url_index);
+    
+    pfc::map_t<metadb_index_hash, metadb_handle_ptr> allHashes;
     for (size_t w = 0; w < count; ++w) {
         metadb_index_hash hash;
         if (client->hashHandle(tracks[w], hash)) {
+            if (allHashes.exists(hash)) continue;
+            allHashes.set(hash, tracks[w]);
+        }
+    }
+
+    if (allHashes.get_count() == 0) {
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Could not hash any of the tracks due to unavailable metadata, bailing";
+        return;
+    }
+
+    auto thread_impl = new service_impl_t<threaded_process_artwork_uploader>(allHashes);
+    const std::string p_title = "Uploading artwork";
+
+    threaded_process::g_run_modeless(
+        thread_impl,
+        threaded_process::flag_show_progress | threaded_process::flag_show_abort | threaded_process::flag_show_delayed,
+        g_foobar2000_api->get_main_window(),
+        p_title.c_str(),
+        p_title.length()
+    );
+}
+
+void clearUrls( metadb_handle_list_cref tracks ) {
+    const size_t count = tracks.get_count();
+    if (count == 0) return;
+
+    auto client = clientByGUID(guid::artwork_url_index);
+    pfc::avltree_t<metadb_index_hash> allHashes;
+
+    for (size_t w = 0; w < count; ++w) {
+        metadb_index_hash hash;
+        if (client->hashHandle(tracks[w], hash)) {
+            if (allHashes.exists(hash)) continue;
             allHashes += hash;
         }
     }
@@ -383,22 +519,22 @@ static void generateUrls( const GUID & whichID, metadb_handle_list_cref tracks )
     }
 
     pfc::list_t<metadb_index_hash> lstChanged; // Linear list of hashes that actually changed
-    for (auto iter = allHashes.first(); iter.is_valid(); ++iter) {
-        const metadb_index_hash hash = *iter;
 
-        // TODO get the first track with hash and use that?
-        if ( cover_url_set(whichID, hash, "") ) {
+    for (auto iter = allHashes.first(); iter.is_valid(); ++iter)
+    {
+        const metadb_index_hash hash = *iter;
+        if (cover_url_set( hash, "" ))
+        {
             lstChanged += hash;
         }
     }
 
-    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": " << lstChanged.get_count() << " entries updated";
+    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": " << lstChanged.get_count() << " entries cleared";
     if (lstChanged.get_count() > 0) {
         // This gracefully tells everyone about what just changed, in one pass regardless of how many items got altered
-        cover_api()->dispatch_refresh(whichID, lstChanged);
+        cached_index_api()->dispatch_refresh(guid::artwork_url_index, lstChanged);
     }
 }
-
     
 class contextmenu_cover_url : public contextmenu_item_simple {
 public:
@@ -406,26 +542,38 @@ public:
 		return guid::context_menu_group;
 	}
 	unsigned get_num_items() {
-		return 1;
+		return 2;
 	}
 	void get_item_name(unsigned p_index, pfc::string_base & p_out) {
 		PFC_ASSERT( p_index < get_num_items() );
 		switch(p_index) {
 		    case 0:
-		        p_out = "Generate cover art url"; break;
+		        p_out = "Generate artwork url"; break;
+		    case 1:
+		        p_out = "Clear artwork"; break;
 		}
 		
 	}
 	void context_command(unsigned p_index, metadb_handle_list_cref p_data, const GUID& p_caller) {
 		PFC_ASSERT( p_index < get_num_items() );
-		
-		const GUID whichID = guid::cover_art_url_index;
-	    
-	    generateUrls( whichID, p_data );
+
+        switch (p_index)
+        {
+        case 0:
+            // TODO concurrency!!!
+            generateUrls( p_data );
+            break;
+        case 1:
+            clearUrls( p_data );
+            break;
+        default:
+            uBugCheck();    
+        }
 	}
 	GUID get_item_guid(unsigned p_index) {
 		switch(p_index) {
 		    case 0:	return guid::context_menu_item_generate_url;
+		    case 1:	return guid::context_menu_item_clear_url;
 		    default: uBugCheck();
 		}
 	}
@@ -433,8 +581,12 @@ public:
 		PFC_ASSERT( p_index < get_num_items() );
 		switch( p_index ) {
 		case 0:
-			p_out = "Generate url to be use with discord rich presence";
+			p_out = "Generate urls to be used with discord rich presence";
 			return true;
+		case 1:
+		    // Currently clears based on album. Can be changed after a good way of storing image hashes is found
+		    p_out = "Clear artwork urls of selected albums";
+		    return true;
 		default:
 			PFC_ASSERT(!"Should not get here");
 			return false;
@@ -442,9 +594,8 @@ public:
 	}
 };
 
-// TODO not currently implemented properly so context menu options just hidden for now 
-//static contextmenu_group_popup_factory g_mygroup( guid::context_menu_group, contextmenu_groups::root, "Discord rich presence", 0 );
-//static contextmenu_item_factory_t< contextmenu_cover_url > g_contextmenu_rating;
+static contextmenu_group_popup_factory g_mygroup( guid::context_menu_group, contextmenu_groups::root, "Discord rich presence", 0 );
+static contextmenu_item_factory_t< contextmenu_cover_url > g_contextmenu_rating;
 
 
 class track_property_provider_impl : public track_property_provider_v2 {
@@ -466,7 +617,7 @@ public:
 			bool bFirst = true;
 			bool bVarComments = false;
 			for (auto i = hashes.first(); i.is_valid(); ++i) {
-				auto rec = record_get(whichID, *i);
+				auto rec = record_get( *i );
 
 
 				if ( bFirst ) {
@@ -482,10 +633,10 @@ public:
 			}
 		}
 
-		p_out.set_property(strPropertiesGroup, priorityBase, PFC_string_formatter() << "Cover Art Url", strComment);
+		p_out.set_property(strPropertiesGroup, priorityBase, PFC_string_formatter() << "Artwork Url", strComment);
 	}
 	void enumerate_properties(metadb_handle_list_cref p_tracks, track_property_callback & p_out) {
-		workThisIndex( guid::cover_art_url_index, 0, p_tracks, p_out );
+		workThisIndex( guid::artwork_url_index, 0, p_tracks, p_out );
 	}
 	void enumerate_properties_v2(metadb_handle_list_cref p_tracks, track_property_callback_v2 & p_out) {
 		if ( p_out.is_group_wanted( strPropertiesGroup ) ) {
