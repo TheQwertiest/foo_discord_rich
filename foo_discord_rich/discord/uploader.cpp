@@ -10,6 +10,39 @@
 
 namespace drp::uploader
 {
+/**
+ * Used to restrict uploading to one image at a time.
+ * used by defining a variable of this type. Lock is automatically acquired,
+ * and it is unlocked after the variable goes out of scope
+ */
+class upload_lock
+{
+public:
+    upload_lock()
+    {
+        lock_.lock();
+    }
+    ~upload_lock()
+    {
+        lock_.unlock();
+    }
+
+    static bool is_locked()
+    {
+        const auto locked = lock_.try_lock();
+        if ( locked )
+        {
+            lock_.unlock();
+        }
+        return !locked;
+    }
+
+private:
+    static std::mutex lock_;
+};
+
+// Must initialize static class variables outside of the class
+std::mutex upload_lock::lock_;
 
 threaded_process_artwork_uploader::threaded_process_artwork_uploader(
     const pfc::map_t<metadb_index_hash, metadb_handle_ptr>& hashes) : hashes_(hashes)
@@ -36,14 +69,11 @@ void threaded_process_artwork_uploader::run(threaded_process_status &p_status, a
                 continue;
             }
 
-            auto artwork = extractAlbumArt( kv.m_value, p_abort );
-            p_abort.check();
-            if (artwork.success)
+            pfc::string8 artwork_url;
+
+            if (extractAndUploadArtwork(kv.m_value, p_abort, artwork_url, kv.m_key))
             {
-                auto artwork_url = uploadAlbumArt( artwork, p_abort );
-                if ( artwork_url.get_length() > 0 && artwork_url_set( kv.m_key, artwork_url.c_str() ) ) {
-                    lstChanged += kv.m_key;
-                }
+                lstChanged += kv.m_key;
             }
             
             p_abort.check();
@@ -94,7 +124,39 @@ metadb_index_client_impl * clientByGUID( const GUID & guid ) {
     return g_clientTrack;
 }
 
-album_art_info extractAlbumArt( const metadb_handle_ptr track, abort_callback &abort )
+bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abort, pfc::string8 &artwork_url, metadb_index_hash hash)
+{
+    bool wasLocked = upload_lock::is_locked();
+    upload_lock lock;
+    abort.check();
+
+    // If we were locked check if this tracks artwork was uploaded and use that if it is found
+    if (wasLocked)
+    {
+        const auto rec = record_get( hash );
+        if (rec.artwork_url.get_length() > 0)
+        {
+            artwork_url = rec.artwork_url;
+            return true;
+        }
+    }
+
+    auto artwork = extractArtwork( track, abort );
+    abort.check();
+    if (artwork.success)
+    {
+        artwork_url = uploadArtwork( artwork, abort );
+        if (artwork_url.get_length() > 0)
+        {
+            artwork_url_set( hash, artwork_url );
+            return true;
+        }
+    }
+
+    return false;
+}
+
+artwork_info extractArtwork( const metadb_handle_ptr track, abort_callback &abort )
 {
     static_api_ptr_t<album_art_manager_v3> aam;
     auto extractor = aam->open(pfc::list_single_ref_t(track),
@@ -102,7 +164,7 @@ album_art_info extractAlbumArt( const metadb_handle_ptr track, abort_callback &a
 
     try {
         abort.check();
-        album_art_info info;
+        artwork_info info;
 
         const auto paths = extractor->query_paths( album_art_ids::cover_front, abort );
         if (paths->get_count() > 0)
@@ -125,11 +187,11 @@ album_art_info extractAlbumArt( const metadb_handle_ptr track, abort_callback &a
 
         return info;
     } catch (const exception_album_art_not_found&) {
-        return album_art_info();
+        return artwork_info();
     } catch (const exception_aborted&) {
         throw;
     } catch (...) {
-        return album_art_info();
+        return artwork_info();
     }
 }
 
@@ -218,7 +280,7 @@ bool readFromPipe(HANDLE g_hChildStd_OUT_Rd, pfc::string8 &artwork_url)
     return rSuccess;
 }
 
-pfc::string8 getArtworkFilepath(const album_art_info& art, abort_callback &abort, pfc::string8 &tempFile, bool &deleteFile)
+pfc::string8 getArtworkFilepath(const artwork_info& art, abort_callback &abort, pfc::string8 &tempFile, bool &deleteFile)
 {
     auto tempDir = core_api::pathInProfile(DRP_UNDERSCORE_NAME);
 
@@ -292,7 +354,7 @@ pfc::string8 getArtworkFilepath(const album_art_info& art, abort_callback &abort
     return filepath;
 }
 
-pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
+pfc::string8 uploadArtwork(const artwork_info& art, abort_callback &abort)
 {
     pfc::string8 tempFile;
     bool deleteFile;
@@ -496,7 +558,7 @@ static service_factory_single_t<init_stage_callback_impl> g_init_stage_callback_
 static service_factory_single_t<initquit_impl> g_initquit_impl;
 
     
-bool artwork_url_set( metadb_index_hash hash, const char * artwork_url )
+bool artwork_url_set( metadb_index_hash hash, const pfc::string8 &artwork_url )
 {
     auto rec = record_get( hash );
     bool bChanged = false;
@@ -607,7 +669,6 @@ public:
         switch (p_index)
         {
         case 0:
-            // TODO concurrency!!!
             generateUrls( p_data );
             break;
         case 1:

@@ -178,23 +178,13 @@ void PresenceModifier::UpdateImage()
         fb2k::splitTask( [p_out, hash, shared]{
             // In worker thread!
             try {
-                const auto art = uploader::extractAlbumArt(p_out, fb2k::noAbort);
-                if (art.success)
+                pfc::string8 artwork_url;
+                if( uploader::extractAndUploadArtwork(p_out, fb2k::noAbort, artwork_url, hash) )
                 {
-                    auto artwork = uploader::uploadAlbumArt(art, fb2k::noAbort);
-                    if (!artwork.is_empty())
-                    {
-                        uploader::artwork_url_set(
-                            hash,
-                            artwork
-                        );
-
-                        const auto imageKey = std::u8string( artwork );
+                    const auto imageKey = std::u8string( artwork_url );
                         setImageKey(imageKey, shared->pm);
                         shared->handler->MaybeUpdatePresence(shared->pm);
-                    }
                 }
-            } catch(exception_aborted) {
             } catch(std::exception const & e) {
                 // should not really get here
                 FB2K_console_formatter() << DRP_NAME_WITH_VERSION << "Critical error: " << e;
