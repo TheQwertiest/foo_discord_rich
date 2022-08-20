@@ -147,9 +147,9 @@ void PresenceModifier::UpdateImage()
             uploader::clientByGUID( guid::artwork_url_index )->hashHandle( p_out, hash );
             auto rec = uploader::record_get( hash );
 
-            if ( rec.cover_url.get_length() > 0 )
+            if ( rec.artwork_url.get_length() > 0 )
             {
-                setImageKey( std::u8string( rec.cover_url ), presenceData_ );
+                setImageKey( std::u8string( rec.artwork_url ), presenceData_ );
                 return;
             }
         }
@@ -176,26 +176,22 @@ void PresenceModifier::UpdateImage()
         shared->pm = presenceData_;
         shared->handler = &parent_;
 
-        const auto aborter = std::make_shared<abort_callback_impl>();
-        fb2k::splitTask( [aborter, p_out, hash, shared]{
+        fb2k::splitTask( [p_out, hash, shared]{
             // In worker thread!
             try {
-                const auto art = uploader::extractAlbumArt(p_out, *aborter);
-                aborter->check();
+                const auto art = uploader::extractAlbumArt(p_out, fb2k::noAbort);
                 if (art.success)
                 {
-                    auto artwork = uploader::uploadAlbumArt(art, *aborter);
-                    aborter->check();
+                    auto artwork = uploader::uploadAlbumArt(art, fb2k::noAbort);
                     if (!artwork.is_empty())
                     {
-                        uploader::cover_url_set(
+                        uploader::artwork_url_set(
                             hash,
                             artwork
                         );
 
                         const auto imageKey = std::u8string( artwork );
                         setImageKey(imageKey, shared->pm);
-                        aborter->check();
                         shared->handler->MaybeUpdatePresence(shared->pm);
                     }
                 }

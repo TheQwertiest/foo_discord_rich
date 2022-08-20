@@ -27,7 +27,7 @@ private:
 
 /* metadb record */
 struct record_t {
-    pfc::string8 cover_url;
+    pfc::string8 artwork_url;
 };
 
 struct album_art_info
@@ -43,6 +43,6 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort);
 metadb_index_manager::ptr cached_index_api();
 void record_set( metadb_index_hash hash, const record_t & record);
 record_t record_get( metadb_index_hash hash);
-bool cover_url_set( metadb_index_hash hash, const char * cover_url );
+bool artwork_url_set( metadb_index_hash hash, const char * artwork_url );
     
 } // namespace drp::uploader

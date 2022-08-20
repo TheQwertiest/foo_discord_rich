@@ -17,7 +17,7 @@ threaded_process_artwork_uploader::threaded_process_artwork_uploader(
 
 void threaded_process_artwork_uploader::on_init(ctx_t p_wnd) {}
     
-void threaded_process_artwork_uploader::run(threaded_process_status & p_status,abort_callback & p_abort)
+void threaded_process_artwork_uploader::run(threaded_process_status &p_status, abort_callback &p_abort)
 {
     pfc::list_t<metadb_index_hash> lstChanged; // Linear list of hashes that actually changed
     const auto total_count = hashes_.get_count();
@@ -29,7 +29,7 @@ void threaded_process_artwork_uploader::run(threaded_process_status & p_status,a
             p_status.set_progress_float( currIdx / (double)total_count );
             const auto kv = *iter;
             
-            if (record_get( kv.m_key ).cover_url.get_length() > 0)
+            if (record_get( kv.m_key ).artwork_url.get_length() > 0)
             {
                 p_abort.check();
                 currIdx++;
@@ -41,7 +41,7 @@ void threaded_process_artwork_uploader::run(threaded_process_status & p_status,a
             if (artwork.success)
             {
                 auto artwork_url = uploadAlbumArt( artwork, p_abort );
-                if ( artwork_url.get_length() > 0 && cover_url_set( kv.m_key, artwork_url.c_str() ) ) {
+                if ( artwork_url.get_length() > 0 && artwork_url_set( kv.m_key, artwork_url.c_str() ) ) {
                     lstChanged += kv.m_key;
                 }
             }
@@ -58,21 +58,21 @@ void threaded_process_artwork_uploader::run(threaded_process_status & p_status,a
     p_status.set_progress_float(1);
     FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": " << lstChanged.get_count() << " entries updated";
 
-    // TODO This crashes for some unknown reason
-    // However it is only required for title formatting which is not currently configured for this metadb field
-    /**
+
     if (lstChanged.get_count() > 0) {
         // This gracefully tells everyone about what just changed, in one pass regardless of how many items got altered
-        metadb_index_manager::get()->dispatch_refresh(guid::artwork_url_index, lstChanged);
+        fb2k::inMainThread([lstChanged]
+        {
+            cached_index_api()->dispatch_refresh(guid::artwork_url_index, lstChanged);
+        });
     }
-    */
+
 }
 
 void threaded_process_artwork_uploader::on_done(ctx_t p_wnd,bool p_was_aborted)
 {
-    
 }
-    
+
 
 metadb_index_client_impl::metadb_index_client_impl( const char * pinTo ) {
     static_api_ptr_t<titleformat_compiler>()->compile_force(m_keyObj, pinTo);
@@ -219,27 +219,27 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
     saAttr.bInheritHandle = TRUE;
     saAttr.lpSecurityDescriptor = NULL;
 
-    pfc::string8 cover_url = "";
+    pfc::string8 artwork_url = "";
 
      try
      {
          if ( !CreatePipe( &g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0 ) )
-             return cover_url;
+             return artwork_url;
 
          // Ensure the read handle to the pipe for STDOUT is not inherited.
 
          if ( !SetHandleInformation( g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0 ) )
-             return cover_url;
+             return artwork_url;
 
          // Create a pipe for the child process's STDIN.
 
          if ( !CreatePipe( &g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &saAttr, 0 ) )
-             return cover_url;
+             return artwork_url;
 
          // Ensure the write handle to the pipe for STDIN is not inherited.
 
          if ( !SetHandleInformation( g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0 ) )
-             return cover_url;
+             return artwork_url;
 
          STARTUPINFOA siStartInfo;
     
@@ -318,7 +318,9 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
                      const int BUFSIZE = 2048;
                      CHAR chBuf[BUFSIZE];
                      rSuccess = ReadFile( g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL );
-                     cover_url = pfc::string8(chBuf, dwRead);
+                     artwork_url = pfc::string8(chBuf, dwRead);
+                     // rtrim space like characters
+                     artwork_url.skip_trailing_chars(" \t\n\r");
                  }
 
                  if ( wSuccess && rSuccess )
@@ -341,7 +343,7 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
              CloseHandle( piProcInfo.hProcess );
              CloseHandle( piProcInfo.hThread );
 
-             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code << " and url: " << cover_url;
+             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code << " and url: " << artwork_url;
          }
      } catch (...)
      {
@@ -361,7 +363,7 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
 
     abort.check();
     
-    return cover_url;
+    return artwork_url;
 }
     
 // Static cached ptr to metadb_index_manager
@@ -377,7 +379,7 @@ static metadb_index_manager::ptr cached_index_api() {
 void record_set( metadb_index_hash hash, const record_t & record) {
 
     stream_writer_formatter_simple< /* using bing endian data? nope */ false > writer;
-    writer << record.cover_url;
+    writer << record.artwork_url;
 
     cached_index_api()->set_user_data( guid::artwork_url_index, hash, writer.m_buffer.get_ptr(), writer.m_buffer.get_size() );
 }
@@ -394,7 +396,7 @@ record_t record_get( metadb_index_hash hash) {
             record_t ret;
 
             if ( reader.get_remaining() > 0 ) {
-                reader >> ret.cover_url;
+                reader >> ret.artwork_url;
             }
             
             return ret;
@@ -451,12 +453,12 @@ static service_factory_single_t<init_stage_callback_impl> g_init_stage_callback_
 static service_factory_single_t<initquit_impl> g_initquit_impl;
 
     
-bool cover_url_set( metadb_index_hash hash, const char * cover_url )
+bool artwork_url_set( metadb_index_hash hash, const char * artwork_url )
 {
     auto rec = record_get( hash );
     bool bChanged = false;
-    if ( ! rec.cover_url.equals( cover_url ) ) {
-        rec.cover_url = cover_url;
+    if ( ! rec.artwork_url.equals( artwork_url ) ) {
+        rec.artwork_url = artwork_url;
         record_set( hash, rec );
         bChanged = true;
     }
@@ -523,7 +525,7 @@ void clearUrls( metadb_handle_list_cref tracks ) {
     for (auto iter = allHashes.first(); iter.is_valid(); ++iter)
     {
         const metadb_index_hash hash = *iter;
-        if (cover_url_set( hash, "" ))
+        if (artwork_url_set( hash, "" ))
         {
             lstChanged += hash;
         }
@@ -536,7 +538,7 @@ void clearUrls( metadb_handle_list_cref tracks ) {
     }
 }
     
-class contextmenu_cover_url : public contextmenu_item_simple {
+class contextmenu_artwork_url : public contextmenu_item_simple {
 public:
 	GUID get_parent() {
 		return guid::context_menu_group;
@@ -595,7 +597,7 @@ public:
 };
 
 static contextmenu_group_popup_factory g_mygroup( guid::context_menu_group, contextmenu_groups::root, "Discord rich presence", 0 );
-static contextmenu_item_factory_t< contextmenu_cover_url > g_contextmenu_rating;
+static contextmenu_item_factory_t< contextmenu_artwork_url > g_contextmenu_rating;
 
 
 class track_property_provider_impl : public track_property_provider_v2 {
@@ -621,9 +623,9 @@ public:
 
 
 				if ( bFirst ) {
-					strComment = rec.cover_url;
+					strComment = rec.artwork_url;
 				} else if ( ! bVarComments ) {
-					if ( strComment != rec.cover_url ) {
+					if ( strComment != rec.artwork_url ) {
 						bVarComments = true;
 						strComment = "<various>";
 					}
