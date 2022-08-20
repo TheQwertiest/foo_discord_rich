@@ -153,7 +153,6 @@ void PresenceModifier::UpdateImage()
                 return;
             }
         }
-        
     }
 
     switch ( config::largeImageSettings )

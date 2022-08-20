@@ -66,7 +66,6 @@ void threaded_process_artwork_uploader::run(threaded_process_status &p_status, a
             cached_index_api()->dispatch_refresh(guid::artwork_url_index, lstChanged);
         });
     }
-
 }
 
 void threaded_process_artwork_uploader::on_done(ctx_t p_wnd,bool p_was_aborted)
@@ -125,7 +124,6 @@ album_art_info extractAlbumArt( const metadb_handle_ptr track, abort_callback &a
         info.success = true;
 
         return info;
-
     } catch (const exception_album_art_not_found&) {
         return album_art_info();
     } catch (const exception_aborted&) {
@@ -135,7 +133,92 @@ album_art_info extractAlbumArt( const metadb_handle_ptr track, abort_callback &a
     }
 }
 
-pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
+/**
+ * Initialize different process variables to be used with CreateProcess
+ */
+bool initializeProcessVariables(
+    HANDLE &g_hChildStd_IN_Rd,
+    HANDLE &g_hChildStd_IN_Wr,
+    HANDLE &g_hChildStd_OUT_Rd,
+    HANDLE &g_hChildStd_OUT_Wr,
+    SECURITY_ATTRIBUTES &saAttr)
+{
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = TRUE;
+    saAttr.lpSecurityDescriptor = NULL;
+
+    if ( !CreatePipe( &g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0 ) )
+        return false;
+
+    // Ensure the read handle to the pipe for STDOUT is not inherited.
+
+    if ( !SetHandleInformation( g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0 ) )
+        return false;
+
+    // Create a pipe for the child process's STDIN.
+
+    if ( !CreatePipe( &g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &saAttr, 0 ) )
+        return false;
+
+    // Ensure the write handle to the pipe for STDIN is not inherited.
+
+    if ( !SetHandleInformation( g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0 ) )
+        return false;
+
+    return true;
+}
+
+void closePipes(HANDLE pipe1, HANDLE pipe2, HANDLE pipe3, HANDLE pipe4)
+{
+    if (pipe1 != NULL) CloseHandle(pipe1);
+    if (pipe2 != NULL) CloseHandle(pipe2);
+    if (pipe3 != NULL) CloseHandle(pipe3);
+    if (pipe4 != NULL) CloseHandle(pipe4);
+}
+
+bool readFromPipe(HANDLE g_hChildStd_OUT_Rd, pfc::string8 &artwork_url)
+{
+    bool inputFound = false;
+    const int TEMP_BUF_SIZE = 16;
+    CHAR tempBuf[TEMP_BUF_SIZE];
+    DWORD peekedBytes;
+    auto now = std::chrono::high_resolution_clock::now();
+    const auto timeout_s = std::chrono::seconds(10);
+
+    // Try to read output from the process. for 10 seconds
+    while (!inputFound)
+    {
+        if (PeekNamedPipe( g_hChildStd_OUT_Rd, tempBuf, TEMP_BUF_SIZE, &peekedBytes, NULL, NULL ))
+        {
+            if (peekedBytes > 0)
+            {
+                inputFound = true;
+                break;
+            }
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        auto td = std::chrono::high_resolution_clock::now() - now;
+        if (td > timeout_s) break;
+    }
+
+    bool rSuccess = false;
+    if (inputFound)
+    {
+        DWORD dwRead;
+        // Should be good enough amount of characters
+        const int BUFSIZE = 2048;
+        CHAR chBuf[BUFSIZE];
+        rSuccess = ReadFile( g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL );
+        artwork_url = pfc::string8(chBuf, dwRead);
+        // rtrim space like characters
+        artwork_url.skip_trailing_chars(" \t\n\r");
+    }
+
+    return rSuccess;
+}
+
+pfc::string8 getArtworkFilepath(const album_art_info& art, abort_callback &abort, pfc::string8 &tempFile, bool &deleteFile)
 {
     auto tempDir = core_api::pathInProfile(DRP_UNDERSCORE_NAME);
 
@@ -147,11 +230,11 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
     abort.check();
 
     pfc::string8 filepath;
-    
+
     // Tempfile assigned later to make sure the actual cover art is not deleted after uploading
-    const char* tempFile = "";
-    
-    bool deleteFile = false;
+    tempFile = "";
+
+    deleteFile = false;
 
     // If cover art is not embedded just use that file as the input.
     // No need to copy it to another folder
@@ -187,7 +270,7 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
         deleteFile = true;
 
         // UTF-8 might cause problems?
-        tempFile = filepath.c_str();
+        tempFile = filepath;
         {
             service_ptr_t<file> file_ptr;
             // File gets released after file_ptr has been deleted
@@ -201,9 +284,19 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
         // Remove file:// protocol since the program expects a file path instead of a uri
         if (filepath.replace_string("file://", "") > 1)
         {
+            // This should never really be reached
             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Multiple instances of \"file://\" replaced during cover upload";
         }
     }
+
+    return filepath;
+}
+
+pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
+{
+    pfc::string8 tempFile;
+    bool deleteFile;
+    auto filepath = getArtworkFilepath(art, abort, tempFile, deleteFile);
 
     const auto filepath_c = filepath.c_str();
 
@@ -215,31 +308,16 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
     HANDLE g_hChildStd_OUT_Wr = NULL;
     
     SECURITY_ATTRIBUTES saAttr;
-    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-    saAttr.bInheritHandle = TRUE;
-    saAttr.lpSecurityDescriptor = NULL;
 
     pfc::string8 artwork_url = "";
 
      try
      {
-         if ( !CreatePipe( &g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0 ) )
+         if ( !initializeProcessVariables(g_hChildStd_IN_Rd, g_hChildStd_IN_Wr, g_hChildStd_OUT_Rd, g_hChildStd_OUT_Wr, saAttr) )
+         {
+             closePipes(g_hChildStd_IN_Rd, g_hChildStd_IN_Wr, g_hChildStd_OUT_Rd, g_hChildStd_OUT_Wr);
              return artwork_url;
-
-         // Ensure the read handle to the pipe for STDOUT is not inherited.
-
-         if ( !SetHandleInformation( g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0 ) )
-             return artwork_url;
-
-         // Create a pipe for the child process's STDIN.
-
-         if ( !CreatePipe( &g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &saAttr, 0 ) )
-             return artwork_url;
-
-         // Ensure the write handle to the pipe for STDIN is not inherited.
-
-         if ( !SetHandleInformation( g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0 ) )
-             return artwork_url;
+         }
 
          STARTUPINFOA siStartInfo;
     
@@ -277,51 +355,18 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
              // Close handles to the stdin and stdout pipes no longer needed by the child process.
              // If they are not explicitly closed, there is no way to recognize that the child process has ended.
              CloseHandle( g_hChildStd_OUT_Wr );
+             g_hChildStd_OUT_Wr = NULL;
              CloseHandle( g_hChildStd_IN_Rd );
+             g_hChildStd_IN_Rd = NULL;
 
              try
              {
                  DWORD dwWritten;
                  bool wSuccess = WriteFile(g_hChildStd_IN_Wr, filepath_c, strlen( filepath_c ), &dwWritten, NULL );
                  CloseHandle( g_hChildStd_IN_Wr );
+                 g_hChildStd_IN_Wr = NULL;
 
-
-                 bool inputFound = false;
-                 const int TEMP_BUF_SIZE = 16;
-                 CHAR tempBuf[TEMP_BUF_SIZE];
-                 DWORD peekedBytes;
-                 auto now = std::chrono::high_resolution_clock::now();
-                 const auto timeout_s = std::chrono::seconds(10);
-
-                 // Try to read output from the process. for 10 seconds
-                 while (!inputFound)
-                 {
-                     if (PeekNamedPipe( g_hChildStd_OUT_Rd, tempBuf, TEMP_BUF_SIZE, &peekedBytes, NULL, NULL ))
-                     {
-                         if (peekedBytes > 0)
-                         {
-                             inputFound = true;
-                             break;
-                         }
-                     }
-
-                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                     auto td = std::chrono::high_resolution_clock::now() - now;
-                     if (td > timeout_s) break;
-                 }
-
-                 bool rSuccess = false;
-                 if (inputFound)
-                 {
-                     DWORD dwRead;
-                     // Should be good enough amount of characters
-                     const int BUFSIZE = 2048;
-                     CHAR chBuf[BUFSIZE];
-                     rSuccess = ReadFile( g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL );
-                     artwork_url = pfc::string8(chBuf, dwRead);
-                     // rtrim space like characters
-                     artwork_url.skip_trailing_chars(" \t\n\r");
-                 }
+                 bool rSuccess = readFromPipe(g_hChildStd_OUT_Rd, artwork_url);
 
                  if ( wSuccess && rSuccess )
                  {
@@ -331,12 +376,10 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
              catch (...)
              {
                  // Make sure handles are close in case of error
-                 CloseHandle( g_hChildStd_IN_Wr );
                  CloseHandle( piProcInfo.hProcess );
                  CloseHandle( piProcInfo.hThread );
                  throw;
              }
-            
              
              DWORD exit_code;
              GetExitCodeProcess( piProcInfo.hProcess, &exit_code );
@@ -347,6 +390,8 @@ pfc::string8 uploadAlbumArt(const album_art_info& art, abort_callback &abort)
          }
      } catch (...)
      {
+         closePipes(g_hChildStd_IN_Rd, g_hChildStd_IN_Wr, g_hChildStd_OUT_Rd, g_hChildStd_OUT_Wr);
+
          if ( deleteFile )
          {
              filesystem::g_remove( tempFile, abort );
@@ -377,7 +422,6 @@ static metadb_index_manager::ptr cached_index_api() {
 }
     
 void record_set( metadb_index_hash hash, const record_t & record) {
-
     stream_writer_formatter_simple< /* using bing endian data? nope */ false > writer;
     writer << record.artwork_url;
 
@@ -400,7 +444,6 @@ record_t record_get( metadb_index_hash hash) {
             }
             
             return ret;
-
         } catch (exception_io_data) {
             // we get here as a result of stream formatter data error
             // fall thru to return a blank record
@@ -543,9 +586,11 @@ public:
 	GUID get_parent() {
 		return guid::context_menu_group;
 	}
+
 	unsigned get_num_items() {
 		return 2;
 	}
+
 	void get_item_name(unsigned p_index, pfc::string_base & p_out) {
 		PFC_ASSERT( p_index < get_num_items() );
 		switch(p_index) {
@@ -554,8 +599,8 @@ public:
 		    case 1:
 		        p_out = "Clear artwork"; break;
 		}
-		
 	}
+
 	void context_command(unsigned p_index, metadb_handle_list_cref p_data, const GUID& p_caller) {
 		PFC_ASSERT( p_index < get_num_items() );
 
@@ -572,6 +617,7 @@ public:
             uBugCheck();    
         }
 	}
+
 	GUID get_item_guid(unsigned p_index) {
 		switch(p_index) {
 		    case 0:	return guid::context_menu_item_generate_url;
@@ -579,6 +625,7 @@ public:
 		    default: uBugCheck();
 		}
 	}
+
 	bool get_item_description(unsigned p_index, pfc::string_base & p_out) {
 		PFC_ASSERT( p_index < get_num_items() );
 		switch( p_index ) {
@@ -652,6 +699,6 @@ public:
 		return false; 
 	}
 };
-    
+
 static service_factory_single_t<track_property_provider_impl> g_track_property_provider_impl;
 }
