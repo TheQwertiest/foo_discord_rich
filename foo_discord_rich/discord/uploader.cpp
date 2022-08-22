@@ -126,6 +126,12 @@ metadb_index_client_impl * clientByGUID( const GUID & guid ) {
 
 bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abort, pfc::string8 &artwork_url, metadb_index_hash hash)
 {
+    if ( config::uploadArtworkCommand.GetValue().length() == 0 )
+    {
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": No upload command given";
+        return false;
+    }
+
     bool wasLocked = upload_lock::is_locked();
     upload_lock lock;
     abort.check();
@@ -354,8 +360,55 @@ pfc::string8 getArtworkFilepath(const artwork_info& art, abort_callback &abort, 
     return filepath;
 }
 
+std::wstring to_wstring(const std::string &str)
+{
+    // Just check size
+    int convertResult = MultiByteToWideChar(
+            CP_UTF8,
+            0,
+            str.c_str(),
+            str.length(),
+            NULL,
+            0);
+
+    if ( convertResult <= 0 )
+    {
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Failed to convert command to utf-16. Error code " << convertResult;
+        throw std::invalid_argument( "Could not convert command to utf-16" );
+    }
+
+    std::wstring str_w;
+    // https://docs.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-multibytetowidechar
+    // The example has + 10 without any comment as to why
+    str_w.resize( convertResult + 10 );
+
+    // This one writes the bytes to str_w
+    convertResult = MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        str.c_str(),
+        str.length(),
+        &str_w[0],
+        (int)str_w.size() );
+
+    if ( convertResult <= 0 )
+    {
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Failed to convert command to utf-16. Error code " << convertResult;
+        throw std::invalid_argument( "Could not convert command to utf-16" );
+    }
+
+    return str_w;
+}
+
 pfc::string8 uploadArtwork(const artwork_info& art, abort_callback &abort)
 {
+    const std::string commandString = config::uploadArtworkCommand.GetValue();
+    if ( commandString.length() == 0 )
+    {
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": No upload command given";
+        return "";
+    }
+
     pfc::string8 tempFile;
     bool deleteFile;
     auto filepath = getArtworkFilepath(art, abort, tempFile, deleteFile);
@@ -381,10 +434,10 @@ pfc::string8 uploadArtwork(const artwork_info& art, abort_callback &abort)
              return artwork_url;
          }
 
-         STARTUPINFOA siStartInfo;
-    
-         ZeroMemory( &siStartInfo, sizeof(STARTUPINFOA) );
-         siStartInfo.cb = sizeof(STARTUPINFOA); 
+         STARTUPINFO siStartInfo;
+
+         ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
+         siStartInfo.cb = sizeof(STARTUPINFO);
          siStartInfo.hStdError = g_hChildStd_OUT_Wr;
          siStartInfo.hStdOutput = g_hChildStd_OUT_Wr;
          siStartInfo.hStdInput = g_hChildStd_IN_Rd;
@@ -393,20 +446,18 @@ pfc::string8 uploadArtwork(const artwork_info& art, abort_callback &abort)
 
          PROCESS_INFORMATION piProcInfo; 
          ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
-         auto commandString = config::uploadArtworkCommand.GetValue();
-         
-         // TODO Unicode will make this break completely
-         LPSTR command = const_cast<char*>( commandString.c_str() );
+
+         const auto cmd_w = to_wstring( commandString );
 
          abort.check();
 
-         // Create the child process. Not unicode friendly and converting from u8string to w_chart* is a pain
-         bool bSuccess = CreateProcessA(NULL, 
-            command,     // command line 
+         // Create the child process.
+         bool bSuccess = CreateProcess(NULL,
+            (LPWSTR)cmd_w.c_str(), // command line
             NULL,          // process security attributes 
             NULL,          // primary thread security attributes 
             TRUE,          // handles are inherited 
-            CREATE_NO_WINDOW,             // creation flags 
+            CREATE_NO_WINDOW, // creation flags
             NULL,          // use parent's environment 
             NULL,          // use parent's current directory 
             &siStartInfo,  // STARTUPINFO pointer 
@@ -448,7 +499,13 @@ pfc::string8 uploadArtwork(const artwork_info& art, abort_callback &abort)
              CloseHandle( piProcInfo.hProcess );
              CloseHandle( piProcInfo.hThread );
 
-             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code << " and url: " << artwork_url;
+             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code <<
+                 " and " << ( exit_code == 0 ? "url" : "error" ) << ": " << artwork_url;
+
+             if (exit_code != 0)
+             {
+                 artwork_url = "";
+             }
          }
      } catch (...)
      {
