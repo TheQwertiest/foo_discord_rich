@@ -452,7 +452,7 @@ pfc::string8 uploadArtwork(const artwork_info& art, abort_callback &abort)
          abort.check();
 
          // Create the child process.
-         bool bSuccess = CreateProcess(NULL,
+         bool bSuccess = CreateProcessW(NULL,
             (LPWSTR)cmd_w.c_str(), // command line
             NULL,          // process security attributes 
             NULL,          // primary thread security attributes 
