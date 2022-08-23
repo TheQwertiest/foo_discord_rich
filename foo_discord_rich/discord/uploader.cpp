@@ -118,7 +118,7 @@ metadb_index_client_impl * clientByGUID( const GUID & guid ) {
     // Static instances, never destroyed (deallocated with the process), created first time we get here
     // Using service_impl_single_t, reference counting disabled
     // This is somewhat ugly, operating on raw pointers instead of service_ptr, but OK for this purpose
-    static metadb_index_client_impl * g_clientTrack = new service_impl_single_t<metadb_index_client_impl>("%album artist% - $if2([%album%],%title%) [ - %discnumber%]");
+    static metadb_index_client_impl* g_clientTrack = new service_impl_single_t<metadb_index_client_impl>( config::artworkMetadbKey.GetValue().c_str() );
 
     PFC_ASSERT( guid == guid::artwork_url_index );
     return g_clientTrack;
@@ -581,7 +581,7 @@ class init_stage_callback_impl : public init_stage_callback
 public:
     void on_init_stage( t_uint32 stage )
     {
-        if ( stage == init_stages::before_config_read )
+        if ( stage == init_stages::after_config_read )
         {
             auto api = metadb_index_manager::get();
             g_cachedAPI = api;

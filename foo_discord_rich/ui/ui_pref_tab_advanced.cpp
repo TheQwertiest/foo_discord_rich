@@ -23,6 +23,7 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
     , pausedImageId_Dark_( config::pausedImageId_Dark )
     , uploadArtwork_(config::uploadArtwork)
     , uploadArtworkCommand_(config::uploadArtworkCommand)
+    , artworkMetadbKey_(config::artworkMetadbKey)
     , ddxOptions_( {
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( discordAppToken_, IDC_TEXTBOX_APP_TOKEN ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( largeImageId_Light_, IDC_TEXTBOX_LARGE_LIGHT_ID ),
@@ -32,7 +33,8 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( pausedImageId_Light_, IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( pausedImageId_Dark_, IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( uploadArtwork_, IDC_CHECK_UPLOAD_ARTWORK ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( uploadArtworkCommand_, IDC_TEXTBOX_ARTWORK_COMMAND )
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( uploadArtworkCommand_, IDC_TEXTBOX_ARTWORK_COMMAND ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( artworkMetadbKey_, IDC_TEXTBOX_METADB_KEY ),
       } )
 {
 }
@@ -67,7 +69,14 @@ t_uint32 PreferenceTabAdvanced::get_state()
             return ddxOpt->Option().HasChanged();
         } );
 
-    return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
+   const bool needsRestart =
+       ddxOptions_.cend() != std::find_if( ddxOptions_.cbegin(), ddxOptions_.cend(), []( const auto& ddxOpt ) {
+            return ddxOpt->Option().HasChanged() && ddxOpt->Ddx().IsMatchingId(IDC_TEXTBOX_METADB_KEY);
+        } );
+
+    return preferences_state::resettable |
+        ( hasChanged ? preferences_state::changed : 0 ) |
+        ( needsRestart ? preferences_state::needs_restart : 0 );
 }
 
 void PreferenceTabAdvanced::apply()
