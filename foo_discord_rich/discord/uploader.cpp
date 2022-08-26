@@ -313,7 +313,7 @@ pfc::string8 getArtworkFilepath(const artwork_info& art, abort_callback &abort, 
     else
     {
         // Get the image mime type since we cannot deduce it otherwise from embedded artwork
-        auto api = fb2k::imageLoaderLite::tryGet();
+        const auto api = fb2k::imageLoaderLite::tryGet();
         std::string ext = "jpg";
         if (api.is_valid())
         {
@@ -331,7 +331,7 @@ pfc::string8 getArtworkFilepath(const artwork_info& art, abort_callback &abort, 
         // Take the last 10 digits of current time and use that for filename.
         // Should be good enough for this purpose as the file is deleted after the operation or overwritten in the future
         const auto ts = std::to_string(std::time(NULL));
-        auto filename = pfc::string((ts.substr(ts.size() - 10) + "." + ext).c_str());
+        const auto filename = pfc::string((ts.substr(ts.size() - 10) + "." + ext).c_str());
 
         tempDir.add_filename(filename.c_str());
         filepath = tempDir;
@@ -400,6 +400,72 @@ std::wstring to_wstring(const std::string &str)
     return str_w;
 }
 
+bool uploadOpenProcess(const std::wstring &cmd_w, const char* filepath_c, pfc::string8 &artwork_url,
+    STARTUPINFO &siStartInfo, PROCESS_INFORMATION &piProcInfo,
+    HANDLE &g_hChildStd_OUT_Wr, HANDLE &g_hChildStd_IN_Rd, HANDLE &g_hChildStd_IN_Wr, HANDLE &g_hChildStd_OUT_Rd)
+{
+     // Create the child process.
+     bool bSuccess = CreateProcessW(NULL,
+        (LPWSTR)cmd_w.c_str(), // command line
+        NULL,          // process security attributes
+        NULL,          // primary thread security attributes
+        TRUE,          // handles are inherited
+        CREATE_NO_WINDOW, // creation flags
+        NULL,          // use parent's environment
+        NULL,          // use parent's current directory
+        &siStartInfo,  // STARTUPINFO pointer
+        &piProcInfo);  // receives PROCESS_INFORMATION
+
+     if (bSuccess)
+     {
+         // Close handles to the stdin and stdout pipes no longer needed by the child process.
+         // If they are not explicitly closed, there is no way to recognize that the child process has ended.
+         CloseHandle( g_hChildStd_OUT_Wr );
+         g_hChildStd_OUT_Wr = NULL;
+         CloseHandle( g_hChildStd_IN_Rd );
+         g_hChildStd_IN_Rd = NULL;
+
+         try
+         {
+             DWORD dwWritten;
+             bool wSuccess = WriteFile(g_hChildStd_IN_Wr, filepath_c, strlen( filepath_c ), &dwWritten, NULL );
+             CloseHandle( g_hChildStd_IN_Wr );
+             g_hChildStd_IN_Wr = NULL;
+
+             bool rSuccess = readFromPipe(g_hChildStd_OUT_Rd, artwork_url);
+
+             if ( wSuccess && rSuccess )
+             {
+                 WaitForSingleObject( piProcInfo.hProcess, 5000 );
+             }
+         }
+         catch (...)
+         {
+             // Make sure handles are close in case of error
+             CloseHandle( piProcInfo.hProcess );
+             CloseHandle( piProcInfo.hThread );
+             throw;
+         }
+
+         DWORD exit_code;
+         GetExitCodeProcess( piProcInfo.hProcess, &exit_code );
+         CloseHandle( piProcInfo.hProcess );
+         CloseHandle( piProcInfo.hThread );
+
+         FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code <<
+             " and " << ( exit_code == 0 ? "url" : "error" ) << ": " << artwork_url;
+
+         if (exit_code != 0)
+         {
+             artwork_url = "";
+         }
+
+         return true;
+     }
+
+    return false;
+}
+
 pfc::string8 uploadArtwork(artwork_info& art, abort_callback &abort)
 {
     pfc::string8 artwork_url = "";
@@ -456,62 +522,9 @@ pfc::string8 uploadArtwork(artwork_info& art, abort_callback &abort)
 
          abort.check();
 
-         // Create the child process.
-         bool bSuccess = CreateProcessW(NULL,
-            (LPWSTR)cmd_w.c_str(), // command line
-            NULL,          // process security attributes 
-            NULL,          // primary thread security attributes 
-            TRUE,          // handles are inherited 
-            CREATE_NO_WINDOW, // creation flags
-            NULL,          // use parent's environment 
-            NULL,          // use parent's current directory 
-            &siStartInfo,  // STARTUPINFO pointer 
-            &piProcInfo);  // receives PROCESS_INFORMATION
-
-         if (bSuccess)
-         {
-             // Close handles to the stdin and stdout pipes no longer needed by the child process.
-             // If they are not explicitly closed, there is no way to recognize that the child process has ended.
-             CloseHandle( g_hChildStd_OUT_Wr );
-             g_hChildStd_OUT_Wr = NULL;
-             CloseHandle( g_hChildStd_IN_Rd );
-             g_hChildStd_IN_Rd = NULL;
-
-             try
-             {
-                 DWORD dwWritten;
-                 bool wSuccess = WriteFile(g_hChildStd_IN_Wr, filepath_c, strlen( filepath_c ), &dwWritten, NULL );
-                 CloseHandle( g_hChildStd_IN_Wr );
-                 g_hChildStd_IN_Wr = NULL;
-
-                 bool rSuccess = readFromPipe(g_hChildStd_OUT_Rd, artwork_url);
-
-                 if ( wSuccess && rSuccess )
-                 {
-                     WaitForSingleObject( piProcInfo.hProcess, 5000 );
-                 }
-             }
-             catch (...)
-             {
-                 // Make sure handles are close in case of error
-                 CloseHandle( piProcInfo.hProcess );
-                 CloseHandle( piProcInfo.hThread );
-                 throw;
-             }
-             
-             DWORD exit_code;
-             GetExitCodeProcess( piProcInfo.hProcess, &exit_code );
-             CloseHandle( piProcInfo.hProcess );
-             CloseHandle( piProcInfo.hThread );
-
-             FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code <<
-                 " and " << ( exit_code == 0 ? "url" : "error" ) << ": " << artwork_url;
-
-             if (exit_code != 0)
-             {
-                 artwork_url = "";
-             }
-         }
+         uploadOpenProcess(cmd_w, filepath_c, artwork_url,
+             siStartInfo, piProcInfo,
+             g_hChildStd_OUT_Wr, g_hChildStd_IN_Rd, g_hChildStd_IN_Wr, g_hChildStd_OUT_Rd);
      } catch (...)
      {
          closePipes(g_hChildStd_IN_Rd, g_hChildStd_IN_Wr, g_hChildStd_OUT_Rd, g_hChildStd_OUT_Wr);
