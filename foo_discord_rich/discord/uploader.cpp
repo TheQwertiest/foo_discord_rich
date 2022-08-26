@@ -221,7 +221,7 @@ bool save_hash_json(abort_callback &abort)
         return false;
     }
 
-    const auto filename = get_image_hash_file(abort);
+    const auto &filename = get_image_hash_file(abort);
     auto filename_new = pfc::string8(filename);
     filename_new += ".new";
 
@@ -253,8 +253,6 @@ bool set_artwork_url_hash(const pfc::string8 &artwork_url, const pfc::string8 &a
     }
 
     (*g_hashJson)[artwork_hash.c_str()] = artwork_url.c_str();
-
-    const auto filename = get_image_hash_file(abort);
 
     // Should be fine to call this for every new entry as it's only reached from upload at the moment and that
     // has a concurrency lock
