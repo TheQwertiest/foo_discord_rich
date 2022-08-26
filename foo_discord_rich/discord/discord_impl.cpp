@@ -7,6 +7,7 @@
 #include <ctime>
 
 #include "uploader.h"
+#include <fb2k/artwork_metadb.h>
 
 namespace drp::internal
 {
@@ -144,8 +145,8 @@ void PresenceModifier::UpdateImage()
         gSuccess = pc->get_now_playing(p_out);
         if (gSuccess)
         {
-            uploader::clientByGUID( guid::artwork_url_index )->hashHandle( p_out, hash );
-            auto rec = uploader::record_get( hash );
+            clientByGUID( guid::artwork_url_index )->hashHandle( p_out, hash );
+            auto rec = record_get( hash );
 
             if ( rec.artwork_url.get_length() > 0 )
             {
