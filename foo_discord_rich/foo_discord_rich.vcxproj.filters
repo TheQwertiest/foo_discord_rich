@@ -47,6 +47,9 @@
     <ClCompile Include="discord\uploader.cpp">
       <Filter>discord</Filter>
     </ClCompile>
+    <ClCompile Include="discord\image_hasher.cpp">
+      <Filter>discord</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\acfu_github.h">
@@ -77,6 +80,9 @@
       <Filter>resources</Filter>
     </ClInclude>
     <ClInclude Include="discord\uploader.h">
+      <Filter>discord</Filter>
+    </ClInclude>
+    <ClInclude Include="discord\image_hasher.h">
       <Filter>discord</Filter>
     </ClInclude>
   </ItemGroup>
