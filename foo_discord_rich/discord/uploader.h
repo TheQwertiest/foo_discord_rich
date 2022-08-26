@@ -35,12 +35,13 @@ struct artwork_info
     album_art_data_ptr data;
     const char* path{};
     bool success = false;
+    pfc::string8 artwork_hash;
 };
 
 metadb_index_client_impl * clientByGUID( const GUID & guid );
-bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abort, pfc::string8 &artwork_url, metadb_index_hash hash);
+bool extractAndUploadArtwork( const metadb_handle_ptr track, abort_callback &abort, pfc::string8 &artwork_url, metadb_index_hash hash );
 artwork_info extractArtwork( const metadb_handle_ptr track, abort_callback &abort );
-pfc::string8 uploadArtwork(const artwork_info& art, abort_callback &abort);
+pfc::string8 uploadArtwork( artwork_info& art, abort_callback &abort );
 metadb_index_manager::ptr cached_index_api();
 void record_set( metadb_index_hash hash, const record_t & record);
 record_t record_get( metadb_index_hash hash);
