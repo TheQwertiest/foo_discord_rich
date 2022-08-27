@@ -31,6 +31,7 @@ public:
         COMMAND_HANDLER_EX( IDC_TEXTBOX_APP_TOKEN, EN_CHANGE, OnEditChange )
         COMMAND_HANDLER_EX( IDC_TEXTBOX_LARGE_LIGHT_ID, EN_CHANGE, OnEditChange )
         COMMAND_HANDLER_EX( IDC_TEXTBOX_LARGE_DARK_ID, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_LARGE_ARTWORK_ID, EN_CHANGE, OnEditChange ) // +++
         COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID, EN_CHANGE, OnEditChange )
         COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PLAYING_DARK_ID, EN_CHANGE, OnEditChange )
         COMMAND_HANDLER_EX( IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID, EN_CHANGE, OnEditChange )
@@ -67,6 +68,7 @@ private:
     SPTF_DEFINE_UI_OPTIONS( discordAppToken,
                             largeImageId_Light,
                             largeImageId_Dark,
+                            largeImageId_Artwork,
                             playingImageId_Light,
                             playingImageId_Dark,
                             pausedImageId_Light,

@@ -130,6 +130,11 @@ void PresenceModifier::UpdateImage()
         setImageKey( config::largeImageId_Dark );
         break;
     }
+        case config::ImageSetting::Artwork:
+    {
+        setImageKey( config::largeImageId_Artwork );
+        break;
+    }
     case config::ImageSetting::Disabled:
     {
         setImageKey( std::u8string{} );
@@ -225,6 +230,15 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     pd.presence.state = pd.state.c_str();
     pd.presence.details = pd.details.c_str();
     UpdateDuration( durationStr.empty() ? 0 : stold( durationStr ) );
+
+    // +++
+    // Set the URL to config::largeImageId_Artwork
+    const std::u8string pathStr = queryData( config::largeImageQuery );
+    const std::u8string replaceStr = u8"www.youtube.com/watch?v=";
+    const std::u8string replaceWithStr = u8"https://i.ytimg.com/vi/";
+    auto replaceRes = pathStr.replace_string( replaceStr, replaceWithStr );
+    config::largeImageId_Artwork = ( ( replaceRes != 0 ) ? ( pathStr + "/maxresdefault.jpg" ) : "https://www.dropbox.com/s/nzgsal09gwlx5h8/music-solid-colored.png?raw=1" );
+    UpdateImage();
 }
 
 void PresenceModifier::UpdateDuration( double time )

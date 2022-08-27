@@ -16,9 +16,11 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     , isEnabled_( config::isEnabled )
     , stateQuery_( config::stateQuery )
     , detailsQuery_( config::detailsQuery )
+    , largeImageQuery_( config::largeImageQuery ) // +++
     , largeImageSettings_( config::largeImageSettings,
                            { { ImageSetting::Light, IDC_RADIO_IMG_LIGHT },
                              { ImageSetting::Dark, IDC_RADIO_IMG_DARK },
+                             { ImageSetting::Artwork, IDC_RADIO_IMG_ARTWORK }, // +++
                              { ImageSetting::Disabled, IDC_RADIO_IMG_DISABLED } } )
     , smallImageSettings_( config::smallImageSettings,
                            { { ImageSetting::Light, IDC_RADIO_PLAYBACK_IMG_LIGHT },
@@ -34,7 +36,8 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( isEnabled_, IDC_CHECK_IS_ENABLED ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( stateQuery_, IDC_TEXTBOX_STATE ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( detailsQuery_, IDC_TEXTBOX_DETAILS ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( largeImageSettings_, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( largeImageQuery_, IDC_TEXTBOX_DETAILS ), // +++
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( largeImageSettings_, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_ARTWORK, IDC_RADIO_IMG_DISABLED } ), // +++ IDC_RADIO_IMG_ARTWORK
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( smallImageSettings_, std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( timeSettings_, std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( disableWhenPaused_, IDC_CHECK_DISABLE_WHEN_PAUSED ),

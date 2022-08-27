@@ -14,11 +14,12 @@ qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings( guid::conf_time_settings, 
 
 qwr::fb2k::ConfigString stateQuery( guid::conf_state_query, "[%title%]" );
 qwr::fb2k::ConfigString detailsQuery( guid::conf_details_query, "[%album artist%[: %album%]]" );
-
+qwr::fb2k::ConfigString largeImageQuery( guid::conf_large_image_query, "[%path%]" ); // +++
 qwr::fb2k::ConfigString discordAppToken( guid::conf_app_token, "507982587416018945" );
 qwr::fb2k::ConfigString largeImageId_Light( guid::conf_large_image_id_light, "foobar2000" );
 qwr::fb2k::ConfigString largeImageId_Dark( guid::conf_large_image_id_dark, "foobar2000-dark" );
 qwr::fb2k::ConfigString playingImageId_Light( guid::conf_playing_image_id_light, "playing" );
+qwr::fb2k::ConfigString largeImageId_Artwork( guid::conf_large_image_id_artwork, "https://www.dropbox.com/s/nzgsal09gwlx5h8/music-solid-colored.png?raw=1" ); // +++
 qwr::fb2k::ConfigString playingImageId_Dark( guid::conf_playing_image_id_dark, "playing-dark" );
 qwr::fb2k::ConfigString pausedImageId_Light( guid::conf_paused_image_id_light, "paused" );
 qwr::fb2k::ConfigString pausedImageId_Dark( guid::conf_paused_image_id_dark, "paused-dark" );

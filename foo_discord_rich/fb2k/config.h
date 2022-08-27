@@ -9,6 +9,7 @@ enum class ImageSetting : uint8_t
 {
     Light = 0,
     Dark,
+    Artwork,
     Disabled
 };
 enum class TimeSetting : uint8_t
@@ -24,11 +25,12 @@ extern qwr::fb2k::ConfigUint8Enum<ImageSetting> smallImageSettings;
 extern qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings;
 extern qwr::fb2k::ConfigString stateQuery;
 extern qwr::fb2k::ConfigString detailsQuery;
-
+extern qwr::fb2k::ConfigString largeImageQuery; // +++
 extern qwr::fb2k::ConfigString discordAppToken;
 extern qwr::fb2k::ConfigString largeImageId_Light;
 extern qwr::fb2k::ConfigString largeImageId_Dark;
 extern qwr::fb2k::ConfigString playingImageId_Light;
+extern qwr::fb2k::ConfigString largeImageId_Artwork; // +++
 extern qwr::fb2k::ConfigString playingImageId_Dark;
 extern qwr::fb2k::ConfigString pausedImageId_Dark;
 extern qwr::fb2k::ConfigString pausedImageId_Light;

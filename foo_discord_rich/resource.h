@@ -7,9 +7,11 @@
 #define IDD_PREFS_ADVANCED_TAB          121
 #define IDC_TEXTBOX_DETAILS             1068
 #define IDC_TEXTBOX_STATE               1069
+#define IDC_TEXTBOX_ARTWORK             2000 // +++
 #define IDC_TEXTBOX_PARTYID             1070
 #define IDC_RADIO_IMG_LIGHT             1071
 #define IDC_RADIO_IMG_DARK              1072
+#define IDC_RADIO_IMG_ARTWORK           2001 // +++
 #define IDC_RADIO_IMG_DISABLED          1073
 #define IDC_RADIO_TIME_ELAPSED          1074
 #define IDC_RADIO_TIME_REMAINING        1075
@@ -18,6 +20,7 @@
 #define IDC_TAB1                        1078
 #define IDC_TEXTBOX_LARGE_LIGHT_ID      1079
 #define IDC_TEXTBOX_LARGE_DARK_ID       1080
+#define IDC_TEXTBOX_LARGE_ARTWORK_ID    2002 // +++
 #define IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID 1081
 #define IDC_TEXTBOX_SMALL_PLAYING_DARK_ID 1083
 #define IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID 1084

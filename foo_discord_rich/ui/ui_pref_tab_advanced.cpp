@@ -17,6 +17,7 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
     , discordAppToken_( config::discordAppToken )
     , largeImageId_Light_( config::largeImageId_Light )
     , largeImageId_Dark_( config::largeImageId_Dark )
+    , largeImageId_Artwork_( config::largeImageId_Artwork ) // +++
     , playingImageId_Light_( config::playingImageId_Light )
     , playingImageId_Dark_( config::playingImageId_Dark )
     , pausedImageId_Light_( config::pausedImageId_Light )
@@ -26,6 +27,7 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( largeImageId_Light_, IDC_TEXTBOX_LARGE_LIGHT_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( largeImageId_Dark_, IDC_TEXTBOX_LARGE_DARK_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( playingImageId_Light_, IDC_TEXTBOX_SMALL_PLAYING_LIGHT_ID ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( largeImageId_Artwork_, IDC_TEXTBOX_LARGE_ARTWORK_ID ), // +++
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( playingImageId_Dark_, IDC_TEXTBOX_SMALL_PLAYING_DARK_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( pausedImageId_Light_, IDC_TEXTBOX_SMALL_PAUSED_LIGHT_ID ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( pausedImageId_Dark_, IDC_TEXTBOX_SMALL_PAUSED_DARK_ID ),
