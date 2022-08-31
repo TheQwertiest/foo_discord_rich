@@ -85,10 +85,11 @@ bool prepare_static_hash_json( abort_callback& abort )
     static bool loaded = false;
     if (!loaded)
     {
-        if ( read_hash_json( g_hashJson, abort ) )
+        if ( !read_hash_json( g_hashJson, abort ) )
         {
-            loaded = true;
+            g_hashJson = std::make_unique<nlohmann::json>();
         }
+        loaded = true;
     }
 
     return loaded;
@@ -138,15 +139,20 @@ bool save_hash_json(abort_callback &abort)
     // Write current json to file
     {
         service_ptr_t<file> file_ptr;
-        filesystem::g_open_write_new(file_ptr, filename_new, abort);
-        file_ptr->write_string_raw(g_hashJson->dump(4).c_str(), abort);
+        filesystem::g_open_write_new( file_ptr, filename_new, abort );
+        file_ptr->write_string_raw( g_hashJson->dump(4).c_str(), abort );
     }
 
-    // Copy the old file to backup file
-    filesystem::g_copy(filename, filename_old, abort);
+    // The file might not exist when using the extension for the first time
+    if ( filesystem::g_exists( filename, abort ) )
+    {
+        // Copy the old file to backup file
+        filesystem::g_copy( filename, filename_old, abort );
+    }
+    
 
     // Copy the new file to the main file
-    filesystem::g_copy(filename_new, filename, abort);
+    filesystem::g_copy( filename_new, filename, abort );
 
     return true;
 }
