@@ -101,6 +101,10 @@ bool check_artwork_hash(artwork_info &artwork, abort_callback &abort, pfc::strin
     const auto md5 = static_api_ptr_t<hasher_md5>()->process_single(artwork.data->get_ptr(), artwork.data->get_size()).asString();
     artwork.artwork_hash = md5;
 
+#   ifdef _DEBUG
+    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Artwork hash " << artwork.artwork_hash;
+#   endif
+
     if ( !prepare_static_hash_json( abort ) )
     {
         return false;

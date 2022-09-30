@@ -131,6 +131,9 @@ bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abor
     abort.check();
     if (artwork.success)
     {
+#ifdef _DEBUG
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Artwork path after extract " << artwork.path;
+#endif
         artwork_url = uploadArtwork( artwork, abort );
         if (artwork_url.get_length() > 0)
         {
@@ -144,9 +147,17 @@ bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abor
 
 artwork_info extractArtwork( const metadb_handle_ptr track, abort_callback &abort )
 {
-    static_api_ptr_t<album_art_manager_v3> aam;
+    auto aam = album_art_manager_v3::get();
     auto extractor = aam->open(pfc::list_single_ref_t(track),
                            pfc::list_single_ref_t(album_art_ids::cover_front), abort);
+
+    if (!extractor.is_valid())
+    {
+        #ifdef _DEBUG
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Invalid artwork extractor instance found";
+        #endif
+        return artwork_info();
+    }
 
     try {
         abort.check();
@@ -155,10 +166,14 @@ artwork_info extractArtwork( const metadb_handle_ptr track, abort_callback &abor
         const auto paths = extractor->query_paths( album_art_ids::cover_front, abort );
         if (paths->get_count() > 0)
         {
-            info.path = paths->get_path(0);
+            info.path = pfc::string8(paths->get_path(0));
             auto loc = track->get_location().get_path();
+
+            #ifdef _DEBUG
+            FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": extracted filepath " << info.path << " track filepath " << loc << " is valid? " << paths.is_valid();
+            #endif
             // Artwork location same as file means artwork is embedded
-            if (strcmp(info.path, loc) == 0)
+            if (info.path.equals(loc))
             {
                 info.path = "";
             }
@@ -171,6 +186,12 @@ artwork_info extractArtwork( const metadb_handle_ptr track, abort_callback &abor
         info.data = extractor->query(album_art_ids::cover_front, abort);
         info.success = true;
 
+        #ifdef _DEBUG
+        if (info.path != "")
+        {
+            FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": found existing path " << info.path;
+        }
+        #endif
         return info;
     } catch (const exception_album_art_not_found&) {
         return artwork_info();
@@ -268,13 +289,6 @@ bool readFromPipe(HANDLE g_hChildStd_OUT_Rd, pfc::string8 &artwork_url)
 
 pfc::string8 getArtworkFilepath(const artwork_info& art, abort_callback &abort, pfc::string8 &tempFile, bool &deleteFile)
 {
-    auto tempDir = core_api::pathInProfile(DRP_UNDERSCORE_NAME);
-
-    if (!filesystem::g_exists(tempDir.c_str(), abort))
-    {
-        filesystem::g_create_directory(tempDir.c_str(), abort);
-    }
-
     abort.check();
 
     pfc::string8 filepath;
@@ -292,6 +306,13 @@ pfc::string8 getArtworkFilepath(const artwork_info& art, abort_callback &abort, 
     }
     else
     {
+        auto tempDir = core_api::pathInProfile(DRP_UNDERSCORE_NAME);
+
+        if (!filesystem::g_exists(tempDir.c_str(), abort))
+        {
+            filesystem::g_create_directory(tempDir.c_str(), abort);
+        }
+
         // Get the image mime type since we cannot deduce it otherwise from embedded artwork
         const auto api = fb2k::imageLoaderLite::tryGet();
         std::string ext = "jpg";
@@ -311,11 +332,15 @@ pfc::string8 getArtworkFilepath(const artwork_info& art, abort_callback &abort, 
         // Take the last 10 digits of current time and use that for filename.
         // Should be good enough for this purpose as the file is deleted after the operation or overwritten in the future
         const auto ts = std::to_string(std::time(NULL));
-        const auto filename = pfc::string((ts.substr(ts.size() - 10) + "." + ext).c_str());
+        const auto filename = pfc::string8((ts.substr(std::max(ts.size(), 10u) - 10) + "." + ext).c_str());
 
         tempDir.add_filename(filename.c_str());
         filepath = tempDir;
         deleteFile = true;
+
+        #ifdef _DEBUG
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": full temp filepath " << filepath;
+        #endif
 
         // UTF-8 might cause problems?
         tempFile = filepath;
@@ -498,6 +523,10 @@ pfc::string8 uploadArtwork(artwork_info& art, abort_callback &abort)
          PROCESS_INFORMATION piProcInfo; 
          ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
 
+        #ifdef _DEBUG
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Upload command " << commandString;
+        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Cover file path " << filepath;
+        #endif
          const auto cmd_w = to_wstring( commandString );
 
          abort.check();

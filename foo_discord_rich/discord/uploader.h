@@ -19,9 +19,10 @@ private:
 struct artwork_info
 {
     album_art_data_ptr data;
-    const char* path{};
+    // This being a char* caused problems where the contents would randomly change. pfc::string8 did not seem to have this problem
+    pfc::string8 path{};
     bool success = false;
-    pfc::string8 artwork_hash;
+    pfc::string8 artwork_hash{};
 };
 
 bool extractAndUploadArtwork( const metadb_handle_ptr track, abort_callback &abort, pfc::string8 &artwork_url, metadb_index_hash hash );
