@@ -457,10 +457,13 @@ bool uploadOpenProcess(const std::wstring &cmd_w, const char* filepath_c, pfc::s
          CloseHandle( piProcInfo.hProcess );
          CloseHandle( piProcInfo.hThread );
 
-         FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code <<
-             " and " << ( exit_code == 0 ? "url" : "error" ) << ": " << artwork_url;
+         // If exit code is zero and result contains newlines assume it's an error since urls should not contains those
+         const bool isError = exit_code != 0 || artwork_url.find_first('\n') != ~0;
 
-         if (exit_code != 0)
+         FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code <<
+             " and " << ( isError ? "url" : "error" ) << ": " << artwork_url;
+
+         if (isError)
          {
              artwork_url = "";
          }
