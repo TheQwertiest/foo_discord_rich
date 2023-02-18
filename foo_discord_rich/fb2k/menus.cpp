@@ -2,6 +2,7 @@
 
 #include "artwork_metadb.h"
 #include "discord/uploader.h"
+#include "discord/image_hasher.h"
 #include "foobar2000/SDK/component.h"
 
 namespace drp
@@ -81,6 +82,45 @@ void clearUrls( metadb_handle_list_cref tracks ) {
     }
 }
 
+void clearArtworkHashes( metadb_handle_list_cref tracks )
+{
+	const size_t count = tracks.get_count();
+	if (count == 0) return;
+
+	auto client = clientByGUID(guid::artwork_url_index);
+	pfc::avltree_t<metadb_index_hash> allHashes;
+
+	for (size_t w = 0; w < count; ++w) {
+		metadb_index_hash hash;
+		if (client->hashHandle(tracks[w], hash)) {
+			if (allHashes.exists(hash)) continue;
+			allHashes += hash;
+		}
+	}
+
+	if (allHashes.get_count() == 0) {
+		FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Could not hash any of the tracks due to unavailable metadata, bailing";
+		return;
+	}
+
+
+	pfc::avltree_t<pfc::string8> urls;
+
+	for (auto iter = allHashes.first(); iter.is_valid(); ++iter)
+	{
+		const metadb_index_hash hash = *iter;
+		const auto rec = record_get( hash );
+		if (rec.artwork_url.get_length() != 0)
+		{
+			urls += rec.artwork_url;
+		}
+	}
+
+	int deleted = 0;
+	uploader::delete_artwork_urls_from_json(urls, fb2k::noAbort, deleted);
+	FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Deleted hashes for " << deleted << " url(s).";
+}
+
 class contextmenu_artwork_url : public contextmenu_item_simple {
 public:
 	GUID get_parent() {
@@ -88,7 +128,7 @@ public:
 	}
 
 	unsigned get_num_items() {
-		return 2;
+		return 4;
 	}
 
 	void get_item_name(unsigned p_index, pfc::string_base & p_out) {
@@ -97,7 +137,11 @@ public:
 		    case 0:
 		        p_out = "Generate artwork url"; break;
 		    case 1:
-		        p_out = "Clear artwork"; break;
+		        p_out = "Clear artwork url"; break;
+			case 2:
+				p_out = "Delete image hashes for urls"; break;
+			case 3:
+				p_out = "Clear all cached image hashes"; break;
 		}
 	}
 
@@ -112,6 +156,13 @@ public:
         case 1:
             clearUrls( p_data );
             break;
+        case 2:
+        	clearArtworkHashes( p_data );
+        	break;
+        case 3:
+        	uploader::clear_all_hashes(fb2k::noAbort);
+        	FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Image hash json file emptied";
+        	break;
         default:
             uBugCheck();
         }
@@ -121,6 +172,8 @@ public:
 		switch(p_index) {
 		    case 0:	return guid::context_menu_item_generate_url;
 		    case 1:	return guid::context_menu_item_clear_url;
+		    case 2:	return guid::context_menu_item_clear_hash_urls;
+		    case 3:	return guid::context_menu_item_clear_all_hash_urls;
 		    default: uBugCheck();
 		}
 	}
@@ -135,6 +188,12 @@ public:
 		    // Currently clears based on album. Can be changed after a good way of storing image hashes is found
 		    p_out = "Clear artwork urls of selected albums";
 		    return true;
+		case 2:
+			p_out = "Clears image hashes associated with the urls of the selected tracks";
+			return true;
+		case 3:
+			p_out = "Empties the image hash to url json file";
+			return true;
 		default:
 			PFC_ASSERT(!"Should not get here");
 			return false;

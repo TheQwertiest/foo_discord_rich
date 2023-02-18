@@ -1,4 +1,5 @@
 #include <stdafx.h>
+#include <mutex>
 
 #include <nlohmann/json.hpp>
 
@@ -9,6 +10,41 @@
 
 namespace drp::uploader
 {
+
+/**
+ * Copy pasted from uploader_lock. Maybe there's a better way
+ * but this was the easiest to implement due to the use of a static variable.
+ *
+ * Lock is required as operations on the json file and the json object are not thread safe.
+ */
+class json_lock
+{
+public:
+    json_lock()
+    {
+        lock_.lock();
+    }
+    ~json_lock()
+    {
+        lock_.unlock();
+    }
+
+    static bool is_locked()
+    {
+        const auto locked = lock_.try_lock();
+        if ( locked )
+        {
+            lock_.unlock();
+        }
+        return !locked;
+    }
+
+private:
+    static std::mutex lock_;
+};
+
+// Must initialize static class variables outside of the class
+std::mutex json_lock::lock_;
 
 pfc::string8 get_image_hash_file(abort_callback &abort)
 {
@@ -85,6 +121,12 @@ bool prepare_static_hash_json( abort_callback& abort )
     static bool loaded = false;
     if (!loaded)
     {
+        bool wasLocked = json_lock::is_locked();
+        json_lock lock;
+
+        // If another thread opened the json no need to do it again
+        if (wasLocked && loaded) return loaded;
+
         if ( !read_hash_json( g_hashJson, abort ) )
         {
             g_hashJson = std::make_unique<nlohmann::json>();
@@ -110,6 +152,7 @@ bool check_artwork_hash(artwork_info &artwork, abort_callback &abort, pfc::strin
         return false;
     }
 
+    json_lock lock;
     if (g_hashJson->contains(md5.c_str()))
     {
         artwork_url = pfc::string8(
@@ -133,6 +176,9 @@ bool save_hash_json(abort_callback &abort)
         return false;
     }
 
+    // Acquire lock for the whole saving operation
+    json_lock lock;
+
     const auto &filename = get_image_hash_file(abort);
     auto filename_new = pfc::string8(filename);
     filename_new += ".new";
@@ -153,7 +199,6 @@ bool save_hash_json(abort_callback &abort)
         // Copy the old file to backup file
         filesystem::g_copy( filename, filename_old, abort );
     }
-    
 
     // Copy the new file to the main file
     filesystem::g_copy( filename_new, filename, abort );
@@ -169,12 +214,70 @@ bool set_artwork_url_hash(const pfc::string8 &artwork_url, const pfc::string8 &a
         return false;
     }
 
-    (*g_hashJson)[artwork_hash.c_str()] = artwork_url.c_str();
+    {
+        json_lock lock;
+        (*g_hashJson)[artwork_hash.c_str()] = artwork_url.c_str();
+    }
 
-    // Should be fine to call this for every new entry as it's only reached from upload at the moment and that
-    // has a concurrency lock
     return save_hash_json(abort);
 }
+
+
+bool delete_artwork_urls_from_json(const pfc::avltree_t<pfc::string8> &urls, abort_callback &abort, int& deleted)
+{
+    deleted = 0;
+    if (urls.get_count() == 0) return true;
+
+    if ( !prepare_static_hash_json( abort) )
+    {
+        return false;
+    }
+
+    {
+        // Lock must be released before save
+        json_lock lock;
+        for (auto it = g_hashJson->begin(); it != g_hashJson->end();)
+        {
+            pfc::string8 val(it.value().get<std::string>().c_str());
+            if (urls.contains(val))
+            {
+                it = g_hashJson->erase(it);
+                ++deleted;
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+    // No need to write to disk if no modifications were made
+    if (deleted > 0)
+    {
+        save_hash_json(abort);
+    }
+
+    return true;
+}
+
+
+bool clear_all_hashes(abort_callback &abort)
+{
+    if ( !prepare_static_hash_json( abort) )
+    {
+        return false;
+    }
+
+    {
+        // Lock must be released before save
+        json_lock lock;
+        g_hashJson->clear();
+    }
+
+    save_hash_json(abort);
+    return true;
+}
+
 
 class initquit_impl : public initquit
 {
