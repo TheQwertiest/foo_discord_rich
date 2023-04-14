@@ -30,6 +30,7 @@ namespace drp::ui {
 			COMMAND_HANDLER_EX(IDCANCEL, BN_CLICKED, OnCancel)
 			MSG_WM_DESTROY(OnDestroy)
 		END_MSG_MAP()
+
 	private:
 		BOOL OnInitDialog(CWindow, LPARAM);
 

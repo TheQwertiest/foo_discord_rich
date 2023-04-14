@@ -21,7 +21,6 @@ namespace drp
 
       if (allHashes.get_count() == 0) {
          FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Could not hash any of the tracks due to unavailable metadata, bailing";
-
       }
 
       return allHashes;
