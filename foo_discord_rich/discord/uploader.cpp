@@ -461,7 +461,7 @@ bool uploadOpenProcess(const std::wstring &cmd_w, const char* filepath_c, pfc::s
          const bool isError = exit_code != 0 || artwork_url.find_first('\n') != ~0;
 
          FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code <<
-             " and " << ( isError ? "url" : "error" ) << ": " << artwork_url;
+             " and " << ( isError ? "error" : "url" ) << ": " << artwork_url;
 
          if (isError)
          {
@@ -470,6 +470,8 @@ bool uploadOpenProcess(const std::wstring &cmd_w, const char* filepath_c, pfc::s
 
          return true;
      }
+
+    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Failed to run command '" << cmd_w << "'";
 
     return false;
 }
@@ -526,10 +528,10 @@ pfc::string8 uploadArtwork(artwork_info& art, abort_callback &abort)
          PROCESS_INFORMATION piProcInfo; 
          ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
 
-        #ifdef _DEBUG
-        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Upload command " << commandString;
-        FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Cover file path " << filepath;
-        #endif
+         #ifdef _DEBUG
+         FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Upload command " << commandString;
+         FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": Cover file path " << filepath;
+         #endif
          const auto cmd_w = to_wstring( commandString );
 
          abort.check();
