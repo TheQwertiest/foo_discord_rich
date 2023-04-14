@@ -73,7 +73,7 @@ Global
 		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
 		SolutionNewStyle = 1
+		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
 	EndGlobalSection
 EndGlobal

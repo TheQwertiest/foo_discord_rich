@@ -128,6 +128,7 @@
     <ClCompile Include="fb2k\artwork_metadb.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
     <ClCompile Include="fb2k\menus.cpp" />
+    <ClCompile Include="fb2k\metadb_helpers.cpp" />
     <ClCompile Include="fb2k\playback.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fb2k\mainmenu.cpp" />
@@ -137,6 +138,7 @@
     <ClCompile Include="ui\ui_pref_tab_advanced.cpp" />
     <ClCompile Include="ui\ui_pref_tab_main.cpp" />
     <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
+    <ClCompile Include="ui\url_input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="component_defines.h" />
@@ -146,12 +148,14 @@
     <ClInclude Include="discord\uploader.h" />
     <ClInclude Include="fb2k\artwork_metadb.h" />
     <ClInclude Include="fb2k\config.h" />
+    <ClInclude Include="fb2k\metadb_helpers.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ui\ui_itab.h" />
     <ClInclude Include="ui\ui_pref_tab_advanced.h" />
     <ClInclude Include="ui\ui_pref_tab_main.h" />
     <ClInclude Include="ui\ui_pref_tab_manager.h" />
+    <ClInclude Include="ui\url_input.h" />
     <ClInclude Include="utils\acfu_github.h" />
   </ItemGroup>
   <ItemGroup>
