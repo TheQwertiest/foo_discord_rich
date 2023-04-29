@@ -51,6 +51,7 @@ void PlaybackCallback::on_playback_new_track( metadb_handle_ptr track )
     auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
     pm.UpdateTrack( track );
     pm.UpdateSmallImage();
+    pm.UpdateImage();
 }
 
 void PlaybackCallback::on_playback_stop( play_control::t_stop_reason reason )

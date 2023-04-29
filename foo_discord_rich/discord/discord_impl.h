@@ -54,13 +54,13 @@ public:
 
 private:
     PresenceModifier( DiscordHandler& parent,
-                      const drp::internal::PresenceData& presenceData );
+                      const std::shared_ptr<internal::PresenceData> presenceData );
 
 private:
     DiscordHandler& parent_;
 
     bool isDisabled_ = false;
-    drp::internal::PresenceData presenceData_;
+    std::shared_ptr<internal::PresenceData> presenceData_;
 };
 
 class DiscordHandler
@@ -73,6 +73,8 @@ public:
     void Initialize();
     void Finalize();
     void OnSettingsChanged();
+    /* Update presence if the given presence data pointer is the same as the current one */
+    void MaybeUpdatePresence(std::shared_ptr<internal::PresenceData> pd);
 
     drp::PresenceModifier GetPresenceModifier();
 
@@ -91,7 +93,7 @@ private:
 private:
     bool hasPresence_ = true;
     std::u8string appToken_;
-    drp::internal::PresenceData presenceData_;
+    std::shared_ptr<internal::PresenceData> presenceData_ = std::make_shared<internal::PresenceData>();
 };
 
 } // namespace drp
