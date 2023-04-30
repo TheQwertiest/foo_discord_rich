@@ -6,6 +6,8 @@
 #include "fb2k/metadb_helpers.h"
 #include "url_input.h"
 
+#include "qwr/string_helpers.h"
+
 
 namespace drp::ui {
 InputDialog::InputDialog(metadb_handle_list_cref data) {
@@ -107,11 +109,14 @@ void InputDialog::work( std::shared_ptr<sharedData_t> shared, std::shared_ptr<ab
 		}
 
 		pfc::list_t<metadb_index_hash> lstChanged; // Linear list of hashes that actually changed
+		auto url = shared->url;
+		url.skip_trailing_chars(" \t");
 
 		for (auto iter = allHashes.first(); iter.is_valid(); ++iter)
 		{
 			const metadb_index_hash hash = *iter;
-			if (artwork_url_set( hash, shared->url ))
+
+			if (artwork_url_set( hash, url ))
 			{
 				lstChanged += hash;
 			}
