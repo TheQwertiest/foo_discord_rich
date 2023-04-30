@@ -24,6 +24,7 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
     , uploadArtwork_(config::uploadArtwork)
     , uploadArtworkCommand_(config::uploadArtworkCommand)
     , artworkMetadbKey_(config::artworkMetadbKey)
+    , processTimeout_(config::processTimeout)
     , ddxOptions_( {
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( discordAppToken_, IDC_TEXTBOX_APP_TOKEN ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( largeImageId_Light_, IDC_TEXTBOX_LARGE_LIGHT_ID ),
@@ -35,6 +36,7 @@ PreferenceTabAdvanced::PreferenceTabAdvanced( PreferenceTabManager* pParent )
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( uploadArtwork_, IDC_CHECK_UPLOAD_ARTWORK ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( uploadArtworkCommand_, IDC_TEXTBOX_ARTWORK_COMMAND ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( artworkMetadbKey_, IDC_TEXTBOX_METADB_KEY ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEditNum>( processTimeout_, IDC_TEXTBOX_PROCESS_TIMEOUT ),
       } )
 {
 }

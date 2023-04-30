@@ -24,6 +24,7 @@ qwr::fb2k::ConfigString pausedImageId_Light( guid::conf_paused_image_id_light, "
 qwr::fb2k::ConfigString pausedImageId_Dark( guid::conf_paused_image_id_dark, "paused-dark" );
 qwr::fb2k::ConfigString uploadArtworkCommand( guid::conf_upload_artwork_command, "" );
 qwr::fb2k::ConfigString artworkMetadbKey( guid::conf_artwork_metadb_key, "%album artist% - $if2([%album%],%title%) [ - %discnumber%]" );
+qwr::fb2k::ConfigUint32 processTimeout( guid::conf_process_timeout, 10 );
 
 qwr::fb2k::ConfigBool disableWhenPaused( guid::conf_disable_when_paused, false );
 qwr::fb2k::ConfigBool swapSmallImages( guid::conf_swap_small_images, false );

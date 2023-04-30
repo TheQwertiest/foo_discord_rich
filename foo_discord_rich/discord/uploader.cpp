@@ -251,8 +251,11 @@ bool readFromPipe(HANDLE g_hChildStd_OUT_Rd, pfc::string8 &artwork_url)
     const int TEMP_BUF_SIZE = 16;
     CHAR tempBuf[TEMP_BUF_SIZE];
     DWORD peekedBytes;
-    auto now = std::chrono::high_resolution_clock::now();
-    const auto timeout_s = std::chrono::seconds(10);
+    const auto now = std::chrono::high_resolution_clock::now();
+
+    // Read timeout from conf. If set to 0 use 1 day as timeout.
+    const long timeout_config = config::processTimeout.GetValue();
+    const auto timeout_s = std::chrono::seconds(timeout_config == 0 ? 86400 : timeout_config);
 
     // Try to read output from the process. for 10 seconds
     while (!inputFound)
@@ -267,7 +270,7 @@ bool readFromPipe(HANDLE g_hChildStd_OUT_Rd, pfc::string8 &artwork_url)
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        auto td = std::chrono::high_resolution_clock::now() - now;
+        const auto td = std::chrono::high_resolution_clock::now() - now;
         if (td > timeout_s) break;
     }
 
@@ -454,11 +457,21 @@ bool uploadOpenProcess(const std::wstring &cmd_w, const char* filepath_c, pfc::s
 
          DWORD exit_code;
          GetExitCodeProcess( piProcInfo.hProcess, &exit_code );
+         bool terminateProcess = exit_code == STILL_ACTIVE && artwork_url.get_length() == 0;
+
+         // In case of a time out terminate the process
+         if (terminateProcess)
+         {
+             TerminateProcess(&piProcInfo.hProcess, exit_code);
+             WaitForSingleObject( piProcInfo.hProcess, 5000 );
+         }
+
          CloseHandle( piProcInfo.hProcess );
          CloseHandle( piProcInfo.hThread );
 
          // If exit code is zero and result contains newlines assume it's an error since urls should not contains those
          const bool isError = exit_code != 0 || artwork_url.find_first('\n') != ~0;
+         artwork_url =  terminateProcess ? pfc::string8("Process timed out") : artwork_url;
 
          FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": artwork uploader exited with status: " << exit_code <<
              " and " << ( isError ? "error" : "url" ) << ": " << artwork_url;

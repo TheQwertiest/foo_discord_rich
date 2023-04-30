@@ -38,6 +38,7 @@ public:
         COMMAND_HANDLER_EX( IDC_CHECK_UPLOAD_ARTWORK, BN_CLICKED, OnEditChange )
         COMMAND_HANDLER_EX( IDC_TEXTBOX_ARTWORK_COMMAND, EN_CHANGE, OnEditChange )
         COMMAND_HANDLER_EX( IDC_TEXTBOX_METADB_KEY, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_PROCESS_TIMEOUT, EN_CHANGE, OnEditChange )
     END_MSG_MAP()
 
 public:
@@ -76,12 +77,13 @@ private:
                             pausedImageId_Dark,
                             uploadArtwork,
                             uploadArtworkCommand,
-                            artworkMetadbKey)
+                            artworkMetadbKey,
+                            processTimeout)
 
 #undef SPTF_DEFINE_OPTIONS
 #undef SPTF_DEFINE_OPTION
 
-    std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 10> ddxOptions_;
+    std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 11> ddxOptions_;
 };
 
 } // namespace drp::ui
