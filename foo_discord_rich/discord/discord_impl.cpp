@@ -125,13 +125,20 @@ struct sharedData_t
     DiscordHandler* handler;
 };
     
-void PresenceModifier::UpdateImage()
+void PresenceModifier::UpdateImage(const pfc::string8& url)
 {
     auto pc = playback_control::get();
     
     if (config::largeImageSettings == config::ImageSetting::Disabled)
     {
         setImageKey( std::u8string{}, presenceData_ );
+        return;
+    }
+
+    // If cover url given use that. This is the case with some internet radios.
+    if (url.get_length() > 0)
+    {
+        setImageKey( std::u8string( url ), presenceData_ );
         return;
     }
     
@@ -143,7 +150,13 @@ void PresenceModifier::UpdateImage()
     if (config::uploadArtwork)
     {
         gSuccess = pc->get_now_playing(p_out);
-        if (gSuccess)
+
+        // Length -1 indicates a live stream I think. Not checking saved value in this
+        // case is useful for internet radios as their tracks change over time with
+        // possibly different cover art. This should not be a problem even if the artwork
+        // does not change, as the image is hashed and the url is retrieved from cache
+        // on reupload attempts.
+        if (gSuccess && p_out->get_length() != -1)
         {
             clientByGUID( guid::artwork_url_index )->hashHandle( p_out, hash );
             auto rec = record_get( hash );

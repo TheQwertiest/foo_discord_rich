@@ -42,7 +42,7 @@ class PresenceModifier
 public:
     ~PresenceModifier();
 
-    void UpdateImage();
+    void UpdateImage(const pfc::string8& url="");
     void UpdateSmallImage();
     void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateDuration( double time );
