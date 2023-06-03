@@ -99,17 +99,11 @@ void PlaybackCallback::on_playback_dynamic_info_track( const file_info& info )
 {
     on_playback_changed();
 
-    auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
     // Some radio stations provide cover as a url. If so use that instead of the default.
     if (info.info_exists("cover_url"))
     {
+        auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
         pm.UpdateImage( info.info_get( "cover_url" ) );
-    }
-    else
-    {
-        // If no cover_url present try to update image anyway, as some people might
-        // update a local file whenever the track changes.
-        pm.UpdateImage();
     }
 }
 

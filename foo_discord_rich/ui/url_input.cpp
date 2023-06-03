@@ -6,6 +6,7 @@
 #include "fb2k/metadb_helpers.h"
 #include "url_input.h"
 
+#include "discord/discord_impl.h"
 #include "qwr/string_helpers.h"
 
 
@@ -126,6 +127,11 @@ void InputDialog::work( std::shared_ptr<sharedData_t> shared, std::shared_ptr<ab
 		if (lstChanged.get_count() > 0) {
 			// This gracefully tells everyone about what just changed, in one pass regardless of how many items got altered
 			cached_index_api()->dispatch_refresh(guid::artwork_url_index, lstChanged);
+
+			if (url.get_length() > 0)
+			{
+				DiscordHandler::GetInstance().GetPresenceModifier().UpdateImage();
+			}
 		}
 	} );
 }

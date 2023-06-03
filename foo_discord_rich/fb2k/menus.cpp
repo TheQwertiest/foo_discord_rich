@@ -14,7 +14,7 @@ namespace drp
 static const char strPropertiesGroup[] = "Discord rich presence";
 
 
-void generateUrls( metadb_handle_list_cref tracks ) {
+void generateUrls( metadb_handle_list_cref tracks, bool regenerate ) {
     const size_t count = tracks.get_count();
     if (count == 0) return;
 
@@ -34,7 +34,7 @@ void generateUrls( metadb_handle_list_cref tracks ) {
         return;
     }
 
-    auto thread_impl = new service_impl_t<uploader::threaded_process_artwork_uploader>(allHashes);
+    auto thread_impl = new service_impl_t<uploader::threaded_process_artwork_uploader>(allHashes, regenerate);
     const std::string p_title = "Uploading artwork";
 
     threaded_process::g_run_modeless(
@@ -105,7 +105,7 @@ public:
 	}
 
 	unsigned get_num_items() {
-		return 5;
+		return 6;
 	}
 
 	void get_item_name(unsigned p_index, pfc::string_base & p_out) {
@@ -121,6 +121,8 @@ public:
 				p_out = "Clear all cached image hashes"; break;
 			case 4:
 				p_out = "Manually enter artwork url"; break;
+			case 5:
+				p_out = "Regenerate artwork url"; break;
 		}
 	}
 
@@ -130,7 +132,7 @@ public:
         switch (p_index)
         {
         case 0:
-            generateUrls( p_data );
+            generateUrls( p_data, false );
             break;
         case 1:
             clearUrls( p_data );
@@ -145,6 +147,9 @@ public:
         case 4:
         	ui::InputDialog::OpenDialog(p_data);
         	break;
+        case 5:
+        	generateUrls( p_data, true );
+        	break;
         default:
             uBugCheck();
         }
@@ -157,6 +162,7 @@ public:
 		    case 2:	return guid::context_menu_item_clear_hash_urls;
 		    case 3:	return guid::context_menu_item_clear_all_hash_urls;
 		    case 4:	return guid::context_menu_item_enter_url;
+		    case 5:	return guid::context_menu_item_regenerate_url;
 		    default: uBugCheck();
 		}
 	}
@@ -179,6 +185,9 @@ public:
 			return true;
 		case 4:
 			p_out = "Manually enter artwork url";
+			return true;
+		case 5:
+			p_out = "Regenerate the artwork url";
 			return true;
 		default:
 			PFC_ASSERT(!"Should not get here");

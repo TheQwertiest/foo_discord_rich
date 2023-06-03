@@ -7,6 +7,7 @@
 #include <ctime>
 #include <fb2k/artwork_metadb.h>
 
+#include "discord_impl.h"
 #include "image_hasher.h"
 #include "foobar2000/SDK/component.h"
 
@@ -47,7 +48,7 @@ private:
 std::mutex upload_lock::lock_;
 
 threaded_process_artwork_uploader::threaded_process_artwork_uploader(
-    const pfc::map_t<metadb_index_hash, metadb_handle_ptr>& hashes) : hashes_(hashes)
+    const pfc::map_t<metadb_index_hash, metadb_handle_ptr>& hashes, const bool regenerate) : hashes_(hashes), regenerate_(regenerate)
 {}
 
 void threaded_process_artwork_uploader::on_init(ctx_t p_wnd) {}
@@ -64,7 +65,7 @@ void threaded_process_artwork_uploader::run(threaded_process_status &p_status, a
             p_status.set_progress_float( currIdx / (double)total_count );
             const auto kv = *iter;
             
-            if (record_get( kv.m_key ).artwork_url.get_length() > 0)
+            if (!regenerate_ && record_get( kv.m_key ).artwork_url.get_length() > 0)
             {
                 p_abort.check();
                 currIdx++;
@@ -73,7 +74,7 @@ void threaded_process_artwork_uploader::run(threaded_process_status &p_status, a
 
             pfc::string8 artwork_url;
 
-            if (extractAndUploadArtwork(kv.m_value, p_abort, artwork_url, kv.m_key))
+            if (extractAndUploadArtwork(kv.m_value, p_abort, artwork_url, kv.m_key, regenerate_))
             {
                 lstChanged += kv.m_key;
             }
@@ -96,6 +97,7 @@ void threaded_process_artwork_uploader::run(threaded_process_status &p_status, a
         fb2k::inMainThread([lstChanged]
         {
             cached_index_api()->dispatch_refresh(guid::artwork_url_index, lstChanged);
+            DiscordHandler::GetInstance().GetPresenceModifier().UpdateImage();
         });
     }
 }
@@ -104,7 +106,7 @@ void threaded_process_artwork_uploader::on_done(ctx_t p_wnd,bool p_was_aborted)
 {
 }
 
-bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abort, pfc::string8 &artwork_url, metadb_index_hash hash)
+bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abort, pfc::string8 &artwork_url, metadb_index_hash hash, const bool regenerate)
 {
     if ( config::uploadArtworkCommand.GetValue().length() == 0 )
     {
@@ -116,8 +118,9 @@ bool extractAndUploadArtwork(const metadb_handle_ptr track, abort_callback &abor
     upload_lock lock;
     abort.check();
 
-    // If we were locked check if this tracks artwork was uploaded and use that if it is found
-    if (wasLocked)
+    // If we were locked check if this tracks artwork was uploaded and use that if it is found.
+    // If the artwork url needs to be regenerated do not do this
+    if (wasLocked && !regenerate)
     {
         const auto rec = record_get( hash );
         if (rec.artwork_url.get_length() > 0)

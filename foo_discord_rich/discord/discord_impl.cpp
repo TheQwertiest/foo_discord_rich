@@ -151,12 +151,7 @@ void PresenceModifier::UpdateImage(const pfc::string8& url)
     {
         gSuccess = pc->get_now_playing(p_out);
 
-        // Length -1 indicates a live stream I think. Not checking saved value in this
-        // case is useful for internet radios as their tracks change over time with
-        // possibly different cover art. This should not be a problem even if the artwork
-        // does not change, as the image is hashed and the url is retrieved from cache
-        // on reupload attempts.
-        if (gSuccess && p_out->get_length() != -1)
+        if (gSuccess)
         {
             clientByGUID( guid::artwork_url_index )->hashHandle( p_out, hash );
             auto rec = record_get( hash );
