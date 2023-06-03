@@ -44,6 +44,22 @@
     <ClCompile Include="fb2k\playback.cpp">
       <Filter>fb2k</Filter>
     </ClCompile>
+    <ClCompile Include="discord\uploader.cpp">
+      <Filter>discord</Filter>
+    </ClCompile>
+    <ClCompile Include="discord\image_hasher.cpp">
+      <Filter>discord</Filter>
+    </ClCompile>
+    <ClCompile Include="fb2k\artwork_metadb.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="fb2k\menus.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="fb2k\metadb_helpers.cpp" />
+    <ClCompile Include="ui\url_input.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\acfu_github.h">
@@ -72,6 +88,19 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="resource.h">
       <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="discord\uploader.h">
+      <Filter>discord</Filter>
+    </ClInclude>
+    <ClInclude Include="discord\image_hasher.h">
+      <Filter>discord</Filter>
+    </ClInclude>
+    <ClInclude Include="fb2k\artwork_metadb.h">
+      <Filter>fb2k</Filter>
+    </ClInclude>
+    <ClInclude Include="fb2k\metadb_helpers.h" />
+    <ClInclude Include="ui\url_input.h">
+      <Filter>ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -5,6 +5,7 @@
 #define IDD_PREFS_MAIN_TAB              107
 #define IDD_PREFS_TAB_HOST              116
 #define IDD_PREFS_ADVANCED_TAB          121
+#define IDD_CTX_MENU_INPUT              123
 #define IDC_TEXTBOX_DETAILS             1068
 #define IDC_TEXTBOX_STATE               1069
 #define IDC_TEXTBOX_PARTYID             1070
@@ -29,6 +30,11 @@
 #define IDC_CHECK_DISABLE_WHEN_PAUSED   1090
 #define IDC_CHECK_SWAP_STATUS           1091
 #define IDC_LINK_FORMAT_HELP            1092
+#define IDC_TEXTBOX_ARTWORK_COMMAND     1094
+#define IDC_CHECK_UPLOAD_ARTWORK        1095
+#define IDC_TEXTBOX_METADB_KEY          1096
+#define IDC_TEXTBOX_URL                 1097
+#define IDC_TEXTBOX_PROCESS_TIMEOUT     1098
 #ifndef IDC_STATIC
 #define IDC_STATIC -1
 #endif
@@ -37,9 +43,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        123
+#define _APS_NEXT_RESOURCE_VALUE        125
 #define _APS_NEXT_COMMAND_VALUE         40012
-#define _APS_NEXT_CONTROL_VALUE         1093
+#define _APS_NEXT_CONTROL_VALUE         1099
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -51,6 +51,7 @@ void PlaybackCallback::on_playback_new_track( metadb_handle_ptr track )
     auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
     pm.UpdateTrack( track );
     pm.UpdateSmallImage();
+    pm.UpdateImage();
 }
 
 void PlaybackCallback::on_playback_stop( play_control::t_stop_reason reason )
@@ -97,6 +98,13 @@ void PlaybackCallback::on_playback_edited( metadb_handle_ptr track )
 void PlaybackCallback::on_playback_dynamic_info_track( const file_info& info )
 {
     on_playback_changed();
+
+    // Some radio stations provide cover as a url. If so use that instead of the default.
+    if (info.info_exists("cover_url"))
+    {
+        auto pm = DiscordHandler::GetInstance().GetPresenceModifier();
+        pm.UpdateImage( info.info_get( "cover_url" ) );
+    }
 }
 
 void PlaybackCallback::on_playback_time( double time )
