@@ -1,0 +1,150 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Build component
+
+on:
+  workflow_dispatch:
+    inputs:
+      verbosity:
+        description: Verbosity of msbuild
+        default: 'normal'
+        type: choice
+        options:
+          - quiet
+          - minimal
+          - normal
+          - detailed
+          - diagnostic
+
+      platform:
+        description: Comma separated list of platforms
+        default: '"Win32", "x64"'
+
+      build_configuration:
+        description: Comma separated list of build configurations
+        default: '"Release", "Debug"'
+  
+  push:
+    branches:
+      - '*'
+      - '!gh-pages'
+    paths-ignore:
+      - 'README.md'
+      - 'THIRD_PARTY_NOTICES.md'
+  pull_request:
+    branches:
+      - '*'
+      - '!gh-pages'
+    paths-ignore:
+      - 'README.md'
+      - 'THIRD_PARTY_NOTICES.md'
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: workspaces/foo_discord_rich.sln
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    strategy:
+      matrix:
+        build_configuration: ${{ fromJSON(format('[{0}]', inputs.build_configuration)) }}
+        platform: ${{ fromJSON(format('[{0}]', inputs.platform)) }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Install semver
+      run: pip install semver
+
+    - name: Setup python dependencies
+      run: python -u scripts\setup.py
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - uses: ChristopheLav/windows-sdk-install@v1
+      with:
+        version-sdk: 18362
+        features: OptionId.DesktopCPPx86,OptionId.DesktopCPPx64
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      continue-on-error: true
+      with:
+        sdk: 10.0.18362.0
+        arch: ${{matrix.platform}}
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{matrix.build_configuration}} /p:Platform=${{matrix.platform}} /v:${{inputs.verbosity == '' && 'normal' || inputs.verbosity}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: '_result-${{matrix.platform}}_${{matrix.build_configuration}}'
+        path: |
+          _result
+          !_result/AllPlatforms
+
+    - name: Upload static artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: static-files
+        path: |
+          licences/
+          LICENCE
+          CHANGELOG.md
+        
+  pack-component:
+    needs: [build]
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build_configuration: ['Release', 'Debug']
+    steps:     
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: '.'
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Pack component
+        run: ${{ matrix.build_configuration == 'Release' && 'python scripts/pack_component.py' || 'python scripts/pack_component.py --debug' }} 
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.build_configuration == 'Release' && 'foo_discord_rich.fb2k-component' || 'foo_discord_rich.fb2k-component_debug' }}
+          path: _result/Win32_${{matrix.build_configuration}}/foo_discord_rich.fb2k-component
+
+      - name: Upload release debug symbols
+        if: ${{ matrix.build_configuration == 'Release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: foo_discord_rich_pdb.zip
+          path: _result/Win32_${{matrix.build_configuration}}/foo_discord_rich_pdb.zip
