@@ -20,16 +20,26 @@ on:
           - diagnostic
 
       platform:
-        description: Comma separated list of platforms
+        type: choice
         default: '"Win32", "x64"'
+        options:
+          - '"Win32", "x64"'
+          - '"Win32"'
+          - '"x64"'
 
       build_configuration:
-        description: Comma separated list of build configurations
+        type: choice
         default: '"Release", "Debug"'
+        options:
+          - '"Release", "Debug"'
+          - '"Release"'
+          - '"Debug"'
   
   push:
     branches:
-      - '*'
+      - 'master'
+      - 'cover-art-images'
+      - 'cover-art-images-64bit'
       - '!gh-pages'
     paths-ignore:
       - 'README.md'
