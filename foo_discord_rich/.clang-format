@@ -3,26 +3,48 @@ BasedOnStyle: Mozilla
 AccessModifierOffset: '-4'
 AlwaysBreakAfterDefinitionReturnType: 'false'
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: 'false'
-AlignConsecutiveMacros: 'true'
+AlignConsecutiveAssignments: None
+AlignConsecutiveMacros: Consecutive
 AlignEscapedNewlines: Left
-AlignOperands: 'true'
+AlignOperands: Align
 AllowShortBlocksOnASingleLine: 'false'
 AllowShortCaseLabelsOnASingleLine: 'false'
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: 'false'
+AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: 'false'
 AlwaysBreakAfterReturnType: None
 AlwaysBreakTemplateDeclarations: 'true'
 BinPackParameters: 'true'
+BreakAfterAttributes: Leave
 BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeBraces: Allman
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: 'true'
+  AfterClass: 'true'
+  AfterControlStatement: Always
+  AfterEnum: 'true'
+  AfterFunction: 'true'
+  AfterNamespace: 'true'
+  AfterObjCDeclaration: 'true'
+  AfterStruct: 'true'
+  AfterUnion: 'true'
+  AfterExternBlock: 'true'
+  BeforeCatch: 'true'
+  BeforeElse: 'true'
+  BeforeLambdaBody: 'false'
+  BeforeWhile: 'false'
+  IndentBraces: 'false'
+  SplitEmptyFunction: 'true'
+  SplitEmptyRecord: 'true'
+  SplitEmptyNamespace: 'true'
 BreakBeforeInheritanceComma: 'true'
 BreakConstructorInitializers: BeforeComma
 ColumnLimit: '0'
 ConstructorInitializerIndentWidth: '4' 
 ContinuationIndentWidth: '4'
 Cpp11BracedListStyle: 'false'
+EmptyLineBeforeAccessModifier: Always
 FixNamespaceComments: 'true'
 IncludeBlocks: Regroup
 IncludeCategories: 
@@ -33,7 +55,7 @@ IncludeCategories:
   - Regex:           '"[[:alnum:]_]+'
     Priority:        1
   # <dependency/header>
-  - Regex:           '^<(acfu-sdk|columns_ui-sdk|fmt|foobar2000|nlohmann|nonstd|range)/'
+  - Regex:           '^<(acfu-sdk|columns_ui-sdk|fmt|foobar2000|nlohmann|nonstd|pfc|qwr|range)/'
     Priority:        4 
   # <dependency_header>
   - Regex:           '^<(atl.*\.h|discord_rpc\.h)>'
@@ -48,17 +70,24 @@ IncludeCategories:
   - Regex:           '<[[:alnum:]_]+>'
     Priority:        6
 IncludeIsMainRegex: '$'
-IndentCaseLabels: false
+IndentCaseLabels: 'false'
 IndentPPDirectives: AfterHash
+IndentRequiresClause: 'true'
 IndentWidth: '4'
-IndentWrappedFunctionNames: false
+IndentWrappedFunctionNames: 'false'
+InsertNewlineAtEOF: 'true'
+LambdaBodyIndentation: Signature
 Language: Cpp
+LineEnding: CRLF
 MacroBlockBegin: "^BEGIN_*"
 MacroBlockEnd: "^END_*"
 MaxEmptyLinesToKeep: '1'
+PackConstructorInitializers: Never
 PointerAlignment: Left
 ReflowComments: 'true'
-SortIncludes: 'false'
+RequiresClausePosition: OwnLine
+RequiresExpressionIndentation: OuterScope
+SeparateDefinitionBlocks: Always
 SpaceAfterCStyleCast: 'false'
 SpaceAfterTemplateKeyword : 'true'
 SpaceBeforeAssignmentOperators: 'true'
@@ -67,10 +96,13 @@ SpaceBeforeRangeBasedForLoopColon: 'false'
 SpaceInEmptyParentheses: 'false'
 SpacesInAngles: 'false'
 SpacesInCStyleCastParentheses: 'false'
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
 SpacesInParentheses: 'true'
 SpacesInSquareBrackets: 'false'
 SortIncludes: 'true'
-Standard: Cpp11
+Standard: c++20
 TabWidth: '4'
 TypenameMacros: ['STDMETHOD', 'STDMETHODIMP_']
 UseTab: Never

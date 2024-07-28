@@ -20,9 +20,6 @@
 [submodule "submodules/fmt"]
 	path = submodules/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "submodules/span"]
-	path = submodules/span
-	url = https://github.com/martinmoene/span-lite.git
 [submodule "submodules/range"]
 	path = submodules/range
 	url = https://github.com/ericniebler/range-v3.git

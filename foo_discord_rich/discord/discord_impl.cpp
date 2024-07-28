@@ -113,7 +113,7 @@ void PresenceModifier::UpdateImage()
     auto& pd = presenceData_;
     auto pc = playback_control::get();
 
-    auto setImageKey = [&pd]( const std::u8string& imageKey ) {
+    auto setImageKey = [&pd]( const qwr::u8string& imageKey ) {
         pd.largeImageKey = imageKey;
         pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
@@ -132,7 +132,7 @@ void PresenceModifier::UpdateImage()
     }
     case config::ImageSetting::Disabled:
     {
-        setImageKey( std::u8string{} );
+        setImageKey( qwr::u8string{} );
         break;
     }
     }
@@ -143,7 +143,7 @@ void PresenceModifier::UpdateSmallImage()
     auto& pd = presenceData_;
     auto pc = playback_control::get();
 
-    auto setImageKey = [&pd]( const std::u8string& imageKey ) {
+    auto setImageKey = [&pd]( const qwr::u8string& imageKey ) {
         pd.smallImageKey = imageKey;
         pd.presence.smallImageKey = pd.smallImageKey.empty() ? nullptr : pd.smallImageKey.c_str();
     };
@@ -164,7 +164,7 @@ void PresenceModifier::UpdateSmallImage()
     }
     case config::ImageSetting::Disabled:
     {
-        setImageKey( std::u8string{} );
+        setImageKey( qwr::u8string{} );
         break;
     }
     }
@@ -184,7 +184,7 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     }
 
     auto pc = playback_control::get();
-    const auto queryData = [&pc, metadb = pd.metadb]( const std::u8string& query ) -> std::u8string {
+    const auto queryData = [&pc, metadb = pd.metadb]( const qwr::u8string& query ) -> qwr::u8string {
         titleformat_object::ptr tf;
         titleformat_compiler::get()->compile_safe( tf, query.c_str() );
         pfc::string8_fast result;
@@ -201,7 +201,7 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
 
         return result.c_str();
     };
-    const auto fixStringLength = []( std::u8string& str ) {
+    const auto fixStringLength = []( qwr::u8string& str ) {
         if ( str.length() == 1 )
         { // minimum allowed non-zero string length is 2, so we need to pad it
             str += ' ';
@@ -217,10 +217,10 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     pd.details = queryData( config::detailsQuery );
     fixStringLength( pd.details );
 
-    const std::u8string lengthStr = queryData( "[%length_seconds_fp%]" );
+    const qwr::u8string lengthStr = queryData( "[%length_seconds_fp%]" );
     pd.trackLength = ( lengthStr.empty() ? 0 : stold( lengthStr ) );
 
-    const std::u8string durationStr = queryData( "[%playback_time_seconds%]" );
+    const qwr::u8string durationStr = queryData( "[%playback_time_seconds%]" );
 
     pd.presence.state = pd.state.c_str();
     pd.presence.details = pd.details.c_str();

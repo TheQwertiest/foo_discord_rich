@@ -20,7 +20,7 @@
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -52,7 +52,7 @@ rmdir /s/q "$(ProjectDir)"..\_result</NMakeCleanCommandLine>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\*.h" />
-    <ClInclude Include="..\src\*.h" />
+    <ClInclude Include="..\src\*.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

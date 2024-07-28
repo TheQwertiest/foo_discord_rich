@@ -10,6 +10,7 @@ from typing import Union
 
 import call_wrapper
 import download_submodules
+import patch_submodules
 import configure_discord_rpc
 
 PathLike = Union[str, Path]
@@ -51,6 +52,7 @@ def setup( skip_submodules_download,
             )(
                 root_dir=root_dir
             )
+            call_decorator("Patching submodules")(patch_submodules.patch)()
 
     call_decorator('Version header generation')(
         load_module(scripts_path/'generate_version_header.py').generate_header_custom

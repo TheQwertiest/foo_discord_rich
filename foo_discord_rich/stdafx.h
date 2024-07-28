@@ -44,17 +44,12 @@
 #    undef SubclassWindow
 #endif
 
-#if not __cpp_char8_t
-// Dummy type
-#    include <string>
-
-using char8_t = char;
-namespace std
-{
-using u8string = basic_string<char8_t, char_traits<char8_t>, allocator<char8_t>>;
-using u8string_view = basic_string_view<char8_t>;
-} // namespace std
-#endif
+#include <string>
+namespace qwr
+{// TODO: create a custom type
+    using u8string = std::string;
+    using u8string_view = std::string_view;
+}
 
 // Unicode converters
 #include <qwr/unicode.h>

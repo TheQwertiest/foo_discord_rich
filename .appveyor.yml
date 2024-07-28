@@ -37,7 +37,7 @@ max_jobs: 1
 #---------------------------------#
 
 # Build worker image (VM template)
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 # environment variables
 environment:
