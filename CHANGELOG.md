@@ -10,6 +10,10 @@ ___
 
 ## [Unreleased][]
 
+### Changed
+- !!! Now requires foobar2000 v2.0+ !!!
+- Changed Rich Presence activity type from `Playing` to `Listening to` (#2).
+
 ## [1.2.0][] - 2019-09-11
 ### Added
 - Added playback status images.

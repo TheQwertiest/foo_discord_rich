@@ -12,6 +12,7 @@ namespace drp::internal
 PresenceData::PresenceData()
 {
     memset( &presence, 0, sizeof( presence ) );
+    presence.activityType = DiscordActivityType::LISTENING;
     presence.state = state.c_str();
     presence.details = details.c_str();
 }
@@ -63,6 +64,7 @@ void PresenceData::CopyData( const PresenceData& other )
     trackLength = other.trackLength;
 
     memcpy( &presence, &other.presence, sizeof( presence ) );
+    presence.activityType = DiscordActivityType::LISTENING;
     presence.state = state.c_str();
     presence.details = details.c_str();
     presence.largeImageKey = ( largeImageKey.empty() ? nullptr : largeImageKey.c_str() );

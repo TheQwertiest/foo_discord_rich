@@ -10,4 +10,39 @@ index 1be8390..e8a5e85 100644
  IncludeCategories:
    - Regex: '^("|<)stdafx\.h(pp)?("|>)'
      Priority: -1
-
+diff --git a/submodules/discord-rpc/include/discord_rpc.h b/submodules/discord-rpc/include/discord_rpc.h
+index 9470434..20f29bc 100644
+--- a/submodules/discord-rpc/include/discord_rpc.h
++++ b/submodules/discord-rpc/include/discord_rpc.h
+@@ -23,7 +23,17 @@
+ extern "C" {
+ #endif
+ 
++typedef enum DiscordActivityType {
++    PLAYING = 0,
++    STREAMING = 1,
++    LISTENING = 2,
++    WATCHING = 3,
++    CUSTOM = 4,
++    COMPETING = 5
++} DiscordActivityType;
++
+ typedef struct DiscordRichPresence {
++    DiscordActivityType activityType;
+     const char* state;   /* max 128 bytes */
+     const char* details; /* max 128 bytes */
+     int64_t startTimestamp;
+diff --git a/submodules/discord-rpc/submodules/src/serialization.cpp b/submodules/discord-rpc/src/serialization.cpp
+index 70efa63..e822dfc 100644
+--- a/submodules/discord-rpc/src/serialization.cpp
++++ b/submodules/discord-rpc/src/serialization.cpp
+@@ -104,6 +104,9 @@ size_t JsonWriteRichPresenceObj(char* dest,
+ 
+             if (presence != nullptr) {
+                 WriteObject activity(writer, "activity");
++                
++                WriteKey(writer, "type");
++                writer.Int(presence->activityType);
+ 
+                 WriteOptionalString(writer, "state", presence->state);
+                 WriteOptionalString(writer, "details", presence->details);
