@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29215.179
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pfc", "..\submodules\pfc\pfc.vcxproj", "{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}"
 EndProject
@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fb2k_utils", "..\submodules\fb2k_utils\src\fb2k_utils.vcxproj", "{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpr", "..\submodules\cpr\cpr.vcxproj", "{252FFD06-6A3F-4A2F-AEE0-4586A16D698F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,10 @@ Global
 		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}.Debug|Win32.Build.0 = Debug|Win32
 		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}.Release|Win32.ActiveCfg = Release|Win32
 		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571}.Release|Win32.Build.0 = Release|Win32
+		{252FFD06-6A3F-4A2F-AEE0-4586A16D698F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{252FFD06-6A3F-4A2F-AEE0-4586A16D698F}.Debug|Win32.Build.0 = Debug|Win32
+		{252FFD06-6A3F-4A2F-AEE0-4586A16D698F}.Release|Win32.ActiveCfg = Release|Win32
+		{252FFD06-6A3F-4A2F-AEE0-4586A16D698F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,9 +77,10 @@ Global
 		{71AD2674-065B-48F5-B8B0-E1F9D3892081} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 		{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 		{EE3BF4F9-2014-4CFF-96C8-44CFB85E0571} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
+		{252FFD06-6A3F-4A2F-AEE0-4586A16D698F} = {FFFB67DC-1AF7-40E8-BA23-3D617878AA6E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
 		SolutionNewStyle = 1
+		SolutionGuid = {4D2A89B2-D138-40DD-95BE-5B71166AD3DC}
 	EndGlobalSection
 EndGlobal

@@ -2,7 +2,9 @@
 
 #include "discord_impl.h"
 
+#include <album_art/album_art_fetcher.h>
 #include <fb2k/config.h>
+#include <fb2k/current_track_titleformat.h>
 
 #include <ctime>
 
@@ -38,15 +40,7 @@ bool PresenceData::operator==( const PresenceData& other )
         return ( ( a == b ) || ( a && b && !strcmp( a, b ) ) );
     };
 
-    return ( areStringsSame( presence.state, other.presence.state )
-             && areStringsSame( presence.details, other.presence.details )
-             && areStringsSame( presence.largeImageKey, other.presence.largeImageKey )
-             && areStringsSame( presence.largeImageText, other.presence.largeImageText )
-             && areStringsSame( presence.smallImageKey, other.presence.smallImageKey )
-             && areStringsSame( presence.smallImageText, other.presence.smallImageText )
-             && presence.startTimestamp == other.presence.startTimestamp
-             && presence.endTimestamp == other.presence.endTimestamp
-             && trackLength == other.trackLength );
+    return ( areStringsSame( presence.state, other.presence.state ) && areStringsSame( presence.details, other.presence.details ) && areStringsSame( presence.largeImageKey, other.presence.largeImageKey ) && areStringsSame( presence.largeImageText, other.presence.largeImageText ) && areStringsSame( presence.smallImageKey, other.presence.smallImageKey ) && areStringsSame( presence.smallImageText, other.presence.smallImageText ) && presence.startTimestamp == other.presence.startTimestamp && presence.endTimestamp == other.presence.endTimestamp && trackLength == other.trackLength );
 }
 
 bool PresenceData::operator!=( const PresenceData& other )
@@ -76,8 +70,7 @@ void PresenceData::CopyData( const PresenceData& other )
 namespace drp
 {
 
-PresenceModifier::PresenceModifier( DiscordHandler& parent,
-                                    const drp::internal::PresenceData& presenceData )
+PresenceModifier::PresenceModifier( DiscordHandler& parent, const drp::internal::PresenceData& presenceData )
     : parent_( parent )
     , presenceData_( presenceData )
 {
@@ -91,9 +84,7 @@ PresenceModifier::~PresenceModifier()
         parent_.presenceData_ = presenceData_;
     }
 
-    const bool needsToBeDisabled = ( isDisabled_
-                                     || !playback_control::get()->is_playing()
-                                     || ( playback_control::get()->is_paused() && config::disableWhenPaused ) );
+    const bool needsToBeDisabled = ( isDisabled_ || !playback_control::get()->is_playing() || ( playback_control::get()->is_paused() && config::disableWhenPaused ) );
     if ( needsToBeDisabled )
     {
         if ( parent_.HasPresence() )
@@ -110,7 +101,7 @@ PresenceModifier::~PresenceModifier()
     }
 }
 
-void PresenceModifier::UpdateImage()
+void PresenceModifier::UpdateImage( metadb_handle_ptr metadb )
 {
     auto& pd = presenceData_;
     auto pc = playback_control::get();
@@ -120,23 +111,32 @@ void PresenceModifier::UpdateImage()
         pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
 
-    switch ( config::largeImageSettings )
+    // TODO: add proper config (make MBID search optional as well)
+    const auto artUrlOpt = AlbumArtFetcher::Get().GetArtUrl( metadb );
+    if ( artUrlOpt )
     {
-    case config::ImageSetting::Light:
-    {
-        setImageKey( config::largeImageId_Light );
-        break;
+        setImageKey( *artUrlOpt );
     }
-    case config::ImageSetting::Dark:
+    else
     {
-        setImageKey( config::largeImageId_Dark );
-        break;
-    }
-    case config::ImageSetting::Disabled:
-    {
-        setImageKey( qwr::u8string{} );
-        break;
-    }
+        switch ( config::largeImageSettings )
+        {
+        case config::ImageSetting::Light:
+        {
+            setImageKey( config::largeImageId_Light );
+            break;
+        }
+        case config::ImageSetting::Dark:
+        {
+            setImageKey( config::largeImageId_Dark );
+            break;
+        }
+        case config::ImageSetting::Disabled:
+        {
+            setImageKey( qwr::u8string{} );
+            break;
+        }
+        }
     }
 }
 
@@ -185,23 +185,8 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
         pd.metadb = metadb;
     }
 
-    auto pc = playback_control::get();
-    const auto queryData = [&pc, metadb = pd.metadb]( const qwr::u8string& query ) -> qwr::u8string {
-        titleformat_object::ptr tf;
-        titleformat_compiler::get()->compile_safe( tf, query.c_str() );
-        pfc::string8_fast result;
-
-        if ( pc->is_playing() )
-        {
-            metadb_handle_ptr dummyHandle;
-            pc->playback_format_title_ex( dummyHandle, nullptr, result, tf, nullptr, playback_control::display_level_all );
-        }
-        else if ( metadb.is_valid() )
-        {
-            metadb->format_title( nullptr, result, tf, nullptr );
-        }
-
-        return result.c_str();
+    const auto queryData = [metadb = pd.metadb]( const qwr::u8string& query ) {
+        return EvaluateQueryForCurrentTrack( metadb, query );
     };
     const auto fixStringLength = []( qwr::u8string& str ) {
         if ( str.length() == 1 )
@@ -227,15 +212,14 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     pd.presence.state = pd.state.c_str();
     pd.presence.details = pd.details.c_str();
     UpdateDuration( durationStr.empty() ? 0 : stold( durationStr ) );
+    UpdateImage( metadb );
 }
 
 void PresenceModifier::UpdateDuration( double time )
 {
     auto& pd = presenceData_;
     auto pc = playback_control::get();
-    const config::TimeSetting timeSetting = ( ( pd.trackLength && pc->is_playing() && !pc->is_paused() )
-                                                  ? config::timeSettings
-                                                  : config::TimeSetting::Disabled );
+    const config::TimeSetting timeSetting = ( ( pd.trackLength && pc->is_playing() && !pc->is_paused() ) ? config::timeSettings : config::TimeSetting::Disabled );
     switch ( timeSetting )
     {
     case config::TimeSetting::Elapsed:

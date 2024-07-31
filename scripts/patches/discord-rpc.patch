@@ -1,4 +1,4 @@
-diff --git a/submodules/discord-rpc/submodules/.clang-format b/submodules/discord-rpc/.clang-format
+diff --git a/submodules/discord-rpc/.clang-format b/submodules/discord-rpc/.clang-format
 index 1be8390..e8a5e85 100644
 --- a/submodules/discord-rpc/.clang-format
 +++ b/submodules/discord-rpc/.clang-format
@@ -32,7 +32,7 @@ index 9470434..20f29bc 100644
      const char* state;   /* max 128 bytes */
      const char* details; /* max 128 bytes */
      int64_t startTimestamp;
-diff --git a/submodules/discord-rpc/submodules/src/serialization.cpp b/submodules/discord-rpc/src/serialization.cpp
+diff --git a/submodules/discord-rpc/src/serialization.cpp b/submodules/discord-rpc/src/serialization.cpp
 index 70efa63..e822dfc 100644
 --- a/submodules/discord-rpc/src/serialization.cpp
 +++ b/submodules/discord-rpc/src/serialization.cpp
@@ -40,7 +40,7 @@ index 70efa63..e822dfc 100644
  
              if (presence != nullptr) {
                  WriteObject activity(writer, "activity");
-+                
++
 +                WriteKey(writer, "type");
 +                writer.Int(presence->activityType);
  

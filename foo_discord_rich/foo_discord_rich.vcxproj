@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\workspaces\packages\Microsoft.SourceLink.GitHub.1.0.0\build\Microsoft.SourceLink.GitHub.props" Condition="Exists('..\workspaces\packages\Microsoft.SourceLink.GitHub.1.0.0\build\Microsoft.SourceLink.GitHub.props')" />
   <Import Project="..\workspaces\packages\Microsoft.SourceLink.Common.1.0.0\build\Microsoft.SourceLink.Common.props" Condition="Exists('..\workspaces\packages\Microsoft.SourceLink.Common.1.0.0\build\Microsoft.SourceLink.Common.props')" />
@@ -47,6 +47,7 @@
     <Import Project="$(QwrFb2kUtilsPropsDir)submodules\pfc.props" />
     <Import Project="$(QwrFb2kUtilsPropsDir)submodules\span.props" />
     <Import Project="$(QwrFb2kUtilsPropsDir)submodules\wtl.props" />
+    <Import Project="$(SolutionDir)\..\props\local_dependencies\cpr.props" />
     <Import Project="$(SolutionDir)\..\props\local_dependencies\discord.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -104,6 +105,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\submodules\cpr\cpr.vcxproj">
+      <Project>{252ffd06-6a3f-4a2f-aee0-4586a16d698f}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\submodules\discord-rpc\src\discord-rpc.vcxproj">
       <Project>{fd83c8ca-35c7-4f67-ade3-2fd99c91b230}</Project>
     </ProjectReference>
@@ -121,9 +125,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="album_art\album_art_fetcher.cpp" />
     <ClCompile Include="discord\discord_impl.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
+    <ClCompile Include="fb2k\current_track_titleformat.cpp" />
     <ClCompile Include="fb2k\playback.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fb2k\mainmenu.cpp" />
@@ -135,10 +141,12 @@
     <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="album_art\album_art_fetcher.h" />
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="component_guids.h" />
     <ClInclude Include="discord\discord_impl.h" />
     <ClInclude Include="fb2k\config.h" />
+    <ClInclude Include="fb2k\current_track_titleformat.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ui\ui_itab.h" />

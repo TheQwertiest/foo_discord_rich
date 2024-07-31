@@ -12,9 +12,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{FD83C8CA-35C7-4F67-ADE3-2FD99C91B230}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectGuid>{252FFD06-6A3F-4A2F-AEE0-4586A16D698F}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -32,27 +32,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(ProjectDir)..\_result\</OutDir>
-    <NMakeOutput>$(ProjectDir)..\_result\lib\discord-rpc.lib</NMakeOutput>
+    <OutDir>$(ProjectDir)_result\</OutDir>
+    <NMakeOutput>$(ProjectDir)_result\lib\cpr.lib</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup>
-    <NMakeBuildCommandLine>cd "$(ProjectDir)"..\
+    <NMakeBuildCommandLine>cd "$(ProjectDir)"
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=..\_result -DCMAKE_GENERATOR_INSTANCE="$(CurrentVsInstallRoot)" -DCMAKE_GENERATOR_PLATFORM=Win32 -DUSE_STATIC_CRT=ON
-cmake --build ..\build --config $(Configuration) --target install</NMakeBuildCommandLine>
+cmake .. -DCMAKE_INSTALL_PREFIX=..\_result -DCMAKE_GENERATOR_INSTANCE="$(CurrentVsInstallRoot)" -DCMAKE_GENERATOR_PLATFORM=Win32 -DCMAKE_BUILD_TYPE=$(Configuration) -DFORCE_SSE2=ON -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_CURL:BOOL=ON -DBUILD_STATIC_LIBS:BOOL=ON -DCURL_STATIC_CRT:BOOL=ON -DWITH_OPTIM:BOOL=OFF
+cmake --build ../build --config $(Configuration) --target install</NMakeBuildCommandLine>
     <ExecutablePath>$(DevEnvDir)CommonExtensions\Microsoft\CMake\CMake\bin;$(ExecutablePath)</ExecutablePath>
-    <NMakeCleanCommandLine>rmdir /s/q "$(ProjectDir)"..\build
-rmdir /s/q "$(ProjectDir)"..\_result</NMakeCleanCommandLine>
+    <NMakeCleanCommandLine>rmdir /s/q "$(ProjectDir)"build
+rmdir /s/q "$(ProjectDir)"_result</NMakeCleanCommandLine>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\*.cpp" />
+    <ClCompile Include="cpr\*.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\*.h" />
-    <ClInclude Include="..\src\*.h" />
+    <ClInclude Include="include\cpr\*.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

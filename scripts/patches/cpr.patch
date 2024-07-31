@@ -1,0 +1,13 @@
+diff --git a/submodules/cpr/CMakeLists.txt b/submodules/cpr/CMakeLists.txt
+index 66a064b..90623d0 100644
+--- a/submodules/cpr/CMakeLists.txt
++++ b/submodules/cpr/CMakeLists.txt
+@@ -87,6 +87,8 @@ include(cmake/code_coverage.cmake)
+ include(cmake/sanitizer.cmake)
+ include(cmake/clear_variable.cmake)
+ 
++set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
++
+ # So CMake can find FindMbedTLS.cmake
+ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
+ 

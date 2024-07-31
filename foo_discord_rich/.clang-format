@@ -2,7 +2,7 @@
 BasedOnStyle: Mozilla
 AccessModifierOffset: '-4'
 AlwaysBreakAfterDefinitionReturnType: 'false'
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: BlockIndent
 AlignConsecutiveAssignments: None
 AlignConsecutiveMacros: Consecutive
 AlignEscapedNewlines: Left
@@ -43,7 +43,7 @@ BreakConstructorInitializers: BeforeComma
 ColumnLimit: '0'
 ConstructorInitializerIndentWidth: '4' 
 ContinuationIndentWidth: '4'
-Cpp11BracedListStyle: 'false'
+Cpp11BracedListStyle: 'true'
 EmptyLineBeforeAccessModifier: Always
 FixNamespaceComments: 'true'
 IncludeBlocks: Regroup
@@ -55,7 +55,7 @@ IncludeCategories:
   - Regex:           '"[[:alnum:]_]+'
     Priority:        1
   # <dependency/header>
-  - Regex:           '^<(acfu-sdk|columns_ui-sdk|fmt|foobar2000|nlohmann|nonstd|pfc|qwr|range)/'
+  - Regex:           '^<(acfu-sdk|columns_ui-sdk|cpr|fmt|foobar2000|nlohmann|nonstd|pfc|qwr|range)/'
     Priority:        4 
   # <dependency_header>
   - Regex:           '^<(atl.*\.h|discord_rpc\.h)>'

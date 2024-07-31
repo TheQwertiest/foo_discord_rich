@@ -1,8 +1,8 @@
+CPR: MIT
 Discord RPC: MIT
 fmt: other
 foobar2000 SDK: other
 JSON for Modern C++: MIT
 PFC: zlib
 range-v3: BSL-1.0
-span lite: BSL-1.0
 WTL: MS-PL

@@ -42,7 +42,7 @@ class PresenceModifier
 public:
     ~PresenceModifier();
 
-    void UpdateImage();
+    void UpdateImage( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateSmallImage();
     void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateDuration( double time );
@@ -53,8 +53,7 @@ public:
     void Disable();
 
 private:
-    PresenceModifier( DiscordHandler& parent,
-                      const drp::internal::PresenceData& presenceData );
+    PresenceModifier( DiscordHandler& parent, const drp::internal::PresenceData& presenceData );
 
 private:
     DiscordHandler& parent_;

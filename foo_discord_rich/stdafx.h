@@ -39,6 +39,11 @@
 // range v3
 #include <range/v3/all.hpp>
 
+// json
+/// Enable extended diagnostics
+#define JSON_DIAGNOSTICS 1
+#include <nlohmann/json.hpp>
+
 // Some macros defined by windowsx.h should be removed
 #ifdef _INC_WINDOWSX
 #    undef SubclassWindow
@@ -51,7 +56,8 @@ namespace qwr
     using u8string_view = std::string_view;
 }
 
-// Unicode converters
+// Frequently used headers and utilities
+#include <qwr/qwr_exception.h>
 #include <qwr/unicode.h>
 
 // Additional PFC wrappers

@@ -16,6 +16,9 @@
     <Filter Include="resources">
       <UniqueIdentifier>{be01d18f-b5d4-4cbd-bfef-8bb55e89465e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="album_art">
+      <UniqueIdentifier>{9fbf3842-764c-4d29-9baf-29f65646a0fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ui\ui_pref_tab_manager.cpp">
@@ -43,6 +46,12 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="fb2k\playback.cpp">
       <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="fb2k\current_track_titleformat.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
+    <ClCompile Include="album_art\album_art_fetcher.cpp">
+      <Filter>album_art</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +81,12 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="resource.h">
       <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="fb2k\current_track_titleformat.h">
+      <Filter>fb2k</Filter>
+    </ClInclude>
+    <ClInclude Include="album_art\album_art_fetcher.h">
+      <Filter>album_art</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
