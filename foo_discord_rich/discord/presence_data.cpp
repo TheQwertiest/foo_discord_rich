@@ -255,7 +255,8 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
         }
         else if ( str.length() > 127 )
         { // maximum allowed length is 127
-            str.resize( 127 );
+            str.resize( 124 );
+            str += "...";
         }
     };
 
