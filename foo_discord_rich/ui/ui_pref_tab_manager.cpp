@@ -111,10 +111,10 @@ BOOL PreferenceTabManager::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 
     for ( size_t i = 0; i < tabs_.size(); ++i )
     {
-        cTabs_.InsertItem( i, tabs_[i]->Name() );
+        cTabs_.InsertItem( static_cast<int>( i ), tabs_[i]->Name() );
     }
 
-    cTabs_.SetCurSel( activeTabIdx_ );
+    cTabs_.SetCurSel( static_cast<int>( activeTabIdx_ ) );
     CreateTab();
 
     return TRUE; // set focus to default control

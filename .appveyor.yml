@@ -42,7 +42,7 @@ image: Visual Studio 2022
 # environment variables
 environment:
   APPVEYOR_IGNORE_COMMIT_FILTERING_ON_TAG: true
-  git_user_email: qwertiest@mail.ru
+  git_user_email: theqwertiest@outlook.com
   git_user_name: TheQwertiest
   GITHUB_TOKEN:
     secure: gBfHQnRcGcTS0yQXWOHhKfDkTZfIBwPIDjTsCQOGmOSPkRqs1QPYBX47BjCvJKim
@@ -58,8 +58,6 @@ for:
         - configuration: Release
     cache:
       - workspaces\packages -> **\packages.config
-      - _result\Win32_Release\bin\foo_discord_rich.ipdb
-      - _result\Win32_Release\bin\foo_discord_rich.iobj
 
 cache:
   - workspaces\packages -> **\packages.config
@@ -82,6 +80,7 @@ install:
 # build platform, i.e. x86, x64, Any CPU. This setting is optional.
 platform:
   - Win32
+  - x64
 
 # build Configuration, i.e. Debug, Release, etc.
 configuration:
@@ -110,11 +109,13 @@ after_build:
 # scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
 before_package:
   - if '%configuration%' == 'Debug' (
-      py scripts\pack_component.py --debug &&
-      ren "_result\%platform%_%configuration%\foo_discord_rich.fb2k-component" "foo_discord_rich.fb2k-component_debug"
+      py scripts\pack_component.py --configuration %configuration% --platform %platform% &&
+      ren "_result\%platform%_%configuration%\foo_discord_rich.fb2k-component" "foo_discord_rich-%platform%.fb2k-component-debug"
     )
     else (
-      py scripts\pack_component.py
+      py scripts\pack_component.py --configuration %configuration% --platform %platform% &&
+      ren "_result\%platform%_%configuration%\foo_discord_rich.fb2k-component" "foo_discord_rich-%platform%.fb2k-component" &&
+      ren "_result\%platform%_%configuration%\foo_discord_rich_pdb.zip" "foo_discord_rich_pdb-%platform%.zip"
     )
 
 # to disable automatic builds
@@ -126,12 +127,12 @@ before_package:
 
 artifacts:
   # pushing a single file with environment variable in path and "Deployment name" specified
-  - path: _result\$(platform)_$(configuration)\foo_discord_rich.fb2k-component
-    name: DRP package (Release)
-  - path: _result\$(platform)_$(configuration)\foo_discord_rich_pdb.zip
-    name: DRP PDB package (Release)
-  - path: _result\$(platform)_$(configuration)\foo_discord_rich.fb2k-component_debug
-    name: DRP package (Debug)
+  - path: _result\$(platform)_$(configuration)\foo_discord_rich-$(platform).fb2k-component
+    name: DRP package ($(configuration), $(platform))
+  - path: _result\$(platform)_$(configuration)\foo_discord_rich_pdb-$(platform).zip
+    name: DRP PDB package ($(configuration), $(platform))
+  - path: _result\$(platform)_$(configuration)\foo_discord_rich-$(platform).fb2k-component-debug
+    name: DRP package ($(configuration), $(platform))
 
 #---------------------------------#
 #     deployment configuration    #
@@ -143,7 +144,7 @@ deploy:
   description: 'Dummy description'
   provider: GitHub
   auth_token: $(GITHUB_TOKEN)
-  artifact: /foo_discord_rich.*/           # upload all NuGet packages to release assets
+  artifact: /foo_discord_rich.*/
   prerelease: true
   on:
     branch: master                 # release from master branch only

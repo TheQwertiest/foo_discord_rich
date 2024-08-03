@@ -9,6 +9,14 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -32,18 +40,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(ProjectDir)_result\</OutDir>
-    <NMakeOutput>$(ProjectDir)_result\lib\cpr.lib</NMakeOutput>
+    <OutDir>$(SolutionDir)..\_result\$(Platform)_$(Configuration)\deps\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)..\_result\$(Platform)_$(Configuration)\temp\$(ProjectName)\</IntDir>
+    <NMakeOutput>$(OutDir)lib\cpr.lib</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup>
-    <NMakeBuildCommandLine>cd "$(ProjectDir)"
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=..\_result -DCMAKE_GENERATOR_INSTANCE="$(CurrentVsInstallRoot)" -DCMAKE_GENERATOR_PLATFORM=Win32 -DCMAKE_BUILD_TYPE=$(Configuration) -DFORCE_SSE2=ON -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_CURL:BOOL=ON -DBUILD_STATIC_LIBS:BOOL=ON -DCURL_STATIC_CRT:BOOL=ON -DWITH_OPTIM:BOOL=OFF
-cmake --build ../build --config $(Configuration) --target install</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>mkdir "$(IntDir)"
+cd "$(IntDir)"
+cmake -S "$(ProjectDir.TrimEnd('\'))" -DCMAKE_INSTALL_PREFIX="$(OutDir.TrimEnd('\'))" -DCMAKE_GENERATOR_INSTANCE="$(CurrentVsInstallRoot)" -DCMAKE_GENERATOR_PLATFORM=$(Platform) -DCMAKE_BUILD_TYPE=$(Configuration) -DFORCE_SSE2=ON -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_CURL:BOOL=ON -DBUILD_STATIC_LIBS:BOOL=ON -DCURL_STATIC_CRT:BOOL=ON -DWITH_OPTIM:BOOL=OFF
+cmake --build "$(IntDir.TrimEnd('\'))" --config $(Configuration) --target install</NMakeBuildCommandLine>
     <ExecutablePath>$(DevEnvDir)CommonExtensions\Microsoft\CMake\CMake\bin;$(ExecutablePath)</ExecutablePath>
-    <NMakeCleanCommandLine>rmdir /s/q "$(ProjectDir)"build
-rmdir /s/q "$(ProjectDir)"_result</NMakeCleanCommandLine>
+    <NMakeCleanCommandLine>rmdir /s/q "$(IntDir.TrimEnd('\'))"
+rmdir /s/q "$(OutDir.TrimEnd('\'))"</NMakeCleanCommandLine>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

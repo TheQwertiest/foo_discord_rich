@@ -6,14 +6,13 @@
     <_PropertySheetDisplayName>cpr</_PropertySheetDisplayName>
   </PropertyGroup>
   <PropertyGroup Label="UserMacros">
-    <SubmoduleName>cpr</SubmoduleName>
-    <SubmoduleDirectory>$(MainDir)submodules\$(SubmoduleName)\</SubmoduleDirectory>
-    <SubmoduleResultDirectory>$(SubmoduleDirectory)_result\</SubmoduleResultDirectory>
-    <IncludePath>$(SubmoduleResultDirectory)include\;$(IncludePath)</IncludePath>
+    <CprName>cpr</CprName>
+    <CprResultDirectory>$(PlatformConfigurationDir)deps\$(CprName)\</CprResultDirectory>
+    <IncludePath>$(CprResultDirectory)include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalLibraryDirectories>$(SubmoduleResultDirectory)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CprResultDirectory)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>cpr.lib;Ws2_32.lib;Wldap32.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

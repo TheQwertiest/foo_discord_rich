@@ -10,6 +10,7 @@ import call_wrapper
 def path_basename_tuple(path):
     return (path, path.name)
 
+
 def zipdir(zip_file, path, arc_path):
     assert(path.exists() and path.is_dir())
 
@@ -23,11 +24,13 @@ def zipdir(zip_file, path, arc_path):
             file_arc_path = file.relative_to(path)
         zip_file.write(file, file_arc_path)
 
-def pack(is_debug = False):
+
+def pack(platform, configuration):
     cur_dir = Path(__file__).parent.absolute()
     root_dir = cur_dir.parent
-    result_machine_dir = root_dir/"_result"/("Win32_Debug" if is_debug else "Win32_Release")
+    result_machine_dir = root_dir/"_result"/f"{platform}_{configuration}" 
     assert(result_machine_dir.exists() and result_machine_dir.is_dir())
+    is_debug = configuration.lower() == 'debug'
 
     output_dir = result_machine_dir
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -62,7 +65,8 @@ def pack(is_debug = False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Pack component to .fb2k-component')
-    parser.add_argument('--debug', default=False, action='store_true')
+    parser.add_argument('--platform', required=True)
+    parser.add_argument('--configuration', required=True)
 
     args = parser.parse_args()
 
@@ -73,5 +77,6 @@ if __name__ == '__main__':
     )(
     pack
     )(
-        args.debug
+        args.platform,
+        args.configuration
     )

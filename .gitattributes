@@ -2,4 +2,3 @@
 * text=auto
 
 *.h linguist-language=cpp
-scripts/* linguist-detectable=false
