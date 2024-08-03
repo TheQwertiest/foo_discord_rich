@@ -162,8 +162,7 @@ void PresenceModifier::UpdateImage( metadb_handle_ptr metadb )
             return std::nullopt;
         }
 
-        // TODO: fix query
-        const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "$meta(MUSICBRAINZ ALBUM ID)" );
+        const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "$if3($meta(MUSICBRAINZ_ALBUMID),$meta(MUSICBRAINZ ALBUM ID))" );
         const AlbumArtFetcher::FetchRequest request{
             .artist = EvaluateQueryForPlayingTrack( metadb, "%artist%" ),
             .album = EvaluateQueryForPlayingTrack( metadb, "%album%" ),
