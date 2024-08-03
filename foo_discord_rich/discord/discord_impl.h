@@ -72,6 +72,7 @@ public:
     void Initialize();
     void Finalize();
     void OnSettingsChanged();
+    void OnImageLoaded();
 
     drp::PresenceModifier GetPresenceModifier();
 

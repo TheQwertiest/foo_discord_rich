@@ -53,11 +53,12 @@
     <ClCompile Include="album_art\album_art_fetcher.cpp">
       <Filter>album_art</Filter>
     </ClCompile>
+    <ClCompile Include="component_paths.cpp" />
+    <ClCompile Include="utils\logging.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="utils\acfu_github.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="ui\ui_pref_tab_manager.h">
       <Filter>ui</Filter>
     </ClInclude>
@@ -87,6 +88,13 @@
     </ClInclude>
     <ClInclude Include="album_art\album_art_fetcher.h">
       <Filter>album_art</Filter>
+    </ClInclude>
+    <ClInclude Include="component_paths.h" />
+    <ClInclude Include="utils\json_std_extenders.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\logging.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,7 @@
 #include <stdafx.h>
 
+#include <component_guids.h>
+
 #include <qwr/acfu_integration.h>
 
 using namespace drp;
@@ -7,21 +9,21 @@ using namespace drp;
 namespace
 {
 
-class DrpSource
+class DRPSource
     : public qwr::acfu::QwrSource
 {
 public:
     // ::acfu::source
-    GUID get_guid() override;
+    [[nodiscard]] GUID get_guid() override;
     ::acfu::request::ptr create_request() override;
 
     // qwr::acfu::github_conf
-    static pfc::string8 get_owner();
-    static pfc::string8 get_repo();
+    [[nodiscard]] static pfc::string8 get_owner();
+    [[nodiscard]] static pfc::string8 get_repo();
 
     // qwr::acfu::QwrSource
-    std::string GetComponentName() const override;
-    std::string GetComponentFilename() const override;
+    [[nodiscard]] std::string GetComponentName() const override;
+    [[nodiscard]] std::string GetComponentFilename() const override;
 };
 
 } // namespace
@@ -29,36 +31,36 @@ public:
 namespace
 {
 
-GUID DrpSource::get_guid()
+GUID DRPSource::get_guid()
 {
     return guid::acfu_source;
 }
 
-::acfu::request::ptr DrpSource::create_request()
+::acfu::request::ptr DRPSource::create_request()
 {
-    return fb2k::service_new<qwr::acfu::github_latest_release<DrpSource>>();
+    return fb2k::service_new<qwr::acfu::github_latest_release<DRPSource>>();
 }
 
-pfc::string8 DrpSource::get_owner()
+pfc::string8 DRPSource::get_owner()
 {
     return "TheQwertiest";
 }
 
-pfc::string8 DrpSource::get_repo()
-{
-    return "https://github.com/TheQwertiest/" DRP_UNDERSCORE_NAME;
-}
-
-std::string DrpSource::GetComponentName() const
-{
-    return DRP_NAME;
-}
-
-std::string DrpSource::GetComponentFilename() const
+pfc::string8 DRPSource::get_repo()
 {
     return DRP_UNDERSCORE_NAME;
 }
 
-service_factory_single_t<DrpSource> g_acfuSource;
+std::string DRPSource::GetComponentName() const
+{
+    return DRP_NAME;
+}
+
+std::string DRPSource::GetComponentFilename() const
+{
+    return DRP_UNDERSCORE_NAME;
+}
+
+FB2K_SERVICE_FACTORY( DRPSource );
 
 } // namespace

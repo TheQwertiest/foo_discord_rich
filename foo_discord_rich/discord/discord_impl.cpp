@@ -111,8 +111,16 @@ void PresenceModifier::UpdateImage( metadb_handle_ptr metadb )
         pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
 
+    // TODO: fix query
+    const auto userReleaseMbid = EvaluateQueryForCurrentTrack( metadb, "$meta(MUSICBRAINZ ALBUM ID)" );
+    const AlbumArtFetcher::FetchRequest request{
+        .artist = EvaluateQueryForCurrentTrack( metadb, "%artist%" ),
+        .album = EvaluateQueryForCurrentTrack( metadb, "%album%" ),
+        .userReleaseMbidOpt = userReleaseMbid.empty() ? std::optional<qwr::u8string>{} : userReleaseMbid
+    };
+
     // TODO: add proper config (make MBID search optional as well)
-    const auto artUrlOpt = AlbumArtFetcher::Get().GetArtUrl( metadb );
+    const auto artUrlOpt = AlbumArtFetcher::Get().GetArtUrl( request );
     if ( artUrlOpt )
     {
         setImageKey( *artUrlOpt );
@@ -306,6 +314,12 @@ void DiscordHandler::OnSettingsChanged()
     {
         pm.Disable();
     }
+}
+
+void DiscordHandler::OnImageLoaded()
+{
+    auto pm = GetPresenceModifier();
+    pm.UpdateImage();
 }
 
 bool DiscordHandler::HasPresence() const

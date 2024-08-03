@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="album_art\album_art_fetcher.cpp" />
+    <ClCompile Include="component_paths.cpp" />
     <ClCompile Include="discord\discord_impl.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
@@ -139,11 +140,13 @@
     <ClCompile Include="ui\ui_pref_tab_advanced.cpp" />
     <ClCompile Include="ui\ui_pref_tab_main.cpp" />
     <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
+    <ClCompile Include="utils\logging.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="album_art\album_art_fetcher.h" />
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="component_guids.h" />
+    <ClInclude Include="component_paths.h" />
     <ClInclude Include="discord\discord_impl.h" />
     <ClInclude Include="fb2k\config.h" />
     <ClInclude Include="fb2k\current_track_titleformat.h" />
@@ -153,7 +156,8 @@
     <ClInclude Include="ui\ui_pref_tab_advanced.h" />
     <ClInclude Include="ui\ui_pref_tab_main.h" />
     <ClInclude Include="ui\ui_pref_tab_manager.h" />
-    <ClInclude Include="utils\acfu_github.h" />
+    <ClInclude Include="utils\json_std_extenders.h" />
+    <ClInclude Include="utils\logging.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="foo_discord_rich.rc2" />

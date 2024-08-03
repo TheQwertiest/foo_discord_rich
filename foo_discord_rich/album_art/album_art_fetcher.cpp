@@ -2,18 +2,44 @@
 
 #include "album_art_fetcher.h"
 
+#include <discord/discord_impl.h>
 #include <fb2k/current_track_titleformat.h>
+
+#include <component_paths.h>
 
 #include <cpr/cpr.h>
 #include <qwr/algorithm.h>
+#include <qwr/file_helpers.h>
 #include <qwr/thread_name_setter.h>
+
+namespace fs = std::filesystem;
 
 namespace
 {
 
-/// @throw qwr::qwrException
-std::optional<qwr::u8string> FetchMbid( const qwr::u8string& artist, const qwr::u8string& album )
+const std::chrono::seconds kRequestProcessingDelay{ 2 };
+
+}
+
+namespace
 {
+
+const fs::path& GetCacheFilePath()
+{
+    static const auto cachePath = drp::path::ImageDir() / "album_art_urls.json";
+    return cachePath;
+}
+
+qwr::u8string GenerateAlbumId( const qwr::u8string& artist, const qwr::u8string& album )
+{
+    return artist + "|" + album;
+}
+
+/// @throw qwr::qwrException
+std::optional<qwr::u8string> FetchReleaseMbid( const qwr::u8string& album, const qwr::u8string& artist )
+{
+    using json = nlohmann::json;
+
     auto releaseGroupResp = cpr::Get(
         cpr::Url{ "https://www.musicbrainz.org/ws/2/release-group" },
         cpr::Parameters{
@@ -97,57 +123,93 @@ drp::AlbumArtFetcher& AlbumArtFetcher::Get()
 
 void AlbumArtFetcher::Initialize()
 {
-    // TODO: add cache load
+    LoadCache();
     StartThread();
 }
 
 void AlbumArtFetcher::Finalize()
 {
-    // TODO: add cache save
     StopThread();
+    SaveCache();
 }
 
-std::optional<qwr::u8string> AlbumArtFetcher::GetArtUrl( const metadb_handle_ptr& handle )
+std::optional<qwr::u8string> AlbumArtFetcher::GetArtUrl( const FetchRequest& request )
 {
-    const auto artist = EvaluateQueryForCurrentTrack( handle, "%artist%" );
-    const auto album = EvaluateQueryForCurrentTrack( handle, "%album%" );
+    const auto& [artist, album, userReleaseMbidOpt] = request;
     if ( artist.empty() || album.empty() )
     {
         return std::nullopt;
     }
 
-    TrackInfo trackInfo{ artist, album };
-    const auto trackId = trackInfo.GenerateId();
-
-    // TODO: verify syntax and tag name
-    const auto tagMbid = EvaluateQueryForCurrentTrack( handle, "$meta(MUSICBRAINZ ALBUM ID)" );
-
-    std::unique_lock lock( mutex_ );
-
-    qwr::u8string mbid;
-    if ( !tagMbid.empty() )
+    if ( const auto artUrlOpt = qwr::FindOrDefault( albumIdToArtUrl_, GenerateAlbumId( artist, album ), std::nullopt );
+         artUrlOpt )
     {
-        mbid = tagMbid;
-    }
-    else
-    {
-        const auto mbidOptOpt = qwr::FindAsOptional( trackIdToMbid_, trackId );
-        if ( !mbidOptOpt )
-        {
-            // TODO: move to method
-            // TODO: use user's mbid if present when queuing
-            currentRequestedTrackOpt_ = trackInfo;
-            return std::nullopt;
-        }
-        if ( !( *mbidOptOpt ) )
-        {
-            return std::nullopt;
-        }
-
-        mbid = **mbidOptOpt;
+        return artUrlOpt;
     }
 
-    return qwr::FindOrDefault( mbidToUrl_, mbid, std::nullopt );
+    {
+        std::unique_lock lock( mutex_ );
+
+        currentRequestOpt_ = request;
+        cv_.notify_all();
+    }
+
+    return std::nullopt;
+}
+
+void AlbumArtFetcher::LoadCache()
+{
+    using json = nlohmann::json;
+
+    try
+    {
+        const auto cachePath = GetCacheFilePath();
+        if ( !fs::exists( cachePath ) )
+        {
+            return;
+        }
+
+        const auto content = qwr::file::ReadFile( cachePath, CP_UTF8 );
+        json::parse( content ).get_to( albumIdToArtUrl_ );
+    }
+    catch ( const qwr::QwrException& e )
+    {
+        LogError( fmt::format( "Failed to load cache: {}", e.what() ) );
+    }
+    catch ( const json::exception& e )
+    {
+        LogError( fmt::format( "Failed to load cache: {}", e.what() ) );
+    }
+    catch ( const fs::filesystem_error& e )
+    {
+        LogError( fmt::format( "Failed to load cache: {}", e.what() ) );
+    }
+}
+
+void AlbumArtFetcher::SaveCache()
+{
+    using json = nlohmann::json;
+
+    try
+    {
+        const auto cachePath = GetCacheFilePath();
+        fs::create_directories( cachePath.parent_path() );
+
+        const auto content = json( albumIdToArtUrl_ ).dump( 2 );
+        qwr::file::WriteFile( cachePath, content, false );
+    }
+    catch ( const qwr::QwrException& e )
+    {
+        LogError( fmt::format( "Failed to save cache: {}", e.what() ) );
+    }
+    catch ( const json::exception& e )
+    {
+        LogError( fmt::format( "Failed to save cache: {}", e.what() ) );
+    }
+    catch ( const fs::filesystem_error& e )
+    {
+        LogError( fmt::format( "Failed to save cache: {}", e.what() ) );
+    }
 }
 
 void AlbumArtFetcher::StartThread()
@@ -168,88 +230,85 @@ void AlbumArtFetcher::StopThread()
 void AlbumArtFetcher::ThreadMain()
 {
     auto token = pThread_->get_stop_token();
-    std::optional<TrackInfo> lastRequestedTrackOpt;
+    std::optional<FetchRequest> lastRequest;
 
     while ( !token.stop_requested() )
     {
         std::optional<qwr::u8string> mbidOpt;
         {
             std::unique_lock lock( mutex_ );
-            // TODO: verify that it only waits for 2 seconds and not double the time
-            cv_.wait_for( lock, std::chrono::seconds( 2 ), [&] {
-                return token.stop_requested() || lastRequestedTrackOpt != currentRequestedTrackOpt_;
+            cv_.wait_for( lock, kRequestProcessingDelay, [&] {
+                return token.stop_requested() || lastRequest != currentRequestOpt_;
             } );
 
-            if ( currentRequestedTrackOpt_ )
+            if ( currentRequestOpt_ )
             {
-                mbidOpt = qwr::FindOrDefault( trackIdToMbid_, currentRequestedTrackOpt_->GenerateId(), std::nullopt );
-                if ( mbidOpt && qwr::FindOrDefault( mbidToUrl_, *mbidOpt, std::nullopt ) )
+                if ( const auto albumId = GenerateAlbumId( currentRequestOpt_->artist, currentRequestOpt_->album );
+                     albumIdToArtUrl_.contains( albumId ) )
                 {
-                    currentRequestedTrackOpt_.reset();
-                    lastRequestedTrackOpt.reset();
+                    currentRequestOpt_.reset();
+                    lastRequest.reset();
                     continue;
                 }
             }
 
-            if ( lastRequestedTrackOpt != currentRequestedTrackOpt_ )
+            if ( lastRequest != currentRequestOpt_ )
             { // user requested new art, wait again
-                lastRequestedTrackOpt = currentRequestedTrackOpt_;
+                lastRequest = currentRequestOpt_;
                 continue;
             }
 
-            if ( !lastRequestedTrackOpt )
+            if ( !lastRequest )
             {
                 continue;
             }
         }
 
-        // TODO: move to a separate method
-        const auto& trackInfo = *lastRequestedTrackOpt;
-        const auto trackId = trackInfo.GenerateId();
-        try
+        const auto artUrlOpt = ProcessFetchRequest( *lastRequest );
+
         {
-            if ( !mbidOpt )
-            {
-                mbidOpt = FetchMbid( trackInfo.artist, trackInfo.album );
-            }
-            {
-                std::unique_lock lock( mutex_ );
-                if ( !mbidOpt )
-                {
-                    trackIdToMbid_.try_emplace( trackId, std::nullopt );
-                    continue;
-                }
-
-                trackIdToMbid_.try_emplace( trackId, *mbidOpt );
-            }
-
-            const auto& mbid = *mbidOpt;
-            const auto artUrlOpt = FetchAlbumArtUrl( mbid );
-            {
-                std::unique_lock lock( mutex_ );
-                if ( !artUrlOpt )
-                {
-                    mbidToUrl_.try_emplace( mbid, std::nullopt );
-                    continue;
-                }
-
-                // TODO: trigger image refresh
-                mbidToUrl_.try_emplace( mbid, *artUrlOpt );
-            }
-        }
-        catch ( const qwr::QwrException& /* e */ )
-        {
-            // TODO: log error
             std::unique_lock lock( mutex_ );
-            // TODO: fix this after handling user MBID
-            trackIdToMbid_.try_emplace( trackId, std::nullopt );
+
+            const auto albumId = GenerateAlbumId( currentRequestOpt_->artist, currentRequestOpt_->album );
+            albumIdToArtUrl_.try_emplace( albumId, artUrlOpt );
+
+            if ( lastRequest == currentRequestOpt_ )
+            {
+                currentRequestOpt_.reset();
+                lastRequest.reset();
+
+                if ( artUrlOpt )
+                {
+                    fb2k::inMainThread( [] { DiscordHandler::GetInstance().OnImageLoaded(); } );
+                }
+            }
         }
     }
 }
 
-qwr::u8string AlbumArtFetcher::TrackInfo::GenerateId() const
+std::optional<qwr::u8string> AlbumArtFetcher::ProcessFetchRequest( const FetchRequest& request )
 {
-    return artist + "|" + album;
+    try
+    {
+        if ( request.userReleaseMbidOpt )
+        {
+            const auto urlOpt = FetchAlbumArtUrl( *request.userReleaseMbidOpt );
+            return urlOpt;
+        }
+
+        const auto releaseMbidOpt = FetchReleaseMbid( request.album, request.artist );
+        if ( !releaseMbidOpt )
+        {
+            return std::nullopt;
+        }
+
+        return FetchAlbumArtUrl( *releaseMbidOpt );
+    }
+    catch ( const qwr::QwrException& e )
+    {
+        LogError( e.what() );
+        return std::nullopt;
+    }
 }
 
 } // namespace drp

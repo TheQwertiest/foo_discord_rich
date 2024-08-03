@@ -11,39 +11,44 @@ namespace drp
 class AlbumArtFetcher
 {
 public:
+    struct FetchRequest
+    {
+        qwr::u8string artist;
+        qwr::u8string album;
+        std::optional<qwr::u8string> userReleaseMbidOpt;
+
+        auto operator<=>( const FetchRequest& other ) const = default;
+    };
+
+public:
     static AlbumArtFetcher& Get();
 
     void Initialize();
     void Finalize();
 
-    std::optional<qwr::u8string> GetArtUrl( const metadb_handle_ptr& handle );
+    std::optional<qwr::u8string> GetArtUrl( const FetchRequest& request );
 
 private:
+    void LoadCache();
+    void SaveCache();
+
     void StartThread();
     void StopThread();
 
     void ThreadMain();
 
+    std::optional<qwr::u8string> ProcessFetchRequest( const FetchRequest& request );
+
 private:
     AlbumArtFetcher() = default;
 
 private:
-    struct TrackInfo
-    {
-        qwr::u8string artist;
-        qwr::u8string album;
-
-        auto operator<=>( const TrackInfo& other ) const = default;
-
-        qwr::u8string GenerateId() const;
-    };
-
     std::mutex mutex_;
     std::condition_variable cv_;
     std::unique_ptr<std::jthread> pThread_;
-    std::optional<TrackInfo> currentRequestedTrackOpt_;
-    std::unordered_map<qwr::u8string, std::optional<qwr::u8string>> trackIdToMbid_;
-    std::unordered_map<qwr::u8string, std::optional<qwr::u8string>> mbidToUrl_;
+
+    std::optional<FetchRequest> currentRequestOpt_;
+    std::unordered_map<qwr::u8string, std::optional<qwr::u8string>> albumIdToArtUrl_;
 };
 
 } // namespace drp

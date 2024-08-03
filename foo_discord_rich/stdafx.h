@@ -65,6 +65,11 @@ namespace qwr
 #include <qwr/pfc_helpers_stream.h>
 #include <qwr/pfc_helpers_ui.h>
 
+// extend json
+// TODO: move to fb2k_utils
+#include <utils/json_std_extenders.h>
+#include <utils/logging.h>
+
 #include <component_defines.h>
 #include <component_guids.h>
 
