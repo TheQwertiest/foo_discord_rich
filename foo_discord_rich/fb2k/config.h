@@ -22,8 +22,12 @@ extern qwr::fb2k::ConfigBool isEnabled;
 extern qwr::fb2k::ConfigUint8Enum<ImageSetting> largeImageSettings;
 extern qwr::fb2k::ConfigUint8Enum<ImageSetting> smallImageSettings;
 extern qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings;
-extern qwr::fb2k::ConfigString stateQuery;
-extern qwr::fb2k::ConfigString detailsQuery;
+extern qwr::fb2k::ConfigBool fetchAlbumArt;
+
+extern qwr::fb2k::ConfigString topTextQuery;
+extern qwr::fb2k::ConfigString middleTextQuery;
+extern qwr::fb2k::ConfigString bottomTextQuery;
+extern qwr::fb2k::ConfigString bottomTextQuery_v1_deprecated;
 
 extern qwr::fb2k::ConfigString discordAppToken;
 extern qwr::fb2k::ConfigString largeImageId_Light;

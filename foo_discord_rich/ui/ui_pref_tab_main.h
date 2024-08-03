@@ -1,12 +1,13 @@
 #pragma once
 
 #include <fb2k/config.h>
-#include <qwr/fb2k_config_ui_option.h>
-#include <qwr/macros.h>
-#include <qwr/ui_ddx_option.h>
 #include <ui/ui_itab.h>
 
 #include <resource.h>
+
+#include <qwr/fb2k_config_ui_option.h>
+#include <qwr/macros.h>
+#include <qwr/ui_ddx_option.h>
 
 #include <array>
 
@@ -29,8 +30,10 @@ public:
     BEGIN_MSG_MAP( PreferenceTabMain )
         MSG_WM_INITDIALOG( OnInitDialog )
         COMMAND_HANDLER_EX( IDC_CHECK_IS_ENABLED, BN_CLICKED, OnEditChange )
-        COMMAND_HANDLER_EX( IDC_TEXTBOX_STATE, EN_CHANGE, OnEditChange )
-        COMMAND_HANDLER_EX( IDC_TEXTBOX_DETAILS, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_TOP_TEXT, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_MIDDLE_TEXT, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_TEXTBOX_BOTTOM_TEXT, EN_CHANGE, OnEditChange )
+        COMMAND_HANDLER_EX( IDC_CHECK_FETCH_ALBUM_ART, BN_CLICKED, OnEditChange )
         COMMAND_RANGE_CODE_HANDLER_EX( IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DISABLED, BN_CLICKED, OnEditChange )
         COMMAND_RANGE_CODE_HANDLER_EX( IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DISABLED, BN_CLICKED, OnEditChange )
         COMMAND_RANGE_CODE_HANDLER_EX( IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_DISABLED, BN_CLICKED, OnEditChange )
@@ -67,19 +70,23 @@ private:
 #define SPTF_DEFINE_UI_OPTIONS( ... ) \
     QWR_EXPAND( QWR_PASTE( SPTF_DEFINE_UI_OPTION, __VA_ARGS__ ) )
 
+    // clang-format off
     SPTF_DEFINE_UI_OPTIONS( isEnabled,
-                            stateQuery,
-                            detailsQuery,
+                            topTextQuery,
+                            middleTextQuery,
+                            bottomTextQuery,
+                            fetchAlbumArt,
                             largeImageSettings,
                             smallImageSettings,
                             timeSettings,
                             disableWhenPaused,
                             swapSmallImages )
+    // clang-format on
 
 #undef SPTF_DEFINE_OPTIONS
 #undef SPTF_DEFINE_OPTION
 
-    std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 8> ddxOptions_;
+    std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 10> ddxOptions_;
 
     CHyperLink helpUrl_;
 };

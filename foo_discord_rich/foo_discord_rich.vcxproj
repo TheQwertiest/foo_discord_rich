@@ -131,7 +131,6 @@
     <ClCompile Include="discord\presence_data.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
-    <ClCompile Include="fb2k\current_track_titleformat.cpp" />
     <ClCompile Include="fb2k\playback.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="fb2k\mainmenu.cpp" />
@@ -150,7 +149,6 @@
     <ClInclude Include="component_paths.h" />
     <ClInclude Include="discord\discord_integration.h" />
     <ClInclude Include="fb2k\config.h" />
-    <ClInclude Include="fb2k\current_track_titleformat.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ui\ui_itab.h" />

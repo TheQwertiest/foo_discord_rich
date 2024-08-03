@@ -3,7 +3,6 @@
 #include "album_art_fetcher.h"
 
 #include <discord/discord_integration.h>
-#include <fb2k/current_track_titleformat.h>
 
 #include <component_paths.h>
 

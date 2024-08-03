@@ -24,7 +24,7 @@ public:
         MSG_WM_INITDIALOG( OnInitDialog )
         MSG_WM_PARENTNOTIFY( OnParentNotify )
         MESSAGE_HANDLER( WM_WINDOWPOSCHANGED, OnWindowPosChanged )
-        NOTIFY_HANDLER_EX( IDC_TAB1, TCN_SELCHANGE, OnSelectionChanged )
+        NOTIFY_HANDLER_EX( IDC_TAB_PREFS_CURRENT, TCN_SELCHANGE, OnSelectionChanged )
     END_MSG_MAP()
 
 public:

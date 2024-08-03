@@ -11,6 +11,7 @@
 #include "windows.h"
 #undef APSTUDIO_HIDDEN_SYMBOLS
 
+#include <atlres.h>
 #include <component_defines.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -63,7 +64,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CLIPSIBLINGS
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",WS_TABSTOP,0,0,334,287
+    CONTROL         "Tab1",IDC_TAB_PREFS_CURRENT,"SysTabControl32",WS_TABSTOP,0,0,334,287
 END
 
 IDD_PREFS_MAIN_TAB DIALOGEX 0, 0, 327, 268
@@ -71,29 +72,33 @@ STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_SYSMENU
 FONT 8, "Tahoma", 400, 0, 0x0
 BEGIN
     CONTROL         "Enable Rich Presence",IDC_CHECK_IS_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,8,84,10
-    GROUPBOX        "Text fields",IDC_STATIC,6,26,314,82
-    LTEXT           "Top",IDC_STATIC,12,38,13,8
-    EDITTEXT        IDC_TEXTBOX_DETAILS,12,50,301,12,ES_AUTOHSCROLL
-    LTEXT           "Bottom",IDC_STATIC,12,74,24,8
-    EDITTEXT        IDC_TEXTBOX_STATE,12,86,301,12,ES_AUTOHSCROLL
+    GROUPBOX        "Text fields",IDC_STATIC,6,26,314,106
     CTEXT           "?",IDC_LINK_FORMAT_HELP,309,26,8,8
-    GROUPBOX        "Foobar2000 image",IDC_STATIC,6,110,101,55
-    CONTROL         "Light image",IDC_RADIO_IMG_LIGHT,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,15,123,52,10
-    CONTROL         "Dark image",IDC_RADIO_IMG_DARK,"Button",BS_AUTORADIOBUTTON,15,136,51,10
-    CONTROL         "Disabled",IDC_RADIO_IMG_DISABLED,"Button",BS_AUTORADIOBUTTON,15,149,43,10
-    GROUPBOX        "Playback status image",IDC_STATIC,112,110,101,55
-    CONTROL         "Light image",IDC_RADIO_PLAYBACK_IMG_LIGHT,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,121,123,56,10
-    CONTROL         "Dark image",IDC_RADIO_PLAYBACK_IMG_DARK,"Button",BS_AUTORADIOBUTTON,121,136,64,10
-    CONTROL         "Disabled",IDC_RADIO_PLAYBACK_IMG_DISABLED,"Button",BS_AUTORADIOBUTTON,121,149,43,10
-    GROUPBOX        "Track duration",IDC_STATIC,218,110,102,55
-    CONTROL         "Elapsed time",IDC_RADIO_TIME_ELAPSED,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,227,123,56,10
-    CONTROL         "Remaining time",IDC_RADIO_TIME_REMAINING,"Button",BS_AUTORADIOBUTTON,227,136,64,10
-    CONTROL         "Disabled",IDC_RADIO_TIME_DISABLED,"Button",BS_AUTORADIOBUTTON,227,149,43,10
-    GROUPBOX        "Miscellaneous",IDC_STATIC,6,167,314,42
+    LTEXT           "Top",IDC_STATIC,12,38,13,8
+    EDITTEXT        IDC_TEXTBOX_TOP_TEXT,12,50,301,12,ES_AUTOHSCROLL
+    LTEXT           "Middle",IDC_STATIC,12,68,21,8
+    EDITTEXT        IDC_TEXTBOX_MIDDLE_TEXT,12,80,301,12,ES_AUTOHSCROLL
+    LTEXT           "Bottom",IDC_STATIC,12,98,24,8
+    EDITTEXT        IDC_TEXTBOX_BOTTOM_TEXT,12,110,301,12,ES_AUTOHSCROLL
+    GROUPBOX        "Foobar2000 image",IDC_STATIC,6,134,101,55
+    CONTROL         "Light image",IDC_RADIO_IMG_LIGHT,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,15,147,52,10
+    CONTROL         "Dark image",IDC_RADIO_IMG_DARK,"Button",BS_AUTORADIOBUTTON,15,160,51,10
+    CONTROL         "Disabled",IDC_RADIO_IMG_DISABLED,"Button",BS_AUTORADIOBUTTON,15,173,43,10
+    GROUPBOX        "Playback status image",IDC_STATIC,112,134,101,55
+    CONTROL         "Light image",IDC_RADIO_PLAYBACK_IMG_LIGHT,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,121,147,56,10
+    CONTROL         "Dark image",IDC_RADIO_PLAYBACK_IMG_DARK,"Button",BS_AUTORADIOBUTTON,121,160,64,10
+    CONTROL         "Disabled",IDC_RADIO_PLAYBACK_IMG_DISABLED,"Button",BS_AUTORADIOBUTTON,121,173,43,10
+    GROUPBOX        "Track duration",IDC_STATIC,218,134,102,55
+    CONTROL         "Elapsed time",IDC_RADIO_TIME_ELAPSED,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,227,147,56,10
+    CONTROL         "Remaining time",IDC_RADIO_TIME_REMAINING,"Button",BS_AUTORADIOBUTTON,227,160,64,10
+    CONTROL         "Disabled",IDC_RADIO_TIME_DISABLED,"Button",BS_AUTORADIOBUTTON,227,173,43,10
+    GROUPBOX        "Miscellaneous",IDC_STATIC,6,191,314,56
+    CONTROL         "Fetch and display album art from MusicBrainz",IDC_CHECK_FETCH_ALBUM_ART,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,205,159,10
     CONTROL         "Disable Rich Presence when paused",IDC_CHECK_DISABLE_WHEN_PAUSED,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,180,128,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,218,128,10
     CONTROL         "Swap `paused` and `playing` images",IDC_CHECK_SWAP_STATUS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,193,135,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,231,135,10
 END
 
 IDD_PREFS_ADVANCED_TAB DIALOGEX 0, 0, 327, 268
@@ -166,8 +171,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+#include "foo_discord_rich.rc2"
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

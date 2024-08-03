@@ -2,11 +2,7 @@
 
 #include "discord_integration.h"
 
-#include <album_art/album_art_fetcher.h>
 #include <fb2k/config.h>
-#include <fb2k/current_track_titleformat.h>
-
-#include <ctime>
 
 namespace drp
 {
@@ -19,6 +15,16 @@ DiscordAdapter& DiscordAdapter::GetInstance()
 
 void DiscordAdapter::Initialize()
 {
+    // migrate old settings
+    if ( config::bottomTextQuery_v1_deprecated.GetValue() != config::bottomTextQuery_v1_deprecated.GetDefaultValue() )
+    {
+        config::bottomTextQuery = config::bottomTextQuery_v1_deprecated.GetValue();
+        config::middleTextQuery = "";
+        config::bottomTextQuery_v1_deprecated = config::bottomTextQuery_v1_deprecated.GetDefaultValue();
+    }
+    // currently not working with `Listening to` style
+    config::timeSettings = config::TimeSetting::Disabled;
+
     appToken_ = config::discordAppToken;
 
     DiscordEventHandlers handlers{};

@@ -14,14 +14,17 @@ struct PresenceData
     bool operator==( const PresenceData& other );
     bool operator!=( const PresenceData& other );
 
+    void UpdateTextFieldPointers();
+
 private:
     void CopyData( const PresenceData& other );
 
 public:
     DiscordRichPresence presence;
     metadb_handle_ptr metadb;
-    qwr::u8string state;
-    qwr::u8string details;
+    qwr::u8string topText;
+    qwr::u8string middleText;
+    qwr::u8string bottomText;
     qwr::u8string largeImageKey;
     qwr::u8string smallImageKey;
     double trackLength = 0;
@@ -45,7 +48,8 @@ public:
     void UpdateImage( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateSmallImage();
     void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
-    void UpdateDuration( double time );
+    void UpdateDuration( double currentTime );
+    void UpdateDuration( double currentTime, double totalLength );
     void DisableDuration();
 
     /// @brief Disables Discord Rich Presence

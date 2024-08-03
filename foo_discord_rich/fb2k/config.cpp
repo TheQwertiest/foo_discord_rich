@@ -11,9 +11,12 @@ qwr::fb2k::ConfigBool isEnabled( guid::conf_is_enabled, true );
 qwr::fb2k::ConfigUint8Enum<ImageSetting> largeImageSettings( guid::conf_large_image_settings, ImageSetting::Light );
 qwr::fb2k::ConfigUint8Enum<ImageSetting> smallImageSettings( guid::conf_small_image_settings, ImageSetting::Light );
 qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings( guid::conf_time_settings, TimeSetting::Elapsed );
+qwr::fb2k::ConfigBool fetchAlbumArt( guid::conf_fetch_album_art, true );
 
-qwr::fb2k::ConfigString stateQuery( guid::conf_state_query, "[%title%]" );
-qwr::fb2k::ConfigString detailsQuery( guid::conf_details_query, "[%album artist%[: %album%]]" );
+qwr::fb2k::ConfigString topTextQuery( guid::conf_top_text_query, "[%title%]" );
+qwr::fb2k::ConfigString middleTextQuery( guid::conf_middle_text_query, "[by %album artist%]" );
+qwr::fb2k::ConfigString bottomTextQuery( guid::conf_bottom_text_query_v2, "[on %album%]" );
+qwr::fb2k::ConfigString bottomTextQuery_v1_deprecated( guid::conf_bottom_text_query_v1_deprecated, "[%album artist%[: %album%]]" );
 
 qwr::fb2k::ConfigString discordAppToken( guid::conf_app_token, "507982587416018945" );
 qwr::fb2k::ConfigString largeImageId_Light( guid::conf_large_image_id_light, "foobar2000" );

@@ -107,7 +107,7 @@ void PreferenceTabManager::reset()
 
 BOOL PreferenceTabManager::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
-    cTabs_ = GetDlgItem( IDC_TAB1 );
+    cTabs_ = GetDlgItem( IDC_TAB_PREFS_CURRENT );
 
     for ( size_t i = 0; i < tabs_.size(); ++i )
     {
@@ -130,7 +130,7 @@ void PreferenceTabManager::OnParentNotify( UINT message, UINT nChildID, LPARAM l
 
 LRESULT PreferenceTabManager::OnSelectionChanged( LPNMHDR pNmhdr )
 {
-    activeTabIdx_ = TabCtrl_GetCurSel( GetDlgItem( IDC_TAB1 ) );
+    activeTabIdx_ = TabCtrl_GetCurSel( GetDlgItem( IDC_TAB_PREFS_CURRENT ) );
     CreateTab();
 
     return 0;

@@ -2,7 +2,42 @@
 
 #include "presence_data.h"
 
+#include <album_art/album_art_fetcher.h>
 #include <discord/discord_integration.h>
+#include <fb2k/config.h>
+
+#include <qwr/algorithm.h>
+
+namespace
+{
+
+qwr::u8string EvaluateQueryForPlayingTrack( const metadb_handle_ptr& handle, const qwr::u8string& query )
+{
+    static std::unordered_map<qwr::u8string, titleformat_object::ptr> queryToTitleFormat;
+
+    auto pc = playback_control::get();
+    auto tf = qwr::FindOrDefault( queryToTitleFormat, query, titleformat_object::ptr{} );
+    if ( tf.is_empty() )
+    {
+        titleformat_compiler::get()->compile_safe( tf, query.c_str() );
+        queryToTitleFormat.try_emplace( query, tf );
+    }
+
+    pfc::string8_fast result;
+    if ( pc->is_playing() )
+    {
+        metadb_handle_ptr dummyHandle;
+        pc->playback_format_title_ex( dummyHandle, nullptr, result, tf, nullptr, playback_control::display_level_all );
+    }
+    else if ( handle.is_valid() )
+    {
+        handle->format_title( nullptr, result, tf, nullptr );
+    }
+
+    return result.c_str();
+}
+
+} // namespace
 
 namespace drp::internal
 {
@@ -11,8 +46,7 @@ PresenceData::PresenceData()
 {
     memset( &presence, 0, sizeof( presence ) );
     presence.activityType = DiscordActivityType::LISTENING;
-    presence.state = state.c_str();
-    presence.details = details.c_str();
+    UpdateTextFieldPointers();
 }
 
 PresenceData::PresenceData( const PresenceData& other )
@@ -36,7 +70,15 @@ bool PresenceData::operator==( const PresenceData& other )
         return ( ( a == b ) || ( a && b && !strcmp( a, b ) ) );
     };
 
-    return ( areStringsSame( presence.state, other.presence.state ) && areStringsSame( presence.details, other.presence.details ) && areStringsSame( presence.largeImageKey, other.presence.largeImageKey ) && areStringsSame( presence.largeImageText, other.presence.largeImageText ) && areStringsSame( presence.smallImageKey, other.presence.smallImageKey ) && areStringsSame( presence.smallImageText, other.presence.smallImageText ) && presence.startTimestamp == other.presence.startTimestamp && presence.endTimestamp == other.presence.endTimestamp && trackLength == other.trackLength );
+    return areStringsSame( presence.state, other.presence.state )
+           && areStringsSame( presence.details, other.presence.details )
+           && areStringsSame( presence.largeImageKey, other.presence.largeImageKey )
+           && areStringsSame( presence.largeImageText, other.presence.largeImageText )
+           && areStringsSame( presence.smallImageKey, other.presence.smallImageKey )
+           && areStringsSame( presence.smallImageText, other.presence.smallImageText )
+           && presence.startTimestamp == other.presence.startTimestamp
+           && presence.endTimestamp == other.presence.endTimestamp
+           && trackLength == other.trackLength;
 }
 
 bool PresenceData::operator!=( const PresenceData& other )
@@ -47,18 +89,25 @@ bool PresenceData::operator!=( const PresenceData& other )
 void PresenceData::CopyData( const PresenceData& other )
 {
     metadb = other.metadb;
-    state = other.state;
-    details = other.details;
+    topText = other.topText;
+    middleText = other.middleText;
+    bottomText = other.bottomText;
     largeImageKey = other.largeImageKey;
     smallImageKey = other.smallImageKey;
     trackLength = other.trackLength;
 
     memcpy( &presence, &other.presence, sizeof( presence ) );
+    UpdateTextFieldPointers();
     presence.activityType = DiscordActivityType::LISTENING;
-    presence.state = state.c_str();
-    presence.details = details.c_str();
     presence.largeImageKey = ( largeImageKey.empty() ? nullptr : largeImageKey.c_str() );
     presence.smallImageKey = ( smallImageKey.empty() ? nullptr : smallImageKey.c_str() );
+}
+
+void PresenceData::UpdateTextFieldPointers()
+{
+    presence.details = topText.c_str();
+    presence.state = middleText.c_str();
+    presence.largeImageText = bottomText.c_str();
 }
 
 } // namespace drp::internal
@@ -107,16 +156,22 @@ void PresenceModifier::UpdateImage( metadb_handle_ptr metadb )
         pd.presence.largeImageKey = pd.largeImageKey.empty() ? nullptr : pd.largeImageKey.c_str();
     };
 
-    // TODO: fix query
-    const auto userReleaseMbid = EvaluateQueryForCurrentTrack( metadb, "$meta(MUSICBRAINZ ALBUM ID)" );
-    const AlbumArtFetcher::FetchRequest request{
-        .artist = EvaluateQueryForCurrentTrack( metadb, "%artist%" ),
-        .album = EvaluateQueryForCurrentTrack( metadb, "%album%" ),
-        .userReleaseMbidOpt = userReleaseMbid.empty() ? std::optional<qwr::u8string>{} : userReleaseMbid
-    };
+    const auto artUrlOpt = [&]() -> std::optional<qwr::u8string> {
+        if ( !config::fetchAlbumArt )
+        {
+            return std::nullopt;
+        }
 
-    // TODO: add proper config (make MBID search optional as well)
-    const auto artUrlOpt = AlbumArtFetcher::Get().GetArtUrl( request );
+        // TODO: fix query
+        const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "$meta(MUSICBRAINZ ALBUM ID)" );
+        const AlbumArtFetcher::FetchRequest request{
+            .artist = EvaluateQueryForPlayingTrack( metadb, "%artist%" ),
+            .album = EvaluateQueryForPlayingTrack( metadb, "%album%" ),
+            .userReleaseMbidOpt = userReleaseMbid.empty() ? std::optional<qwr::u8string>{} : userReleaseMbid
+        };
+
+        return AlbumArtFetcher::Get().GetArtUrl( request );
+    }();
     if ( artUrlOpt )
     {
         setImageKey( *artUrlOpt );
@@ -180,8 +235,9 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
 {
     auto& pd = presenceData_;
 
-    pd.state.clear();
-    pd.details.clear();
+    pd.topText.clear();
+    pd.middleText.clear();
+    pd.bottomText.clear();
     pd.trackLength = 0;
 
     if ( metadb.is_valid() )
@@ -190,7 +246,7 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     }
 
     const auto queryData = [metadb = pd.metadb]( const qwr::u8string& query ) {
-        return EvaluateQueryForCurrentTrack( metadb, query );
+        return EvaluateQueryForPlayingTrack( metadb, query );
     };
     const auto fixStringLength = []( qwr::u8string& str ) {
         if ( str.length() == 1 )
@@ -203,23 +259,22 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
         }
     };
 
-    pd.state = queryData( config::stateQuery );
-    fixStringLength( pd.state );
-    pd.details = queryData( config::detailsQuery );
-    fixStringLength( pd.details );
+    pd.topText = queryData( config::topTextQuery );
+    fixStringLength( pd.topText );
+    pd.middleText = queryData( config::middleTextQuery );
+    fixStringLength( pd.middleText );
+    pd.bottomText = queryData( config::bottomTextQuery );
+    fixStringLength( pd.bottomText );
+    pd.UpdateTextFieldPointers();
 
     const qwr::u8string lengthStr = queryData( "[%length_seconds_fp%]" );
-    pd.trackLength = ( lengthStr.empty() ? 0 : stold( lengthStr ) );
-
     const qwr::u8string durationStr = queryData( "[%playback_time_seconds%]" );
+    UpdateDuration( durationStr.empty() ? 0 : stold( durationStr ), lengthStr.empty() ? 0 : stold( lengthStr ) );
 
-    pd.presence.state = pd.state.c_str();
-    pd.presence.details = pd.details.c_str();
-    UpdateDuration( durationStr.empty() ? 0 : stold( durationStr ) );
     UpdateImage( metadb );
 }
 
-void PresenceModifier::UpdateDuration( double time )
+void PresenceModifier::UpdateDuration( double currentTime )
 {
     auto& pd = presenceData_;
     auto pc = playback_control::get();
@@ -228,7 +283,7 @@ void PresenceModifier::UpdateDuration( double time )
     {
     case config::TimeSetting::Elapsed:
     {
-        pd.presence.startTimestamp = std::time( nullptr ) - std::llround( time );
+        pd.presence.startTimestamp = std::time( nullptr ) - std::llround( currentTime );
         pd.presence.endTimestamp = 0;
 
         break;
@@ -236,7 +291,7 @@ void PresenceModifier::UpdateDuration( double time )
     case config::TimeSetting::Remaining:
     {
         pd.presence.startTimestamp = 0;
-        pd.presence.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( pd.trackLength - time ) );
+        pd.presence.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( pd.trackLength - currentTime ) );
 
         break;
     }
@@ -250,6 +305,13 @@ void PresenceModifier::UpdateDuration( double time )
     }
 }
 
+void PresenceModifier::UpdateDuration( double currentTime, double totalLength )
+{
+    auto& pd = presenceData_;
+    pd.trackLength = totalLength;
+    UpdateDuration( currentTime );
+}
+
 void PresenceModifier::DisableDuration()
 {
     auto& pd = presenceData_;
@@ -261,3 +323,5 @@ void PresenceModifier::Disable()
 {
     isDisabled_ = true;
 }
+
+} // namespace drp

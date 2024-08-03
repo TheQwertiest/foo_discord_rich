@@ -47,9 +47,6 @@
     <ClCompile Include="fb2k\playback.cpp">
       <Filter>fb2k</Filter>
     </ClCompile>
-    <ClCompile Include="fb2k\current_track_titleformat.cpp">
-      <Filter>fb2k</Filter>
-    </ClCompile>
     <ClCompile Include="album_art\album_art_fetcher.cpp">
       <Filter>album_art</Filter>
     </ClCompile>
@@ -85,9 +82,6 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="resource.h">
       <Filter>resources</Filter>
-    </ClInclude>
-    <ClInclude Include="fb2k\current_track_titleformat.h">
-      <Filter>fb2k</Filter>
     </ClInclude>
     <ClInclude Include="album_art\album_art_fetcher.h">
       <Filter>album_art</Filter>

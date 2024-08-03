@@ -15,8 +15,10 @@ using namespace config;
 PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     : pParent_( pParent )
     , isEnabled_( config::isEnabled )
-    , stateQuery_( config::stateQuery )
-    , detailsQuery_( config::detailsQuery )
+    , topTextQuery_( config::topTextQuery )
+    , middleTextQuery_( config::middleTextQuery )
+    , bottomTextQuery_( config::bottomTextQuery )
+    , fetchAlbumArt_( config::fetchAlbumArt )
     , largeImageSettings_( config::largeImageSettings, { { ImageSetting::Light, IDC_RADIO_IMG_LIGHT }, { ImageSetting::Dark, IDC_RADIO_IMG_DARK }, { ImageSetting::Disabled, IDC_RADIO_IMG_DISABLED } } )
     , smallImageSettings_( config::smallImageSettings, { { ImageSetting::Light, IDC_RADIO_PLAYBACK_IMG_LIGHT }, { ImageSetting::Dark, IDC_RADIO_PLAYBACK_IMG_DARK }, { ImageSetting::Disabled, IDC_RADIO_PLAYBACK_IMG_DISABLED } } )
     , timeSettings_( config::timeSettings, { { TimeSetting::Elapsed, IDC_RADIO_TIME_ELAPSED }, { TimeSetting::Remaining, IDC_RADIO_TIME_REMAINING }, { TimeSetting::Disabled, IDC_RADIO_TIME_DISABLED } } )
@@ -24,8 +26,10 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     , swapSmallImages_( config::swapSmallImages )
     , ddxOptions_( {
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( isEnabled_, IDC_CHECK_IS_ENABLED ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( stateQuery_, IDC_TEXTBOX_STATE ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( detailsQuery_, IDC_TEXTBOX_DETAILS ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( topTextQuery_, IDC_TEXTBOX_TOP_TEXT ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( middleTextQuery_, IDC_TEXTBOX_MIDDLE_TEXT ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( bottomTextQuery_, IDC_TEXTBOX_BOTTOM_TEXT ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( fetchAlbumArt_, IDC_CHECK_FETCH_ALBUM_ART ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( largeImageSettings_, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( smallImageSettings_, std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( timeSettings_, std::initializer_list<int>{ IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } ),
@@ -93,6 +97,12 @@ BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
         ddxOpt->Ddx().SetHwnd( m_hWnd );
     }
     UpdateUiFromCfg();
+
+    // Disable duration options, since they are currently not implemented by Discord API
+    for ( auto id: { IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } )
+    {
+        CButton( GetDlgItem( id ) ).EnableWindow( false );
+    }
 
     helpUrl_.SetHyperLinkExtendedStyle( HLINK_UNDERLINED | HLINK_COMMANDBUTTON );
     helpUrl_.SetToolTipText( L"Title formatting help" );
