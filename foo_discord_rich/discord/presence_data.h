@@ -32,12 +32,12 @@ public:
 namespace drp
 {
 
-class DiscordHandler;
+class DiscordAdapter;
 
 /// @details Destructor updates presence data in parent and sends it to Discord
 class PresenceModifier
 {
-    friend class drp::DiscordHandler;
+    friend class drp::DiscordAdapter;
 
 public:
     ~PresenceModifier();
@@ -53,44 +53,12 @@ public:
     void Disable();
 
 private:
-    PresenceModifier( DiscordHandler& parent, const drp::internal::PresenceData& presenceData );
+    PresenceModifier( DiscordAdapter& parent, const drp::internal::PresenceData& presenceData );
 
 private:
-    DiscordHandler& parent_;
+    DiscordAdapter& parent_;
 
     bool isDisabled_ = false;
-    drp::internal::PresenceData presenceData_;
-};
-
-class DiscordHandler
-{
-    friend class drp::PresenceModifier;
-
-public:
-    static DiscordHandler& GetInstance();
-
-    void Initialize();
-    void Finalize();
-    void OnSettingsChanged();
-    void OnImageLoaded();
-
-    drp::PresenceModifier GetPresenceModifier();
-
-private:
-    bool HasPresence() const;
-    void SendPresence();
-    void ClearPresence();
-
-private:
-    DiscordHandler() = default;
-
-    static void OnReady( const DiscordUser* request );
-    static void OnDisconnected( int errorCode, const char* message );
-    static void OnErrored( int errorCode, const char* message );
-
-private:
-    bool hasPresence_ = true;
-    qwr::u8string appToken_;
     drp::internal::PresenceData presenceData_;
 };
 

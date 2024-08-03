@@ -2,9 +2,10 @@
 
 #include "ui_pref_tab_main.h"
 
-#include <discord/discord_impl.h>
-#include <qwr/fb2k_config_ui_option.h>
+#include <discord/discord_integration.h>
 #include <ui/ui_pref_tab_manager.h>
+
+#include <qwr/fb2k_config_ui_option.h>
 
 namespace drp::ui
 {
@@ -16,18 +17,9 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     , isEnabled_( config::isEnabled )
     , stateQuery_( config::stateQuery )
     , detailsQuery_( config::detailsQuery )
-    , largeImageSettings_( config::largeImageSettings,
-                           { { ImageSetting::Light, IDC_RADIO_IMG_LIGHT },
-                             { ImageSetting::Dark, IDC_RADIO_IMG_DARK },
-                             { ImageSetting::Disabled, IDC_RADIO_IMG_DISABLED } } )
-    , smallImageSettings_( config::smallImageSettings,
-                           { { ImageSetting::Light, IDC_RADIO_PLAYBACK_IMG_LIGHT },
-                             { ImageSetting::Dark, IDC_RADIO_PLAYBACK_IMG_DARK },
-                             { ImageSetting::Disabled, IDC_RADIO_PLAYBACK_IMG_DISABLED } } )
-    , timeSettings_( config::timeSettings,
-                     { { TimeSetting::Elapsed, IDC_RADIO_TIME_ELAPSED },
-                       { TimeSetting::Remaining, IDC_RADIO_TIME_REMAINING },
-                       { TimeSetting::Disabled, IDC_RADIO_TIME_DISABLED } } )
+    , largeImageSettings_( config::largeImageSettings, { { ImageSetting::Light, IDC_RADIO_IMG_LIGHT }, { ImageSetting::Dark, IDC_RADIO_IMG_DARK }, { ImageSetting::Disabled, IDC_RADIO_IMG_DISABLED } } )
+    , smallImageSettings_( config::smallImageSettings, { { ImageSetting::Light, IDC_RADIO_PLAYBACK_IMG_LIGHT }, { ImageSetting::Dark, IDC_RADIO_PLAYBACK_IMG_DARK }, { ImageSetting::Disabled, IDC_RADIO_PLAYBACK_IMG_DISABLED } } )
+    , timeSettings_( config::timeSettings, { { TimeSetting::Elapsed, IDC_RADIO_TIME_ELAPSED }, { TimeSetting::Remaining, IDC_RADIO_TIME_REMAINING }, { TimeSetting::Disabled, IDC_RADIO_TIME_DISABLED } } )
     , disableWhenPaused_( config::disableWhenPaused )
     , swapSmallImages_( config::swapSmallImages )
     , ddxOptions_( {

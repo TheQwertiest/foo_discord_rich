@@ -33,7 +33,7 @@
     <ClCompile Include="fb2k\mainmenu.cpp">
       <Filter>fb2k</Filter>
     </ClCompile>
-    <ClCompile Include="discord\discord_impl.cpp">
+    <ClCompile Include="discord\discord_integration.cpp">
       <Filter>discord</Filter>
     </ClCompile>
     <ClCompile Include="fb2k\config.cpp">
@@ -57,6 +57,9 @@
     <ClCompile Include="utils\logging.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="discord\presence_data.cpp">
+      <Filter>discord</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui\ui_pref_tab_manager.h">
@@ -71,7 +74,7 @@
     <ClInclude Include="ui\ui_pref_tab_advanced.h">
       <Filter>ui</Filter>
     </ClInclude>
-    <ClInclude Include="discord\discord_impl.h">
+    <ClInclude Include="discord\discord_integration.h">
       <Filter>discord</Filter>
     </ClInclude>
     <ClInclude Include="fb2k\config.h">
@@ -101,6 +104,9 @@
     <None Include="packages.config" />
     <None Include="foo_discord_rich.rc2">
       <Filter>resources</Filter>
+    </None>
+    <None Include="discord\presence_data.h">
+      <Filter>discord</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

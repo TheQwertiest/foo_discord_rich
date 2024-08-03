@@ -1,10 +1,11 @@
 #include <stdafx.h>
+
 #include "ui_pref_tab_manager.h"
 
-#include <ui/ui_pref_tab_main.h>
-#include <ui/ui_pref_tab_advanced.h>
-#include <discord/discord_impl.h>
+#include <discord/discord_integration.h>
 #include <fb2k/config.h>
+#include <ui/ui_pref_tab_advanced.h>
+#include <ui/ui_pref_tab_main.h>
 
 namespace
 {
@@ -75,7 +76,7 @@ HWND PreferenceTabManager::get_wnd()
 t_uint32 PreferenceTabManager::get_state()
 {
     uint32_t state = preferences_state::resettable;
-    for ( auto& tab : tabs_ )
+    for ( auto& tab: tabs_ )
     {
         state |= tab->get_state();
     }
@@ -85,18 +86,18 @@ t_uint32 PreferenceTabManager::get_state()
 
 void PreferenceTabManager::apply()
 {
-    for ( auto& tab : tabs_ )
+    for ( auto& tab: tabs_ )
     {
         tab->apply();
     }
 
     OnDataChanged();
-    drp::DiscordHandler::GetInstance().OnSettingsChanged();
+    drp::DiscordAdapter::GetInstance().OnSettingsChanged();
 }
 
 void PreferenceTabManager::reset()
 {
-    for ( auto& tab : tabs_ )
+    for ( auto& tab: tabs_ )
     {
         tab->reset();
     }
@@ -173,7 +174,7 @@ void PreferenceTabManager::CreateTab()
     auto& pCurTab = tabs_[activeTabIdx_];
     pcCurTab_ = &pCurTab->Dialog();
     pCurTab->CreateTab( m_hWnd );
-    
+
     EnableThemeDialogTexture( static_cast<HWND>( *pcCurTab_ ), ETDT_ENABLETAB );
 
     pcCurTab_->SetWindowPos( nullptr, tabRc.left, tabRc.top, tabRc.right - tabRc.left, tabRc.bottom - tabRc.top, SWP_NOZORDER );

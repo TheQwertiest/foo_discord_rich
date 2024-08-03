@@ -127,7 +127,8 @@
   <ItemGroup>
     <ClCompile Include="album_art\album_art_fetcher.cpp" />
     <ClCompile Include="component_paths.cpp" />
-    <ClCompile Include="discord\discord_impl.cpp" />
+    <ClCompile Include="discord\discord_integration.cpp" />
+    <ClCompile Include="discord\presence_data.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
     <ClCompile Include="fb2k\current_track_titleformat.cpp" />
@@ -147,7 +148,7 @@
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="component_guids.h" />
     <ClInclude Include="component_paths.h" />
-    <ClInclude Include="discord\discord_impl.h" />
+    <ClInclude Include="discord\discord_integration.h" />
     <ClInclude Include="fb2k\config.h" />
     <ClInclude Include="fb2k\current_track_titleformat.h" />
     <ClInclude Include="resource.h" />
@@ -160,6 +161,7 @@
     <ClInclude Include="utils\logging.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="discord\presence_data.h" />
     <None Include="foo_discord_rich.rc2" />
     <None Include="packages.config" />
   </ItemGroup>

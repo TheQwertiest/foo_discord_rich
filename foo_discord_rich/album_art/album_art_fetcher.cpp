@@ -2,7 +2,7 @@
 
 #include "album_art_fetcher.h"
 
-#include <discord/discord_impl.h>
+#include <discord/discord_integration.h>
 #include <fb2k/current_track_titleformat.h>
 
 #include <component_paths.h>
@@ -279,7 +279,10 @@ void AlbumArtFetcher::ThreadMain()
 
                 if ( artUrlOpt )
                 {
-                    fb2k::inMainThread( [] { DiscordHandler::GetInstance().OnImageLoaded(); } );
+                    fb2k::inMainThread( [] {
+                        auto pm = DiscordAdapter::GetInstance().GetPresenceModifier();
+                        pm.UpdateImage();
+                    } );
                 }
             }
         }

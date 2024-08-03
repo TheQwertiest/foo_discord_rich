@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include <album_art/album_art_fetcher.h>
-#include <discord/discord_impl.h>
+#include <discord/discord_integration.h>
 #include <fb2k/config.h>
 
 DECLARE_COMPONENT_VERSION(
@@ -20,14 +20,14 @@ class ComponentInitQuit : public initquit
 public:
     void on_init() override
     {
-        drp::DiscordHandler::GetInstance().Initialize();
+        drp::DiscordAdapter::GetInstance().Initialize();
         drp::AlbumArtFetcher::Get().Initialize();
     }
 
     void on_quit() override
     {
         drp::AlbumArtFetcher::Get().Finalize();
-        drp::DiscordHandler::GetInstance().Finalize();
+        drp::DiscordAdapter::GetInstance().Finalize();
     }
 };
 

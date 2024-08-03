@@ -2,10 +2,11 @@
 
 #include "ui_pref_tab_advanced.h"
 
-#include <discord/discord_impl.h>
+#include <discord/discord_integration.h>
 #include <fb2k/config.h>
-#include <qwr/fb2k_config_ui_option.h>
 #include <ui/ui_pref_tab_manager.h>
+
+#include <qwr/fb2k_config_ui_option.h>
 
 namespace drp::ui
 {

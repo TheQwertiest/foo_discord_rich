@@ -1,12 +1,8 @@
 #include <stdafx.h>
 
-#include "discord_impl.h"
+#include "presence_data.h"
 
-#include <album_art/album_art_fetcher.h>
-#include <fb2k/config.h>
-#include <fb2k/current_track_titleformat.h>
-
-#include <ctime>
+#include <discord/discord_integration.h>
 
 namespace drp::internal
 {
@@ -70,7 +66,7 @@ void PresenceData::CopyData( const PresenceData& other )
 namespace drp
 {
 
-PresenceModifier::PresenceModifier( DiscordHandler& parent, const drp::internal::PresenceData& presenceData )
+PresenceModifier::PresenceModifier( DiscordAdapter& parent, const drp::internal::PresenceData& presenceData )
     : parent_( parent )
     , presenceData_( presenceData )
 {
@@ -265,117 +261,3 @@ void PresenceModifier::Disable()
 {
     isDisabled_ = true;
 }
-
-DiscordHandler& DiscordHandler::GetInstance()
-{
-    static DiscordHandler discordHandler;
-    return discordHandler;
-}
-
-void DiscordHandler::Initialize()
-{
-    appToken_ = config::discordAppToken;
-
-    DiscordEventHandlers handlers{};
-
-    handlers.ready = OnReady;
-    handlers.disconnected = OnDisconnected;
-    handlers.errored = OnErrored;
-
-    Discord_Initialize( appToken_.c_str(), &handlers, 1, nullptr );
-    Discord_RunCallbacks();
-
-    hasPresence_ = true; ///< Discord may use default app handler, which we need to override
-
-    auto pm = GetPresenceModifier();
-    pm.UpdateImage();
-    pm.Disable(); ///< we don't want to activate presence yet
-}
-
-void DiscordHandler::Finalize()
-{
-    Discord_ClearPresence();
-    Discord_Shutdown();
-}
-
-void DiscordHandler::OnSettingsChanged()
-{
-    if ( appToken_ != static_cast<std::string>( config::discordAppToken ) )
-    {
-        Finalize();
-        Initialize();
-    }
-
-    auto pm = GetPresenceModifier();
-    pm.UpdateImage();
-    pm.UpdateSmallImage();
-    pm.UpdateTrack();
-    if ( !config::isEnabled )
-    {
-        pm.Disable();
-    }
-}
-
-void DiscordHandler::OnImageLoaded()
-{
-    auto pm = GetPresenceModifier();
-    pm.UpdateImage();
-}
-
-bool DiscordHandler::HasPresence() const
-{
-    return hasPresence_;
-}
-
-void DiscordHandler::SendPresence()
-{
-    if ( config::isEnabled )
-    {
-        Discord_UpdatePresence( &presenceData_.presence );
-        hasPresence_ = true;
-    }
-    else
-    {
-        Discord_ClearPresence();
-        hasPresence_ = false;
-    }
-    Discord_RunCallbacks();
-}
-
-void DiscordHandler::ClearPresence()
-{
-    Discord_ClearPresence();
-    hasPresence_ = false;
-
-    Discord_RunCallbacks();
-}
-
-PresenceModifier DiscordHandler::GetPresenceModifier()
-{
-    return PresenceModifier( *this, presenceData_ );
-}
-
-void DiscordHandler::OnReady( const DiscordUser* request )
-{
-    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": connected to " << ( request->username ? request->username : "<null>" );
-}
-
-void DiscordHandler::OnDisconnected( int errorCode, const char* message )
-{
-    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": disconnected with code " << errorCode;
-    if ( message )
-    {
-        FB2K_console_formatter() << message;
-    }
-}
-
-void DiscordHandler::OnErrored( int errorCode, const char* message )
-{
-    FB2K_console_formatter() << DRP_NAME_WITH_VERSION << ": error " << errorCode;
-    if ( message )
-    {
-        FB2K_console_formatter() << message;
-    }
-}
-
-} // namespace drp

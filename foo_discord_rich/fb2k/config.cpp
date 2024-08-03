@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-#include <discord/discord_impl.h>
+#include <discord/discord_integration.h>
 
 namespace drp::config
 {

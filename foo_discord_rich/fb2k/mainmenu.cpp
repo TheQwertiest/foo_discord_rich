@@ -1,6 +1,6 @@
 #include <stdafx.h>
 
-#include <discord/discord_impl.h>
+#include <discord/discord_integration.h>
 #include <fb2k/config.h>
 
 namespace
@@ -65,7 +65,7 @@ GUID MainMenuCommandsImpl::get_parent()
 void MainMenuCommandsImpl::execute( t_uint32 p_index, service_ptr_t<service_base> p_callback )
 {
     drp::config::isEnabled = !drp::config::isEnabled;
-    drp::DiscordHandler::GetInstance().OnSettingsChanged();
+    drp::DiscordAdapter::GetInstance().OnSettingsChanged();
 }
 
 bool MainMenuCommandsImpl::get_display( t_uint32 p_index, pfc::string_base& p_out, t_uint32& p_flags )
