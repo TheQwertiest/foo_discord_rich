@@ -10,7 +10,7 @@ namespace drp::config
 qwr::fb2k::ConfigBool isEnabled( guid::conf_is_enabled, true );
 qwr::fb2k::ConfigUint8Enum<ImageSetting> largeImageSettings( guid::conf_large_image_settings, ImageSetting::Light );
 qwr::fb2k::ConfigUint8Enum<ImageSetting> smallImageSettings( guid::conf_small_image_settings, ImageSetting::Light );
-qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings( guid::conf_time_settings, TimeSetting::Elapsed );
+qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings( guid::conf_time_settings, TimeSetting::Disabled );
 qwr::fb2k::ConfigBool fetchAlbumArt( guid::conf_fetch_album_art, true );
 
 qwr::fb2k::ConfigString topTextQuery( guid::conf_top_text_query, "[%title%]" );
