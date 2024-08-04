@@ -248,15 +248,18 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
         return EvaluateQueryForPlayingTrack( metadb, query );
     };
     const auto fixStringLength = []( qwr::u8string& str ) {
-        if ( str.length() == 1 )
-        { // minimum allowed non-zero string length is 2, so we need to pad it
-            str += ' ';
+        // Discord uses utf16 when applying text length limits
+        auto strW = qwr::unicode::ToWide( str );
+        if ( strW.size() == 1 )
+        { // minimum allowed non-zero string length is 2, so we need to pad it.
+            strW += ' ';
         }
-        else if ( str.length() > 127 )
+        else if ( strW.size() > 127 )
         { // maximum allowed length is 127
-            str.resize( 124 );
-            str += "...";
+            strW.resize( 124 );
+            strW += L"...";
         }
+        str = qwr::unicode::ToU8( strW );
     };
 
     pd.topText = queryData( config::topTextQuery );
