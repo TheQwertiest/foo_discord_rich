@@ -230,21 +230,6 @@ void PresenceModifier::UpdateSmallImage()
     }
 }
 
-/**
- * https://stackoverflow.com/a/59691895
- * Calculate the number of characters in a utf-8 string.
- *  Some composite characters that are composed of multiple different characters, such as some emojis,
- *  are counted as multiple characters.
- */
-size_t count_codepoints( const qwr::u8string& str )
-{
-    size_t count = 0;
-    for ( auto& c: str )
-        if ( ( c & 0b1100'0000 ) != 0b1000'0000 ) // Not a trailing byte
-            ++count;
-    return count;
-}
-
 void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
 {
     auto& pd = presenceData_;
@@ -263,16 +248,18 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
         return EvaluateQueryForPlayingTrack( metadb, query );
     };
     const auto fixStringLength = []( qwr::u8string& str ) {
-        // Required for correct calculation of utf-8 string length
-        if ( count_codepoints( str ) == 1 )
-        { // minimum allowed non-zero string length is 2, so we need to pad it
-            str += ' ';
+        // Discord uses utf16 when applying text length limits
+        auto strW = qwr::unicode::ToWide( str );
+        if ( strW.size() == 1 )
+        { // minimum allowed non-zero string length is 2, so we need to pad it.
+            strW += ' ';
         }
-        else if ( str.length() > 127 )
+        else if ( strW.size() > 127 )
         { // maximum allowed length is 127
-            str.resize( 124 );
-            str += "...";
+            strW.resize( 124 );
+            strW += L"...";
         }
+        str = qwr::unicode::ToU8( strW );
     };
 
     pd.topText = queryData( config::topTextQuery );
