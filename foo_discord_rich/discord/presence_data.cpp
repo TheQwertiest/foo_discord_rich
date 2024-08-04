@@ -174,27 +174,26 @@ void PresenceModifier::UpdateImage( metadb_handle_ptr metadb )
     if ( artUrlOpt )
     {
         setImageKey( *artUrlOpt );
+        return;
     }
-    else
+
+    switch ( config::largeImageSettings )
     {
-        switch ( config::largeImageSettings )
-        {
-        case config::ImageSetting::Light:
-        {
-            setImageKey( config::largeImageId_Light );
-            break;
-        }
-        case config::ImageSetting::Dark:
-        {
-            setImageKey( config::largeImageId_Dark );
-            break;
-        }
-        case config::ImageSetting::Disabled:
-        {
-            setImageKey( qwr::u8string{} );
-            break;
-        }
-        }
+    case config::ImageSetting::Light:
+    {
+        setImageKey( config::largeImageId_Light );
+        break;
+    }
+    case config::ImageSetting::Dark:
+    {
+        setImageKey( config::largeImageId_Dark );
+        break;
+    }
+    case config::ImageSetting::Disabled:
+    {
+        setImageKey( qwr::u8string{} );
+        break;
+    }
     }
 }
 
