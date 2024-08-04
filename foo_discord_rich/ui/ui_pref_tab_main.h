@@ -5,6 +5,7 @@
 
 #include <resource.h>
 
+#include <foobar2000/SDK/coreDarkMode.h>
 #include <qwr/fb2k_config_ui_option.h>
 #include <qwr/macros.h>
 #include <qwr/ui_ddx_option.h>
@@ -89,6 +90,8 @@ private:
     std::array<std::unique_ptr<qwr::ui::IUiDdxOption>, 10> ddxOptions_;
 
     CHyperLink helpUrl_;
+
+    fb2k::CCoreDarkModeHooks darkModeHooks_;
 };
 
 } // namespace drp::ui

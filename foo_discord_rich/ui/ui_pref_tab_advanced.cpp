@@ -64,7 +64,7 @@ t_uint32 PreferenceTabAdvanced::get_state()
             return ddxOpt->Option().HasChanged();
         } );
 
-    return ( preferences_state::resettable | ( hasChanged ? preferences_state::changed : 0 ) );
+    return ( preferences_state::resettable | preferences_state::dark_mode_supported | ( hasChanged ? preferences_state::changed : 0 ) );
 }
 
 void PreferenceTabAdvanced::apply()
@@ -87,6 +87,8 @@ void PreferenceTabAdvanced::reset()
 
 BOOL PreferenceTabAdvanced::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
+    darkModeHooks_.AddDialogWithControls( m_hWnd );
+
     for ( auto& ddxOpt: ddxOptions_ )
     {
         ddxOpt->Ddx().SetHwnd( m_hWnd );

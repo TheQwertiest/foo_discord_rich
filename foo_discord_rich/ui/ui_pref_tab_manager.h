@@ -4,6 +4,8 @@
 
 #include <resource.h>
 
+#include <foobar2000/SDK/coreDarkMode.h>
+
 namespace drp::ui
 {
 
@@ -56,6 +58,8 @@ private:
 
     size_t activeTabIdx_ = 0;
     std::vector<std::unique_ptr<ITab>> tabs_;
+
+    fb2k::CCoreDarkModeHooks darkModeHooks_;
 };
 
 } // namespace drp::ui

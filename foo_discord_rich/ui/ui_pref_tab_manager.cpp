@@ -75,7 +75,7 @@ HWND PreferenceTabManager::get_wnd()
 
 t_uint32 PreferenceTabManager::get_state()
 {
-    uint32_t state = preferences_state::resettable;
+    uint32_t state = preferences_state::resettable | preferences_state::dark_mode_supported;
     for ( auto& tab: tabs_ )
     {
         state |= tab->get_state();
@@ -107,6 +107,8 @@ void PreferenceTabManager::reset()
 
 BOOL PreferenceTabManager::OnInitDialog( HWND hwndFocus, LPARAM lParam )
 {
+    darkModeHooks_.AddDialogWithControls( m_hWnd );
+
     cTabs_ = GetDlgItem( IDC_TAB_PREFS_CURRENT );
 
     for ( size_t i = 0; i < tabs_.size(); ++i )
