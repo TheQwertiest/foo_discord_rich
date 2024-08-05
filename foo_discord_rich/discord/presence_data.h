@@ -52,6 +52,9 @@ public:
     void UpdateDuration( double currentTime, double totalLength );
     void DisableDuration();
 
+    bool HasChanged() const;
+    void Rollback();
+
     /// @brief Disables Discord Rich Presence
     /// @details The updated data will still be transferred to parent
     void Disable();

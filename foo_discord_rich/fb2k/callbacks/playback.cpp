@@ -2,6 +2,16 @@
 
 #include <discord/discord_integration.h>
 
+#include <chrono>
+#include <optional>
+
+namespace
+{
+
+std::chrono::seconds kDynamicInfoRefreshDelay{ 30 };
+
+}
+
 namespace
 {
 
@@ -21,11 +31,7 @@ public:
     void on_playback_seek( double time ) override;
     void on_playback_pause( bool state ) override;
     void on_playback_edited( metadb_handle_ptr track ) override;
-
-    void on_playback_dynamic_info( const file_info& info ) override
-    { // ignore
-    }
-
+    void on_playback_dynamic_info( const file_info& info ) override;
     void on_playback_dynamic_info_track( const file_info& info ) override;
     void on_playback_time( double time ) override;
 
@@ -38,6 +44,7 @@ private:
 
 private:
     bool needPresenceRefresh_ = false;
+    bool hasScheduledDynamicUpdate_ = false;
 };
 
 } // namespace
@@ -97,6 +104,29 @@ void PlaybackCallback::on_playback_pause( bool state )
 void PlaybackCallback::on_playback_edited( metadb_handle_ptr track )
 {
     on_playback_changed( track );
+}
+
+void PlaybackCallback::on_playback_dynamic_info( const file_info& info )
+{
+    if ( hasScheduledDynamicUpdate_ )
+    {
+        return;
+    }
+
+    auto pm = DiscordAdapter::GetInstance().GetPresenceModifier();
+    pm.UpdateTrack();
+    if ( !pm.HasChanged() )
+    {
+        return;
+    }
+
+    pm.Rollback();
+
+    hasScheduledDynamicUpdate_ = true;
+    fb2k::callLater( static_cast<double>( kDynamicInfoRefreshDelay.count() ), [this] {
+        on_playback_changed();
+        hasScheduledDynamicUpdate_ = false;
+    } );
 }
 
 void PlaybackCallback::on_playback_dynamic_info_track( const file_info& info )

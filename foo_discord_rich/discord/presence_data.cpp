@@ -123,7 +123,7 @@ PresenceModifier::PresenceModifier( DiscordAdapter& parent, const drp::internal:
 
 PresenceModifier::~PresenceModifier()
 {
-    const bool hasChanged = ( parent_.presenceData_ != presenceData_ );
+    const bool hasChanged = HasChanged();
     if ( hasChanged )
     {
         parent_.presenceData_ = presenceData_;
@@ -319,6 +319,16 @@ void PresenceModifier::DisableDuration()
     auto& pd = presenceData_;
     pd.presence.startTimestamp = 0;
     pd.presence.endTimestamp = 0;
+}
+
+bool PresenceModifier::HasChanged() const
+{
+    return ( parent_.presenceData_ != presenceData_ );
+}
+
+void PresenceModifier::Rollback()
+{
+    presenceData_ = parent_.presenceData_;
 }
 
 void PresenceModifier::Disable()

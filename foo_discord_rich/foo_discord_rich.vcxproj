@@ -146,10 +146,10 @@
     <ClCompile Include="discord\discord_integration.cpp" />
     <ClCompile Include="discord\presence_data.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
+    <ClCompile Include="fb2k\callbacks\mainmenu.cpp" />
+    <ClCompile Include="fb2k\callbacks\playback.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
-    <ClCompile Include="fb2k\playback.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="fb2k\mainmenu.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
