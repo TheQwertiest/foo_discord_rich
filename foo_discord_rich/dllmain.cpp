@@ -1,14 +1,13 @@
 #include "stdafx.h"
 
-#include <album_art/album_art_fetcher.h>
+#include <album_art/fetcher.h>
 #include <discord/discord_integration.h>
 #include <fb2k/config.h>
 
 DECLARE_COMPONENT_VERSION(
     DRP_NAME,
     DRP_VERSION,
-    DRP_NAME_WITH_VERSION " by TheQwertiest"
-);
+    DRP_NAME_WITH_VERSION " by TheQwertiest" );
 
 VALIDATE_COMPONENT_FILENAME( DRP_DLL_NAME );
 

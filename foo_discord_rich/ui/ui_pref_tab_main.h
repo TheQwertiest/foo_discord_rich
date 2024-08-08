@@ -76,7 +76,7 @@ private:
                             topTextQuery,
                             middleTextQuery,
                             bottomTextQuery,
-                            fetchAlbumArt,
+                            enableAlbumArtFetch,
                             largeImageSettings,
                             smallImageSettings,
                             timeSettings,

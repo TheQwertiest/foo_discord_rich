@@ -4,6 +4,7 @@
 #include <optional>
 #include <thread>
 #include <unordered_map>
+#include <variant>
 
 namespace drp
 {
@@ -11,14 +12,25 @@ namespace drp
 class AlbumArtFetcher
 {
 public:
-    struct FetchRequest
+    struct MusicBrainzFetchRequest
     {
         qwr::u8string artist;
         qwr::u8string album;
         std::optional<qwr::u8string> userReleaseMbidOpt;
 
-        auto operator<=>( const FetchRequest& other ) const = default;
+        auto operator<=>( const MusicBrainzFetchRequest& other ) const = default;
     };
+
+    struct UploadRequest
+    {
+        qwr::u8string albumId;
+        metadb_handle_ptr handle;
+        qwr::u8string uploaderPath;
+
+        auto operator<=>( const UploadRequest& other ) const = default;
+    };
+
+    using FetchRequest = std::variant<MusicBrainzFetchRequest, UploadRequest>;
 
 public:
     static AlbumArtFetcher& Get();
@@ -37,7 +49,8 @@ private:
 
     void ThreadMain();
 
-    std::optional<qwr::u8string> ProcessFetchRequest( const FetchRequest& request );
+    std::optional<qwr::u8string> ProcessFetchRequest( const MusicBrainzFetchRequest& request );
+    std::optional<qwr::u8string> ProcessFetchRequest( const UploadRequest& request );
 
 private:
     AlbumArtFetcher() = default;

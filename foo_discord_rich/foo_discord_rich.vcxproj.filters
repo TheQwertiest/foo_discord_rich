@@ -44,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="album_art\album_art_fetcher.cpp">
-      <Filter>album_art</Filter>
-    </ClCompile>
     <ClCompile Include="component_paths.cpp" />
     <ClCompile Include="utils\logging.cpp">
       <Filter>utils</Filter>
@@ -59,6 +56,15 @@
     </ClCompile>
     <ClCompile Include="fb2k\callbacks\playback.cpp">
       <Filter>fb2k\callbacks</Filter>
+    </ClCompile>
+    <ClCompile Include="album_art\musicbrainz_fetcher.cpp">
+      <Filter>album_art</Filter>
+    </ClCompile>
+    <ClCompile Include="album_art\uploader.cpp">
+      <Filter>album_art</Filter>
+    </ClCompile>
+    <ClCompile Include="album_art\fetcher.cpp">
+      <Filter>album_art</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,15 +92,21 @@
     <ClInclude Include="resource.h">
       <Filter>resources</Filter>
     </ClInclude>
-    <ClInclude Include="album_art\album_art_fetcher.h">
-      <Filter>album_art</Filter>
-    </ClInclude>
     <ClInclude Include="component_paths.h" />
     <ClInclude Include="utils\json_std_extenders.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\logging.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="album_art\musicbrainz_fetcher.h">
+      <Filter>album_art</Filter>
+    </ClInclude>
+    <ClInclude Include="album_art\fetcher.h">
+      <Filter>album_art</Filter>
+    </ClInclude>
+    <ClInclude Include="album_art\uploader.h">
+      <Filter>album_art</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 BasedOnStyle: Mozilla
 AccessModifierOffset: '-4'
 AlwaysBreakAfterDefinitionReturnType: 'false'
-AlignAfterOpenBracket: BlockIndent
+AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: None
 AlignConsecutiveMacros: Consecutive
 AlignEscapedNewlines: Left

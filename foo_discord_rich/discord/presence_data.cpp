@@ -2,7 +2,7 @@
 
 #include "presence_data.h"
 
-#include <album_art/album_art_fetcher.h>
+#include <album_art/fetcher.h>
 #include <discord/discord_integration.h>
 #include <fb2k/config.h>
 
@@ -146,7 +146,7 @@ PresenceModifier::~PresenceModifier()
     }
 }
 
-void PresenceModifier::UpdateImage( metadb_handle_ptr metadb )
+void PresenceModifier::UpdateImage()
 {
     auto& pd = presenceData_;
     auto pc = playback_control::get();
@@ -157,19 +157,35 @@ void PresenceModifier::UpdateImage( metadb_handle_ptr metadb )
     };
 
     const auto artUrlOpt = [&]() -> std::optional<qwr::u8string> {
-        if ( !config::fetchAlbumArt )
+        // TODO: extract to separate method
+        const auto metadb = pd.metadb;
+        if ( metadb.is_empty() )
         {
             return std::nullopt;
         }
 
-        const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "$if3($meta(MUSICBRAINZ_ALBUMID),$meta(MUSICBRAINZ ALBUM ID))" );
-        const AlbumArtFetcher::FetchRequest request{
-            .artist = EvaluateQueryForPlayingTrack( metadb, "%artist%" ),
-            .album = EvaluateQueryForPlayingTrack( metadb, "%album%" ),
-            .userReleaseMbidOpt = userReleaseMbid.empty() ? std::optional<qwr::u8string>{} : userReleaseMbid
-        };
+        if ( config::enableAlbumArtUpload )
+        { // overrides art fetching
 
-        return AlbumArtFetcher::Get().GetArtUrl( request );
+            const auto albumId = EvaluateQueryForPlayingTrack( metadb, config::albumArtUploadPinQuery );
+            const AlbumArtFetcher::UploadRequest request{
+                .albumId = EvaluateQueryForPlayingTrack( metadb, config::albumArtUploadPinQuery ),
+                .handle = metadb,
+                .uploaderPath = config::albumArtUploaderPath };
+
+            return AlbumArtFetcher::Get().GetArtUrl( request );
+        }
+        if ( config::enableAlbumArtFetch )
+        {
+            const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "$if3($meta(MUSICBRAINZ_ALBUMID),$meta(MUSICBRAINZ ALBUM ID))" );
+            const AlbumArtFetcher::MusicBrainzFetchRequest request{
+                .artist = EvaluateQueryForPlayingTrack( metadb, "%artist%" ),
+                .album = EvaluateQueryForPlayingTrack( metadb, "%album%" ),
+                .userReleaseMbidOpt = userReleaseMbid.empty() ? std::optional<qwr::u8string>{} : userReleaseMbid };
+
+            return AlbumArtFetcher::Get().GetArtUrl( request );
+        }
+        return std::nullopt;
     }();
     if ( artUrlOpt )
     {
@@ -273,7 +289,7 @@ void PresenceModifier::UpdateTrack( metadb_handle_ptr metadb )
     const qwr::u8string durationStr = queryData( "[%playback_time_seconds%]" );
     UpdateDuration( durationStr.empty() ? 0 : stold( durationStr ), lengthStr.empty() ? 0 : stold( lengthStr ) );
 
-    UpdateImage( metadb );
+    UpdateImage();
 }
 
 void PresenceModifier::UpdateDuration( double currentTime )

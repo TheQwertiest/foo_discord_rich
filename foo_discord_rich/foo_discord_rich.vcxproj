@@ -141,7 +141,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="album_art\album_art_fetcher.cpp" />
+    <ClCompile Include="album_art\fetcher.cpp" />
+    <ClCompile Include="album_art\musicbrainz_fetcher.cpp" />
+    <ClCompile Include="album_art\uploader.cpp" />
     <ClCompile Include="component_paths.cpp" />
     <ClCompile Include="discord\discord_integration.cpp" />
     <ClCompile Include="discord\presence_data.cpp" />
@@ -159,7 +161,9 @@
     <ClCompile Include="utils\logging.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="album_art\album_art_fetcher.h" />
+    <ClInclude Include="album_art\fetcher.h" />
+    <ClInclude Include="album_art\musicbrainz_fetcher.h" />
+    <ClInclude Include="album_art\uploader.h" />
     <ClInclude Include="component_defines.h" />
     <ClInclude Include="component_guids.h" />
     <ClInclude Include="component_paths.h" />

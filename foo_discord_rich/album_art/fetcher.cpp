@@ -1,7 +1,9 @@
 #include <stdafx.h>
 
-#include "album_art_fetcher.h"
+#include "fetcher.h"
 
+#include <album_art/musicbrainz_fetcher.h>
+#include <album_art/uploader.h>
 #include <discord/discord_integration.h>
 
 #include <component_paths.h>
@@ -10,6 +12,7 @@
 #include <qwr/algorithm.h>
 #include <qwr/file_helpers.h>
 #include <qwr/thread_name_setter.h>
+#include <qwr/visitor.h>
 
 namespace fs = std::filesystem;
 
@@ -29,84 +32,32 @@ const fs::path& GetCacheFilePath()
     return cachePath;
 }
 
-qwr::u8string GenerateAlbumId( const qwr::u8string& artist, const qwr::u8string& album )
+qwr::u8string GenerateMusicBrainzAlbumId( const qwr::u8string& artist, const qwr::u8string& album )
 {
     return artist + "|" + album;
 }
 
-/// @throw qwr::qwrException
-std::optional<qwr::u8string> FetchReleaseMbid( const qwr::u8string& album, const qwr::u8string& artist )
+std::optional<qwr::u8string> GenerateAlbumId( const drp::AlbumArtFetcher::FetchRequest& request )
 {
-    using json = nlohmann::json;
-
-    auto releaseGroupResp = cpr::Get(
-        cpr::Url{ "https://www.musicbrainz.org/ws/2/release-group" },
-        cpr::Parameters{
-            { "query", fmt::format( "artist:\"{}\"+releasegroup:\"{}\"", artist, album ) },
-            { "fmt", "json" },
-        }
-    );
-    if ( releaseGroupResp.status_code == 404 )
-    {
-        return std::nullopt;
-    }
-    else if ( releaseGroupResp.status_code != 200 )
-    {
-        throw qwr::QwrException( "Failed to fetch MB release group\nCode: {}\nError: {}", releaseGroupResp.status_code, releaseGroupResp.reason );
-    }
-
-    try
-    {
-        auto j = nlohmann::json::parse( releaseGroupResp.text );
-        const auto& releaseGroups = j.at( "release-groups" );
-        if ( releaseGroups.empty() )
-        {
-            return std::nullopt;
-        }
-
-        for ( const auto& release: releaseGroups.front().at( "releases" ) )
-        {
-            const auto releaseId = release.at( "id" ).get<qwr::u8string>();
-            auto releaseResp = cpr::Get(
-                cpr::Url{ fmt::format( "https://www.musicbrainz.org/ws/2/release/{}", releaseId ) },
-                cpr::Header{ { "Accept", "application/json" } }
-            );
-            if ( releaseResp.status_code != 200 )
-            {
-                throw qwr::QwrException( "Failed to fetch MB release\nCode: {}\nError: {}", releaseResp.status_code, releaseResp.reason );
-            }
-
-            auto jRelease = nlohmann::json::parse( releaseResp.text );
-            if ( jRelease.at( "cover-art-archive" ).at( "artwork" ).get<bool>() )
-            {
-                return releaseId;
-            }
-        }
-
-        return std::nullopt;
-    }
-    catch ( const nlohmann::json::parse_error& e )
-    {
-        throw qwr::QwrException( "Failed to parse musicbrainz response: {}", e.what() );
-    }
-}
-
-/// @throw qwr::qwrException
-std::optional<qwr::u8string> FetchAlbumArtUrl( const qwr::u8string& mbid )
-{
-    auto resp = cpr::Get(
-        cpr::Url{ fmt::format( "http://coverartarchive.org/release/{}/front-1200", mbid ) }
-    );
-    if ( resp.status_code == 404 )
-    {
-        return std::nullopt;
-    }
-    else if ( resp.status_code != 200 )
-    {
-        throw qwr::QwrException( "Failed to fetch album art url\nCode: {}\nError: {}", resp.status_code, resp.reason );
-    }
-
-    return resp.url.str();
+    const auto albumId = std::visit(
+        qwr::Visitor{
+            []( const drp::AlbumArtFetcher::MusicBrainzFetchRequest& req ) {
+                const auto& [artist, album, userReleaseMbidOpt] = req;
+                if ( artist.empty() || album.empty() )
+                {
+                    return qwr::u8string{};
+                }
+                return GenerateMusicBrainzAlbumId( req.artist, req.album );
+            },
+            []( const drp::AlbumArtFetcher::UploadRequest& req ) {
+                if ( req.uploaderPath.empty() )
+                {
+                    return qwr::u8string{};
+                }
+                return req.albumId;
+            } },
+        request );
+    return ( albumId.empty() ? std::optional<qwr::u8string>{} : albumId );
 }
 
 } // namespace
@@ -134,13 +85,13 @@ void AlbumArtFetcher::Finalize()
 
 std::optional<qwr::u8string> AlbumArtFetcher::GetArtUrl( const FetchRequest& request )
 {
-    const auto& [artist, album, userReleaseMbidOpt] = request;
-    if ( artist.empty() || album.empty() )
+    const auto albumArtIdOpt = GenerateAlbumId( request );
+    if ( !albumArtIdOpt )
     {
         return std::nullopt;
     }
 
-    if ( const auto artUrlOpt = qwr::FindOrDefault( albumIdToArtUrl_, GenerateAlbumId( artist, album ), std::nullopt );
+    if ( const auto artUrlOpt = qwr::FindOrDefault( albumIdToArtUrl_, *albumArtIdOpt, std::nullopt );
          artUrlOpt )
     {
         return artUrlOpt;
@@ -242,8 +193,8 @@ void AlbumArtFetcher::ThreadMain()
 
             if ( currentRequestOpt_ )
             {
-                if ( const auto albumId = GenerateAlbumId( currentRequestOpt_->artist, currentRequestOpt_->album );
-                     albumIdToArtUrl_.contains( albumId ) )
+                if ( const auto albumIdOpt = GenerateAlbumId( *currentRequestOpt_ );
+                     albumIdOpt && albumIdToArtUrl_.contains( *albumIdOpt ) )
                 {
                     currentRequestOpt_.reset();
                     lastRequest.reset();
@@ -263,13 +214,19 @@ void AlbumArtFetcher::ThreadMain()
             }
         }
 
-        const auto artUrlOpt = ProcessFetchRequest( *lastRequest );
+        const auto artUrlOpt = std::visit( [&]( const auto& arg ) { return ProcessFetchRequest( arg ); }, *lastRequest );
+        if ( !artUrlOpt && ( fb2k::mainAborter().is_aborting() || token.stop_requested() ) )
+        { // do not save nullopt if interrupted, because it might actually had the image
+            return;
+        }
 
         {
             std::unique_lock lock( mutex_ );
 
-            const auto albumId = GenerateAlbumId( currentRequestOpt_->artist, currentRequestOpt_->album );
-            albumIdToArtUrl_.try_emplace( albumId, artUrlOpt );
+            const auto albumIdOpt = GenerateAlbumId( *currentRequestOpt_ );
+            assert( albumIdOpt );
+
+            albumIdToArtUrl_.try_emplace( *albumIdOpt, artUrlOpt );
 
             if ( lastRequest == currentRequestOpt_ )
             {
@@ -288,27 +245,36 @@ void AlbumArtFetcher::ThreadMain()
     }
 }
 
-std::optional<qwr::u8string> AlbumArtFetcher::ProcessFetchRequest( const FetchRequest& request )
+std::optional<qwr::u8string> AlbumArtFetcher::ProcessFetchRequest( const MusicBrainzFetchRequest& request )
 {
     try
     {
-        if ( request.userReleaseMbidOpt )
-        {
-            const auto urlOpt = FetchAlbumArtUrl( *request.userReleaseMbidOpt );
-            return urlOpt;
-        }
-
-        const auto releaseMbidOpt = FetchReleaseMbid( request.album, request.artist );
-        if ( !releaseMbidOpt )
-        {
-            return std::nullopt;
-        }
-
-        return FetchAlbumArtUrl( *releaseMbidOpt );
+        return musicbrainz::FetchArt( request.artist, request.album, request.userReleaseMbidOpt );
     }
     catch ( const qwr::QwrException& e )
     {
         LogError( e.what() );
+        return std::nullopt;
+    }
+    catch ( const exception_aborted& /*e*/ )
+    {
+        return std::nullopt;
+    }
+}
+
+std::optional<qwr::u8string> AlbumArtFetcher::ProcessFetchRequest( const UploadRequest& request )
+{
+    try
+    {
+        return UploadArt( request.handle, request.uploaderPath );
+    }
+    catch ( const qwr::QwrException& e )
+    {
+        LogError( e.what() );
+        return std::nullopt;
+    }
+    catch ( const exception_aborted& /*e*/ )
+    {
         return std::nullopt;
     }
 }

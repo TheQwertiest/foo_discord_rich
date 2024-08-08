@@ -45,7 +45,7 @@ class PresenceModifier
 public:
     ~PresenceModifier();
 
-    void UpdateImage( metadb_handle_ptr metadb = metadb_handle_ptr() );
+    void UpdateImage();
     void UpdateSmallImage();
     void UpdateTrack( metadb_handle_ptr metadb = metadb_handle_ptr() );
     void UpdateDuration( double currentTime );
