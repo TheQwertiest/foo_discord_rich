@@ -45,7 +45,7 @@ namespace
 
 const qwr::u8string& GetTempImageFilePathTemplate()
 {
-    static const qwr::u8string tmpImagePath{ ( drp::path::ImageDir() / "tmp_image" ).u8string() };
+    static const qwr::u8string tmpImagePath{ ( drp::path::ImageDir() / "tmp_image." ).u8string() };
     return tmpImagePath;
 }
 
