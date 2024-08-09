@@ -9,6 +9,7 @@
 #include <component_paths.h>
 
 #include <cpr/cpr.h>
+#include <qwr/abort_callback.h>
 #include <qwr/algorithm.h>
 #include <qwr/file_helpers.h>
 #include <qwr/thread_name_setter.h>
@@ -28,7 +29,7 @@ namespace
 
 const fs::path& GetCacheFilePath()
 {
-    static const auto cachePath = drp::path::ImageDir() / "album_art_urls.json";
+    static const auto cachePath = drp::path::ImageDir() / "art_urls.json";
     return cachePath;
 }
 
@@ -215,7 +216,7 @@ void AlbumArtFetcher::ThreadMain()
         }
 
         auto artUrlOpt = std::visit( [&]( const auto& arg ) { return ProcessFetchRequest( arg ); }, *lastRequest );
-        if ( !artUrlOpt && ( fb2k::mainAborter().is_aborting() || token.stop_requested() ) )
+        if ( !artUrlOpt && ( qwr::GlobalAbortCallback::GetInstance().is_aborting() || token.stop_requested() ) )
         { // do not save nullopt if interrupted, because it might actually had the image
             return;
         }

@@ -4,6 +4,8 @@
 #include <discord/discord_integration.h>
 #include <fb2k/config.h>
 
+#include <qwr/abort_callback.h>
+
 DECLARE_COMPONENT_VERSION(
     DRP_NAME,
     DRP_VERSION,
@@ -25,6 +27,7 @@ public:
 
     void on_quit() override
     {
+        qwr::GlobalAbortCallback::GetInstance().Abort();
         drp::AlbumArtFetcher::Get().Finalize();
         drp::DiscordAdapter::GetInstance().Finalize();
     }

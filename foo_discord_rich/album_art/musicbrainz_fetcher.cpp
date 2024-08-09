@@ -3,6 +3,7 @@
 #include "musicbrainz_fetcher.h"
 
 #include <cpr/cpr.h>
+#include <qwr/abort_callback.h>
 
 namespace
 {
@@ -90,7 +91,7 @@ namespace drp::musicbrainz
 
 std::optional<qwr::u8string> FetchArt( const qwr::u8string& album, const qwr::u8string& artist, const std::optional<qwr::u8string>& userReleaseMbidOpt )
 {
-    auto& aborter = fb2k::mainAborter();
+    auto& aborter = qwr::GlobalAbortCallback::GetInstance();
 
     if ( userReleaseMbidOpt )
     {

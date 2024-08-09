@@ -5,6 +5,7 @@
 #include <component_paths.h>
 
 #include <cpr/cpr.h>
+#include <qwr/abort_callback.h>
 #include <qwr/final_action.h>
 #include <qwr/winapi_error_helpers.h>
 
@@ -193,7 +194,7 @@ void CreateUploaderProcess( const qwr::u8string& uploaderPath, JobData& jobData 
                                  nullptr,
                                  nullptr,
                                  true,
-                                 CREATE_SUSPENDED /* | CREATE_NO_WINDOW*/,
+                                 CREATE_SUSPENDED | CREATE_NO_WINDOW,
                                  nullptr,
                                  nullptr,
                                  &si,
@@ -246,7 +247,7 @@ void WriteDataToJob( const auto artPath, JobData& jobData )
 {
     const auto artPathW = qwr::unicode::ToWide( artPath );
     DWORD written = 0;
-    auto bRet = ::WriteFile( jobData.hStdinWrite.get(), artPathW.data(), artPathW.size(), &written, nullptr );
+    auto bRet = ::WriteFile( jobData.hStdinWrite.get(), artPathW.data(), static_cast<DWORD>( artPathW.size() ), &written, nullptr );
     qwr::error::CheckWinApi( bRet, "WriteFile" );
 
     jobData.hStdinWrite.reset();
@@ -254,25 +255,33 @@ void WriteDataToJob( const auto artPath, JobData& jobData )
 
 /// @throw qwr::qwrException
 /// @throw exception_aborted
-void WairForJob( JobData& jobData, foobar2000_io::abort_callback& aborter )
+DWORD WaitForJob( JobData& jobData )
 {
+    qwr::TimedAbortCallback aborter{ "", kMaxWaitTime };
+
     std::array handlesToWait{ jobData.hProcess.get(), aborter.get_handle() };
-    const auto waitResult = WaitForMultipleObjects( handlesToWait.size(), handlesToWait.data(), false, static_cast<DWORD>( std::chrono::milliseconds{ kMaxWaitTime }.count() ) );
+    const auto waitResult = WaitForMultipleObjects( static_cast<DWORD>( handlesToWait.size() ), handlesToWait.data(), false, static_cast<DWORD>( std::chrono::milliseconds{ kMaxWaitTime }.count() ) );
     if ( waitResult != WAIT_OBJECT_0 )
     {
         if ( waitResult == WAIT_TIMEOUT )
         {
-            throw qwr::QwrException( "Upload process timed out" );
+            throw qwr::QwrException( "Uploader process timed out" );
         }
 
-        assert( waitResult == WAIT_OBJECT_0 + 1 );
+        assert( waitResult == WAIT_OBJECT_0 + 1 && aborter.is_aborting() );
         aborter.check();
     }
+
+    DWORD exitCode = 0;
+    auto bRet = ::GetExitCodeProcess( jobData.hProcess.get(), &exitCode );
+    qwr::error::CheckWinApi( bRet, "GetExitCodeProcess" );
 
     jobData.hProcess.reset();
     jobData.hThread.reset();
     jobData.hStdoutWrite.reset();
     jobData.hStdinRead.reset();
+
+    return exitCode;
 }
 
 /// @throw qwr::qwrException
@@ -280,14 +289,14 @@ std::optional<qwr::u8string> ReadDataFromJob( JobData& jobData )
 {
     std::array<char, 2048> stdoutBuf{};
     DWORD dwRead = 0;
-    if ( !PeekNamedPipe( jobData.hStdoutRead.get(), stdoutBuf.data(), stdoutBuf.size(), &dwRead, nullptr, nullptr ) || !dwRead )
+    if ( !PeekNamedPipe( jobData.hStdoutRead.get(), stdoutBuf.data(), static_cast<DWORD>( stdoutBuf.size() ), &dwRead, nullptr, nullptr ) || !dwRead )
     {
-        throw qwr::QwrException( "Upload process didn't write anything to stdout" );
+        return std::nullopt;
     }
 
     stdoutBuf.fill( 0 );
     dwRead = 0;
-    auto bRet = ::ReadFile( jobData.hStdoutRead.get(), stdoutBuf.data(), stdoutBuf.size(), &dwRead, nullptr );
+    auto bRet = ::ReadFile( jobData.hStdoutRead.get(), stdoutBuf.data(), static_cast<DWORD>( stdoutBuf.size() ), &dwRead, nullptr );
     qwr::error::CheckWinApi( bRet, "ReadFile" );
 
     jobData.hStdoutRead.reset();
@@ -309,7 +318,7 @@ namespace drp
 
 std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const qwr::u8string& uploaderPath )
 {
-    auto& aborter = fb2k::mainAborter();
+    auto& aborter = qwr::GlobalAbortCallback::GetInstance();
 
     const auto artDataOpt = GetArtData( handle, aborter );
     if ( !artDataOpt )
@@ -333,8 +342,12 @@ std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const q
 
     auto jobData = ExecuteUploaderJob( uploaderPath );
     WriteDataToJob( artPath, jobData );
-    WairForJob( jobData, aborter );
-    return ReadDataFromJob( jobData );
+    const auto exitCode = WaitForJob( jobData );
+    const auto jobOutputOpt = ReadDataFromJob( jobData );
+    qwr::QwrException::ExpectTrue( !exitCode, "Uploader failed with error code {}\nUploader output:\n```\n{}\n```", exitCode, jobOutputOpt.value_or( "" ) );
+    qwr::QwrException::ExpectTrue( jobOutputOpt.has_value(), "Uploader process didn't write anything to stdout" );
+
+    return *jobOutputOpt;
 }
 
 } // namespace drp
