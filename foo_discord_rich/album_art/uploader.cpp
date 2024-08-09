@@ -24,6 +24,19 @@ struct ArtData
     std::optional<qwr::u8string> pathOpt;
 };
 
+using UniqueHandlePtr = std::unique_ptr<std::remove_pointer_t<HANDLE>, decltype( &CloseHandle )>;
+
+struct JobData
+{
+    UniqueHandlePtr hStdinRead{ nullptr, CloseHandle };
+    UniqueHandlePtr hStdinWrite{ nullptr, CloseHandle };
+    UniqueHandlePtr hStdoutRead{ nullptr, CloseHandle };
+    UniqueHandlePtr hStdoutWrite{ nullptr, CloseHandle };
+    UniqueHandlePtr hProcess{ nullptr, CloseHandle };
+    UniqueHandlePtr hThread{ nullptr, CloseHandle };
+    UniqueHandlePtr hJob{ nullptr, CloseHandle };
+};
+
 } // namespace
 
 namespace
@@ -132,6 +145,163 @@ qwr::u8string SaveArtToFile( const album_art_data_ptr& pArtData, abort_callback&
     return imagePath;
 }
 
+/// @throw qwr::qwrException
+void CreateUploaderPipes( JobData& data )
+{
+    SECURITY_ATTRIBUTES saAttr{};
+    saAttr.nLength = sizeof( SECURITY_ATTRIBUTES );
+    saAttr.bInheritHandle = true;
+    saAttr.lpSecurityDescriptor = nullptr;
+
+    HANDLE hStdoutRead{};
+    HANDLE hStdoutWrite{};
+    auto bRet = ::CreatePipe( &hStdoutRead, &hStdoutWrite, &saAttr, 0 );
+    qwr::error::CheckWinApi( bRet, "CreatePipe(stdout)" );
+
+    data.hStdoutRead.reset( hStdoutRead );
+    data.hStdoutWrite.reset( hStdoutWrite );
+
+    bRet = SetHandleInformation( hStdoutRead, HANDLE_FLAG_INHERIT, 0 );
+    qwr::error::CheckWinApi( bRet, "SetHandleInformation(stdout)" );
+
+    HANDLE hStdinRead{};
+    HANDLE hStdinWrite{};
+    bRet = ::CreatePipe( &hStdinRead, &hStdinWrite, &saAttr, 0 );
+    qwr::error::CheckWinApi( bRet, "CreatePipe(stdin)" );
+
+    data.hStdinRead.reset( hStdinRead );
+    data.hStdinWrite.reset( hStdinWrite );
+
+    bRet = SetHandleInformation( hStdinWrite, HANDLE_FLAG_INHERIT, 0 );
+    qwr::error::CheckWinApi( bRet, "SetHandleInformation(stdin)" );
+}
+
+/// @throw qwr::qwrException
+/// @throw exception_aborted
+void CreateUploaderProcess( const qwr::u8string& uploaderPath, JobData& jobData )
+{
+    auto uploaderPathW = qwr::unicode::ToWide( uploaderPath );
+    PROCESS_INFORMATION pi{};
+    STARTUPINFO si{};
+    si.cb = sizeof( si );
+    si.hStdError = jobData.hStdoutWrite.get(); // TODO: handle
+    si.hStdOutput = jobData.hStdoutWrite.get();
+    si.hStdInput = jobData.hStdinRead.get();
+    si.dwFlags |= STARTF_USESTDHANDLES;
+    auto bRet = ::CreateProcess( nullptr,
+                                 uploaderPathW.data(),
+                                 nullptr,
+                                 nullptr,
+                                 true,
+                                 CREATE_SUSPENDED /* | CREATE_NO_WINDOW*/,
+                                 nullptr,
+                                 nullptr,
+                                 &si,
+                                 &pi );
+    qwr::error::CheckWinApi( bRet, "CreateProcess" );
+
+    jobData.hProcess.reset( pi.hProcess );
+    jobData.hThread.reset( pi.hThread );
+}
+
+/// @throw qwr::qwrException
+void CreateUploaderJob( JobData& data )
+{
+    const auto hJob = ::CreateJobObject( nullptr, nullptr );
+    qwr::error::CheckWinApi( hJob, "CreateJobObject" );
+
+    data.hJob.reset( hJob );
+
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli{};
+    jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+    auto bRet = ::SetInformationJobObject( hJob, JobObjectExtendedLimitInformation, &jeli, sizeof( jeli ) );
+    qwr::error::CheckWinApi( bRet, "SetInformationJobObject" );
+
+    bRet = ::AssignProcessToJobObject( hJob, data.hProcess.get() );
+    qwr::error::CheckWinApi( bRet, "AssignProcessToJobObject" );
+}
+
+/// @throw qwr::qwrException
+void StartUploaderJob( JobData& jobData )
+{
+    auto iRet = ::ResumeThread( jobData.hThread.get() );
+    qwr::error::CheckWinApi( iRet != -1, "ResumeThread" );
+}
+
+/// @throw qwr::qwrException
+JobData ExecuteUploaderJob( const qwr::u8string& uploaderPath )
+{
+    JobData jobData;
+
+    CreateUploaderPipes( jobData );
+    CreateUploaderProcess( uploaderPath, jobData );
+    CreateUploaderJob( jobData );
+    StartUploaderJob( jobData );
+
+    return jobData;
+}
+
+/// @throw qwr::qwrException
+void WriteDataToJob( const auto artPath, JobData& jobData )
+{
+    const auto artPathW = qwr::unicode::ToWide( artPath );
+    DWORD written = 0;
+    auto bRet = ::WriteFile( jobData.hStdinWrite.get(), artPathW.data(), artPathW.size(), &written, nullptr );
+    qwr::error::CheckWinApi( bRet, "WriteFile" );
+
+    jobData.hStdinWrite.reset();
+}
+
+/// @throw qwr::qwrException
+/// @throw exception_aborted
+void WairForJob( JobData& jobData, foobar2000_io::abort_callback& aborter )
+{
+    std::array handlesToWait{ jobData.hProcess.get(), aborter.get_handle() };
+    const auto waitResult = WaitForMultipleObjects( handlesToWait.size(), handlesToWait.data(), false, static_cast<DWORD>( std::chrono::milliseconds{ kMaxWaitTime }.count() ) );
+    if ( waitResult != WAIT_OBJECT_0 )
+    {
+        if ( waitResult == WAIT_TIMEOUT )
+        {
+            throw qwr::QwrException( "Upload process timed out" );
+        }
+
+        assert( waitResult == WAIT_OBJECT_0 + 1 );
+        aborter.check();
+    }
+
+    jobData.hProcess.reset();
+    jobData.hThread.reset();
+    jobData.hStdoutWrite.reset();
+    jobData.hStdinRead.reset();
+}
+
+/// @throw qwr::qwrException
+std::optional<qwr::u8string> ReadDataFromJob( JobData& jobData )
+{
+    std::array<char, 2048> stdoutBuf{};
+    DWORD dwRead = 0;
+    if ( !PeekNamedPipe( jobData.hStdoutRead.get(), stdoutBuf.data(), stdoutBuf.size(), &dwRead, nullptr, nullptr ) || !dwRead )
+    {
+        throw qwr::QwrException( "Upload process didn't write anything to stdout" );
+    }
+
+    stdoutBuf.fill( 0 );
+    dwRead = 0;
+    auto bRet = ::ReadFile( jobData.hStdoutRead.get(), stdoutBuf.data(), stdoutBuf.size(), &dwRead, nullptr );
+    qwr::error::CheckWinApi( bRet, "ReadFile" );
+
+    jobData.hStdoutRead.reset();
+
+    qwr::u8string_view url{ stdoutBuf.data(), strlen( stdoutBuf.data() ) };
+    url = url.substr( 0, url.find_last_not_of( " \t\n\r" ) + 1 );
+    if ( url.empty() )
+    {
+        return std::nullopt;
+    }
+
+    return qwr::u8string{ url.data(), url.size() };
+}
+
 } // namespace
 
 namespace drp
@@ -139,7 +309,6 @@ namespace drp
 
 std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const qwr::u8string& uploaderPath )
 {
-    // TODO: split to different methods
     auto& aborter = fb2k::mainAborter();
 
     const auto artDataOpt = GetArtData( handle, aborter );
@@ -162,141 +331,10 @@ std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const q
 
     aborter.check();
 
-    SECURITY_ATTRIBUTES saAttr{};
-    saAttr.nLength = sizeof( SECURITY_ATTRIBUTES );
-    saAttr.bInheritHandle = true;
-    saAttr.lpSecurityDescriptor = nullptr;
-
-    HANDLE hStdoutRead{};
-    HANDLE hStdoutWrite{};
-    auto bRet = ::CreatePipe( &hStdoutRead, &hStdoutWrite, &saAttr, 0 );
-    qwr::error::CheckWinApi( bRet, "CreatePipe(stdout)" );
-
-    qwr::final_action autoStdoutReadPipe( [hStdoutRead] {
-        ::CloseHandle( hStdoutRead );
-    } );
-    qwr::final_action autoStdoutWritePipe( [hStdoutWrite] {
-        ::CloseHandle( hStdoutWrite );
-    } );
-
-    bRet = SetHandleInformation( hStdoutRead, HANDLE_FLAG_INHERIT, 0 );
-    qwr::error::CheckWinApi( bRet, "SetHandleInformation(stdout)" );
-
-    HANDLE hStdinRead{};
-    HANDLE hStdinWrite{};
-    bRet = ::CreatePipe( &hStdinRead, &hStdinWrite, &saAttr, 0 );
-    qwr::error::CheckWinApi( bRet, "CreatePipe(stdin)" );
-
-    qwr::final_action autoStdinReadPipe( [hStdinRead] {
-        ::CloseHandle( hStdinRead );
-    } );
-    qwr::final_action autoStdinWritePipe( [hStdinWrite] {
-        ::CloseHandle( hStdinWrite );
-    } );
-
-    bRet = SetHandleInformation( hStdinWrite, HANDLE_FLAG_INHERIT, 0 );
-    qwr::error::CheckWinApi( bRet, "SetHandleInformation(stdin)" );
-
-    const auto hJob = ::CreateJobObject( nullptr, nullptr );
-    qwr::error::CheckWinApi( hJob, "CreateJobObject" );
-
-    qwr::final_action autoJob( [hJob] {
-        ::CloseHandle( hJob );
-    } );
-
-    {
-        JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli{};
-        jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-        bRet = ::SetInformationJobObject( hJob, JobObjectExtendedLimitInformation, &jeli, sizeof( jeli ) );
-        qwr::error::CheckWinApi( bRet, "SetInformationJobObject" );
-    }
-
-    auto uploaderPathW = qwr::unicode::ToWide( uploaderPath );
-    PROCESS_INFORMATION pi{};
-    STARTUPINFO si{};
-    si.cb = sizeof( si );
-    si.hStdError = hStdoutWrite; // TODO: handle
-    si.hStdOutput = hStdoutWrite;
-    si.hStdInput = hStdinRead;
-    si.dwFlags |= STARTF_USESTDHANDLES;
-    bRet = ::CreateProcess( nullptr,
-                            uploaderPathW.data(),
-                            nullptr,
-                            nullptr,
-                            true,
-                            CREATE_SUSPENDED | CREATE_NO_WINDOW,
-                            nullptr,
-                            nullptr,
-                            &si,
-                            &pi );
-    qwr::error::CheckWinApi( bRet, "CreateProcess" );
-
-    qwr::final_action autoProcess( [pi] {
-        ::CloseHandle( pi.hProcess );
-        ::CloseHandle( pi.hThread );
-    } );
-
-    bRet = ::AssignProcessToJobObject( hJob, pi.hProcess );
-    qwr::error::CheckWinApi( bRet, "AssignProcessToJobObject" );
-
-    auto iRet = ::ResumeThread( pi.hThread );
-    qwr::error::CheckWinApi( iRet != -1, "ResumeThread" );
-
-    {
-        const auto artPathW = qwr::unicode::ToWide( artPath );
-        DWORD written = 0;
-        bRet = ::WriteFile( hStdinWrite, artPathW.data(), artPathW.size(), &written, nullptr );
-        qwr::error::CheckWinApi( bRet, "AssignProcessToJobObject" );
-        autoStdinWritePipe.cancel();
-        ::CloseHandle( hStdinWrite );
-    }
-
-    {
-        std::array handlesToWait{ pi.hProcess, aborter.get_handle() };
-        const auto waitResult = WaitForMultipleObjects( handlesToWait.size(), handlesToWait.data(), false, static_cast<DWORD>( std::chrono::milliseconds{ kMaxWaitTime }.count() ) );
-        if ( waitResult != WAIT_OBJECT_0 )
-        {
-            if ( waitResult == WAIT_TIMEOUT )
-            {
-                throw qwr::QwrException( "Upload process timed out" );
-            }
-
-            assert( waitResult == WAIT_OBJECT_0 + 1 );
-            aborter.check();
-        }
-
-        autoProcess.cancel();
-        ::CloseHandle( pi.hProcess );
-        ::CloseHandle( pi.hThread );
-
-        autoStdoutWritePipe.cancel();
-        ::CloseHandle( hStdoutWrite );
-        autoStdinReadPipe.cancel();
-        ::CloseHandle( hStdinRead );
-    }
-
-    {
-        std::array<char, 2048> stdoutBuf{};
-        DWORD dwRead = 0;
-        if ( !PeekNamedPipe( hStdoutRead, stdoutBuf.data(), stdoutBuf.size(), &dwRead, nullptr, nullptr ) || !dwRead )
-        {
-            throw qwr::QwrException( "Upload process didn't write anything to stdout" );
-        }
-
-        stdoutBuf.fill( 0 );
-        dwRead = 0;
-        bRet = ::ReadFile( hStdoutRead, stdoutBuf.data(), stdoutBuf.size(), &dwRead, nullptr );
-        qwr::error::CheckWinApi( bRet, "ReadFile" );
-
-        qwr::u8string_view url{ stdoutBuf.data(), strlen( stdoutBuf.data() ) };
-        url = url.substr( 0, url.find_last_not_of( " \t\n\r" ) + 1 );
-        if ( url.empty() )
-        {
-            return std::nullopt;
-        }
-
-        return qwr::u8string{ url.data(), url.size() };
-    }
+    auto jobData = ExecuteUploaderJob( uploaderPath );
+    WriteDataToJob( artPath, jobData );
+    WairForJob( jobData, aborter );
+    return ReadDataFromJob( jobData );
 }
 
 } // namespace drp

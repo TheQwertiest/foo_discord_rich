@@ -13,7 +13,7 @@ qwr::fb2k::ConfigUint8Enum<ImageSetting> smallImageSettings( guid::conf_small_im
 qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings( guid::conf_time_settings, TimeSetting::Disabled );
 qwr::fb2k::ConfigBool enableAlbumArtFetch( guid::conf_enable_album_art_fetch, true );
 qwr::fb2k::ConfigBool enableAlbumArtUpload( guid::conf_enable_album_art_upload, false );
-qwr::fb2k::ConfigString albumArtUploaderPath( guid::conf_album_art_uploader_path, "" );
+qwr::fb2k::ConfigString albumArtUploaderCmd( guid::conf_album_art_uploader_cmd, "" );
 qwr::fb2k::ConfigString albumArtUploadPinQuery( guid::conf_album_art_uploader_pin_query, "%artist%|%album%" );
 
 qwr::fb2k::ConfigString topTextQuery( guid::conf_top_text_query, "[%title%]" );

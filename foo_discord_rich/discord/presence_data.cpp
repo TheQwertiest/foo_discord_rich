@@ -169,9 +169,9 @@ void PresenceModifier::UpdateImage()
 
             const auto albumId = EvaluateQueryForPlayingTrack( metadb, config::albumArtUploadPinQuery );
             const AlbumArtFetcher::UploadRequest request{
-                .albumId = EvaluateQueryForPlayingTrack( metadb, config::albumArtUploadPinQuery ),
+                .artPinId = EvaluateQueryForPlayingTrack( metadb, config::albumArtUploadPinQuery ),
                 .handle = metadb,
-                .uploaderPath = config::albumArtUploaderPath };
+                .uploaderPath = config::albumArtUploaderCmd };
 
             return AlbumArtFetcher::Get().GetArtUrl( request );
         }

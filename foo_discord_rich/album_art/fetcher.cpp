@@ -32,14 +32,14 @@ const fs::path& GetCacheFilePath()
     return cachePath;
 }
 
-qwr::u8string GenerateMusicBrainzAlbumId( const qwr::u8string& artist, const qwr::u8string& album )
+qwr::u8string GenerateMusicBrainzArtPinId( const qwr::u8string& artist, const qwr::u8string& album )
 {
     return artist + "|" + album;
 }
 
-std::optional<qwr::u8string> GenerateAlbumId( const drp::AlbumArtFetcher::FetchRequest& request )
+std::optional<qwr::u8string> GenerateArtPinId( const drp::AlbumArtFetcher::FetchRequest& request )
 {
-    const auto albumId = std::visit(
+    const auto artPinId = std::visit(
         qwr::Visitor{
             []( const drp::AlbumArtFetcher::MusicBrainzFetchRequest& req ) {
                 const auto& [artist, album, userReleaseMbidOpt] = req;
@@ -47,17 +47,17 @@ std::optional<qwr::u8string> GenerateAlbumId( const drp::AlbumArtFetcher::FetchR
                 {
                     return qwr::u8string{};
                 }
-                return GenerateMusicBrainzAlbumId( req.artist, req.album );
+                return GenerateMusicBrainzArtPinId( req.artist, req.album );
             },
             []( const drp::AlbumArtFetcher::UploadRequest& req ) {
                 if ( req.uploaderPath.empty() )
                 {
                     return qwr::u8string{};
                 }
-                return req.albumId;
+                return req.artPinId;
             } },
         request );
-    return ( albumId.empty() ? std::optional<qwr::u8string>{} : albumId );
+    return ( artPinId.empty() ? std::optional<qwr::u8string>{} : artPinId );
 }
 
 } // namespace
@@ -85,13 +85,13 @@ void AlbumArtFetcher::Finalize()
 
 std::optional<qwr::u8string> AlbumArtFetcher::GetArtUrl( const FetchRequest& request )
 {
-    const auto albumArtIdOpt = GenerateAlbumId( request );
-    if ( !albumArtIdOpt )
+    const auto artPinIdOpt = GenerateArtPinId( request );
+    if ( !artPinIdOpt )
     {
         return std::nullopt;
     }
 
-    if ( const auto artUrlOpt = qwr::FindOrDefault( albumIdToArtUrl_, *albumArtIdOpt, std::nullopt );
+    if ( const auto artUrlOpt = qwr::FindOrDefault( artPinIdToArtUrl_, *artPinIdOpt, std::nullopt );
          artUrlOpt )
     {
         return artUrlOpt;
@@ -120,7 +120,7 @@ void AlbumArtFetcher::LoadCache()
         }
 
         const auto content = qwr::file::ReadFile( cachePath, CP_UTF8 );
-        json::parse( content ).get_to( albumIdToArtUrl_ );
+        json::parse( content ).get_to( artPinIdToArtUrl_ );
     }
     catch ( const qwr::QwrException& e )
     {
@@ -145,7 +145,7 @@ void AlbumArtFetcher::SaveCache()
         const auto cachePath = GetCacheFilePath();
         fs::create_directories( cachePath.parent_path() );
 
-        const auto content = json( albumIdToArtUrl_ ).dump( 2 );
+        const auto content = json( artPinIdToArtUrl_ ).dump( 2 );
         qwr::file::WriteFile( cachePath, content, false );
     }
     catch ( const qwr::QwrException& e )
@@ -193,8 +193,8 @@ void AlbumArtFetcher::ThreadMain()
 
             if ( currentRequestOpt_ )
             {
-                if ( const auto albumIdOpt = GenerateAlbumId( *currentRequestOpt_ );
-                     albumIdOpt && albumIdToArtUrl_.contains( *albumIdOpt ) )
+                if ( const auto artPinIdOpt = GenerateArtPinId( *currentRequestOpt_ );
+                     artPinIdOpt && artPinIdToArtUrl_.contains( *artPinIdOpt ) )
                 {
                     currentRequestOpt_.reset();
                     lastRequest.reset();
@@ -214,19 +214,25 @@ void AlbumArtFetcher::ThreadMain()
             }
         }
 
-        const auto artUrlOpt = std::visit( [&]( const auto& arg ) { return ProcessFetchRequest( arg ); }, *lastRequest );
+        auto artUrlOpt = std::visit( [&]( const auto& arg ) { return ProcessFetchRequest( arg ); }, *lastRequest );
         if ( !artUrlOpt && ( fb2k::mainAborter().is_aborting() || token.stop_requested() ) )
         { // do not save nullopt if interrupted, because it might actually had the image
             return;
         }
 
+        if ( artUrlOpt && qwr::unicode::ToWide( *artUrlOpt ).length() > 255 )
+        { // Discord API max image key size
+            LogError( fmt::format( "Failed to process art url `{}`:\nlength is bigger than 255", *artUrlOpt ) );
+            artUrlOpt.reset();
+        }
+
         {
             std::unique_lock lock( mutex_ );
 
-            const auto albumIdOpt = GenerateAlbumId( *currentRequestOpt_ );
-            assert( albumIdOpt );
+            const auto artPinIdOpt = GenerateArtPinId( *currentRequestOpt_ );
+            assert( artPinIdOpt );
 
-            albumIdToArtUrl_.try_emplace( *albumIdOpt, artUrlOpt );
+            artPinIdToArtUrl_.try_emplace( *artPinIdOpt, artUrlOpt );
 
             if ( lastRequest == currentRequestOpt_ )
             {

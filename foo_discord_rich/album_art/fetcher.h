@@ -23,7 +23,7 @@ public:
 
     struct UploadRequest
     {
-        qwr::u8string albumId;
+        qwr::u8string artPinId;
         metadb_handle_ptr handle;
         qwr::u8string uploaderPath;
 
@@ -61,7 +61,7 @@ private:
     std::unique_ptr<std::jthread> pThread_;
 
     std::optional<FetchRequest> currentRequestOpt_;
-    std::unordered_map<qwr::u8string, std::optional<qwr::u8string>> albumIdToArtUrl_;
+    std::unordered_map<qwr::u8string, std::optional<qwr::u8string>> artPinIdToArtUrl_;
 };
 
 } // namespace drp
