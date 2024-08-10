@@ -32,7 +32,7 @@ Nightly builds: [Win32][nightly_win32], [x64][nightly_x64]
 
 ## Credits
 
-- [s0hv](https://github.com/s0hv): idea and original implementation of artwork uploader.
+- [s0hv](https://github.com/s0hv): idea, original implementation and documentation for artwork uploader.
 - [Respective authors][3rdparty_license] of the code being used in this project.
 
 [changelog]: changelog.md
