@@ -18,7 +18,7 @@ markdown: kramdown
 kramdown:
   parse_block_html: true
 
-baseurl: "/foo_discord_rich/" 
+baseurl: "/foo_discord_rich" 
 url: "https://theqwertiest.github.io"
 
 permalink: pretty
@@ -29,8 +29,11 @@ aux_links:
   "View on GitHub":
     - "//github.com/theqwertiest/foo_discord_rich"
 
+aux_links_new_tab: true
+
 color_scheme: "dark"
 
-footer_content: "Copyright &copy; 2018-2020 Yuri Shutenko.<br/>Distributed by an <a href=\"https://github.com/TheQwertiest/foo_discord_rich/blob/master/LICENSE\">MIT license.</a>"
+footer_content: "Copyright &copy; 2018-2024 Yuri Shutenko.<br/>Distributed by an <a href=\"https://github.com/TheQwertiest/foo_discord_rich/blob/master/LICENSE\">MIT license.</a>"
 
 ga_tracking: UA-154231909-3
+ga_tracking_anonymize_ip: true
