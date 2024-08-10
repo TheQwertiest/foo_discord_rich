@@ -32,26 +32,29 @@ It is recommended that you surround any paths with quotes, as paths containing s
 The exact commands that you need to input here change based on the script and are explained with more detail in the [Upload scripts](#upload-scripts) section.  
 The last option is called `Art pin query`, which is better left untouched in most cases (see [Descriptions of options](#descriptions-of-options) for more info).
 
-## Upload scripts
+## Uploaders
 
 **Disclaimer**: uploading is implemented via third-party software, which is maintained and updated, if at all, separately from this plugin by their respective authors. Use them at your own discretion, we are not responsible for any damages or other problems the scripts might cause.
 
-### Imgur
-Scripts for uploading art to [https://imgur.com](https://imgur.com)
+### Imgur ([imgur.com](https://imgur.com))
 
-#### Imgur uploader (standalone)
+#### Standalone binary
 
 This one is the easiest to install and use as it's just a single exe that you need download.
+
 You can find the latest release here [https://github.com/s0hv/rust-imgur-upload/releases/latest](https://github.com/s0hv/rust-imgur-upload/releases/latest)
-Then, to use it, just copy the path to the Artwork upload command like so `"C:\path\to\imgur-uploader.exe"`.
+
+Then, to use it, just copy the path to the Artwork upload command like so `"C:\path\to\imgur-uploader.exe"`.  
 After this the album art feature should start working.
 
-#### Imgur uploader (for Python 3.7 or later)
+#### Python 3.7 (or later) script
 
 This one requires a bit of technical knowledge but it's easier to customize for other needs if you have basic coding skills. 
+
 You need to have python 3.7 or later installed along with the requests library.
-Also, you need to obtain an imgur API token from here [https://api.imgur.com/oauth2/addclient](https://api.imgur.com/oauth2/addclient) (more instructions can be found here [https://apidocs.imgur.com/#intro](https://apidocs.imgur.com/#intro)).
-Fill the form and for authorization type make sure to select "OAuth 2 authorization without a callback URL".
+
+Also, you need to obtain an imgur API token from here [https://api.imgur.com/oauth2/addclient](https://api.imgur.com/oauth2/addclient) (more instructions can be found here [https://apidocs.imgur.com/#intro](https://apidocs.imgur.com/#intro)).  
+Fill the form and for authorization type make sure to select "OAuth 2 authorization without a callback URL".  
 After obtaining the API client id you can move on to the code.
 
 The code can be found in [this gist](https://gist.github.com/s0hv/5c07cfb4b939ee619d0efcc047991ceb).
@@ -64,11 +67,9 @@ After you have installed python, saved the script on your machine and inserted t
 
 After these steps you should start seeing the album art show up in your discord status.
 
-### Catbox
+### Catbox ([catbox.moe](https://catbox.moe))
 
-Scripts for uploading art to [https://catbox.moe](https://catbox.moe)
-
-#### Catbox uploader (for Powershell 7)
+#### Powershell 7 script
 
 To use this script you must have Powershell 7 installed (might work with 6, but I have not tested this). 
 One way of installing it is with [winget](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3#winget)
@@ -80,7 +81,7 @@ The code can be found from [this gist](https://gist.github.com/vt-idiot/8a7161a4
 After downloading set the Artwork upload command to the following value (assumes powershell 7 has been installed in the default location)
 `"C:\Program Files\PowerShell\7\pwsh.exe" "C:\path\to\catbox.ps1"`
 
-#### Catbox uploader (for Python 3.7 or later)
+#### Python 3.7 (or later) script
 
 The python setup for this is the same as for [imgur script](#imgur-upload-script-for-python-37-or-later).
 The code can be found from [this gist](https://gist.github.com/mechabubba/db1200c05fbbecf753b23c92ee8e9271).
@@ -88,13 +89,15 @@ The code can be found from [this gist](https://gist.github.com/mechabubba/db1200
 After you have installed python and saved the script on your machine, you need to set the Artwork upload command as follows.
 `"C:\path\to\python" "C:\path\to\catbox_upload.py"`
 
-#### Catbox uploader (standalone)
+#### Standalone binary
 
 The code for this uploader can be found [here](https://github.com/realoksi/foobar2000-catbox)
 and the releases can be found [here](https://github.com/realoksi/foobar2000-catbox/releases).
-The installation instructions are the same as for [Standalone imgur uploader](#standalone-imgur-uploader)
+The installation instructions are the same as for [Standalone imgur uploader](#standalone-binary)
 
-### Amazon S3 (for Python 3.7 or later)
+### Amazon S3
+
+#### Python 3.7 (or later) script
 
 This script allows you to upload images to an Amazon S3 bucket, 
 and it can be found [here](https://gist.github.com/okdargy/a55f40c7b339ee0a8b10a9827015453b).
