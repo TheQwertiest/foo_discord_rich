@@ -14,7 +14,7 @@ nav_order: 3
     - Click on `Reset page` and then `Apply`.
     - Restart foobar2000.
 - If it didn't help, try launching both Discord and foobar2000 as Administrator (right-click the app, and select the `Run as administrator` option).
-- If it didn't help, try the following steps to check if the problem is caused by conflict with some other components:
+- If it didn't help, try the following steps to check if the problem is caused by conflict with some other component:
     - Download the latest (non-beta) foobar2000.
     - Install it in portable mode to some `%FOLDER%`.
     - Download and install the latest (non-beta) `foo_discord_rich`.
