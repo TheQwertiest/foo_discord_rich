@@ -171,13 +171,13 @@ deploy_script:
 on_success:
   # issues clean up
   - ps: |
-        If ($env:APPVEYOR_REPO_TAG -eq $true -and $env:CONFIGURATION -eq "Release")
+        If ($env:APPVEYOR_REPO_TAG -eq $true -and $env:CONFIGURATION -eq "Release" -and $env:PLATFORM -eq "x64")
         {
           py -u submodules\fb2k_utils\scripts\close_gh_issues.py
         }
   # gh-pages
   - ps: |
-        If ($env:APPVEYOR_REPO_TAG -eq $true -and $env:CONFIGURATION -eq "Release")
+        If ($env:APPVEYOR_REPO_TAG -eq $true -and $env:CONFIGURATION -eq "Release" -and $env:PLATFORM -eq "x64")
         {
           git config --global credential.helper store
           Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:GITHUB_TOKEN):x-oauth-basic@github.com`n"
