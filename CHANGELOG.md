@@ -10,9 +10,26 @@ ___
 
 ## [Unreleased][]
 
+### Added
+- Added x64 support (#39).
+- Added dark-mode support (#61).
+- Added option to fetch and display album art from MusicBrainz (#6).
+- Added option to upload and display art from foobar2000 (requires external tools, not included in component) (#62).
+- Added text refresh when dynamic track info changes (no more than once in 30 seconds, due to Discord API limitations) (#50).
+
 ### Changed
 - !!! Now requires foobar2000 v2.0+ !!!
 - Changed Rich Presence activity type from `Playing` to `Listening to` (#2).
+  This change has also other effects, due to the way it's implemented in Discord API:
+	- Additional middle text field was added.
+	- Playback time is no longer displayed.
+	- Big image hover text is the same as middle text.
+
+### Fixed
+- Fixed inconsistent behaviour when pausing/stoping playback (#21).
+- Fixed tabs not receiving focus on `tab` press in Preferences (#23).
+- Fixed typo in component name in Preferences (#41).
+- Fixed various corner cases when multibyte characters were used in text queries (#57)
 
 ## [1.2.0][] - 2019-09-11
 ### Added
