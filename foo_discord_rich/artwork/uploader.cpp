@@ -140,7 +140,7 @@ qwr::u8string SaveArtToFile( const album_art_data_ptr& pArtData, abort_callback&
 namespace drp
 {
 
-std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const qwr::u8string& uploaderPath )
+std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const qwr::u8string& uploadCommand )
 {
     auto& aborter = qwr::GlobalAbortCallback::GetInstance();
 
@@ -165,7 +165,7 @@ std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const q
     aborter.check();
 
     const auto artUrl = [&] {
-        SubprocessExecutor uploader{ uploaderPath };
+        SubprocessExecutor uploader{ uploadCommand };
 
         uploader.Start();
         uploader.WriteData( artPath );

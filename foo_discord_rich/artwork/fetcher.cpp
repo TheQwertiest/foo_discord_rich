@@ -2,8 +2,8 @@
 
 #include "fetcher.h"
 
-#include <album_art/musicbrainz_fetcher.h>
-#include <album_art/uploader.h>
+#include <artwork/musicbrainz_fetcher.h>
+#include <artwork/uploader.h>
 #include <discord/discord_integration.h>
 
 #include <component_paths.h>
@@ -27,22 +27,16 @@ const std::chrono::seconds kRequestProcessingDelay{ 2 };
 namespace
 {
 
-const fs::path& GetCacheFilePath()
-{
-    static const auto cachePath = drp::path::ImageDir() / "art_urls.json";
-    return cachePath;
-}
-
 qwr::u8string GenerateMusicBrainzArtPinId( const qwr::u8string& artist, const qwr::u8string& album )
 {
     return artist + "|" + album;
 }
 
-std::optional<qwr::u8string> GenerateArtPinId( const drp::AlbumArtFetcher::FetchRequest& request )
+std::optional<qwr::u8string> GenerateArtPinId( const drp::ArtworkFetcher::FetchRequest& request )
 {
     const auto artPinId = std::visit(
         qwr::Visitor{
-            []( const drp::AlbumArtFetcher::MusicBrainzFetchRequest& req ) {
+            []( const drp::ArtworkFetcher::MusicBrainzFetchRequest& req ) {
                 const auto& [artist, album, userReleaseMbidOpt] = req;
                 if ( artist.empty() || album.empty() )
                 {
@@ -50,8 +44,8 @@ std::optional<qwr::u8string> GenerateArtPinId( const drp::AlbumArtFetcher::Fetch
                 }
                 return GenerateMusicBrainzArtPinId( req.artist, req.album );
             },
-            []( const drp::AlbumArtFetcher::UploadRequest& req ) {
-                if ( req.uploaderPath.empty() )
+            []( const drp::ArtworkFetcher::UploadRequest& req ) {
+                if ( req.uploadCommand.empty() )
                 {
                     return qwr::u8string{};
                 }
@@ -66,25 +60,25 @@ std::optional<qwr::u8string> GenerateArtPinId( const drp::AlbumArtFetcher::Fetch
 namespace drp
 {
 
-drp::AlbumArtFetcher& AlbumArtFetcher::Get()
+drp::ArtworkFetcher& ArtworkFetcher::Get()
 {
-    static AlbumArtFetcher instance;
+    static ArtworkFetcher instance;
     return instance;
 }
 
-void AlbumArtFetcher::Initialize()
+void ArtworkFetcher::Initialize()
 {
     LoadCache();
     StartThread();
 }
 
-void AlbumArtFetcher::Finalize()
+void ArtworkFetcher::Finalize()
 {
     StopThread();
     SaveCache();
 }
 
-std::optional<qwr::u8string> AlbumArtFetcher::GetArtUrl( const FetchRequest& request )
+std::optional<qwr::u8string> ArtworkFetcher::GetArtUrl( const FetchRequest& request )
 {
     const auto artPinIdOpt = GenerateArtPinId( request );
     if ( !artPinIdOpt )
@@ -108,7 +102,7 @@ std::optional<qwr::u8string> AlbumArtFetcher::GetArtUrl( const FetchRequest& req
     return std::nullopt;
 }
 
-void AlbumArtFetcher::LoadCache()
+void ArtworkFetcher::LoadCache()
 {
     using json = nlohmann::json;
 
@@ -137,7 +131,7 @@ void AlbumArtFetcher::LoadCache()
     }
 }
 
-void AlbumArtFetcher::SaveCache()
+void ArtworkFetcher::SaveCache()
 {
     using json = nlohmann::json;
 
@@ -163,13 +157,19 @@ void AlbumArtFetcher::SaveCache()
     }
 }
 
-void AlbumArtFetcher::StartThread()
+std::filesystem::path ArtworkFetcher::GetCacheFilePath()
 {
-    pThread_ = std::make_unique<std::jthread>( &AlbumArtFetcher::ThreadMain, this );
-    qwr::SetThreadName( *pThread_, "DRP AlbumArtFetcher" );
+    static const auto cachePath = drp::path::ImageDir() / "art_urls.json";
+    return cachePath;
 }
 
-void AlbumArtFetcher::StopThread()
+void ArtworkFetcher::StartThread()
+{
+    pThread_ = std::make_unique<std::jthread>( &ArtworkFetcher::ThreadMain, this );
+    qwr::SetThreadName( *pThread_, "DRP ArtFetcher" );
+}
+
+void ArtworkFetcher::StopThread()
 {
     if ( pThread_ )
     {
@@ -178,7 +178,7 @@ void AlbumArtFetcher::StopThread()
     }
 }
 
-void AlbumArtFetcher::ThreadMain()
+void ArtworkFetcher::ThreadMain()
 {
     auto token = pThread_->get_stop_token();
     std::optional<FetchRequest> lastRequest;
@@ -252,7 +252,7 @@ void AlbumArtFetcher::ThreadMain()
     }
 }
 
-std::optional<qwr::u8string> AlbumArtFetcher::ProcessFetchRequest( const MusicBrainzFetchRequest& request )
+std::optional<qwr::u8string> ArtworkFetcher::ProcessFetchRequest( const MusicBrainzFetchRequest& request )
 {
     try
     {
@@ -269,11 +269,11 @@ std::optional<qwr::u8string> AlbumArtFetcher::ProcessFetchRequest( const MusicBr
     }
 }
 
-std::optional<qwr::u8string> AlbumArtFetcher::ProcessFetchRequest( const UploadRequest& request )
+std::optional<qwr::u8string> ArtworkFetcher::ProcessFetchRequest( const UploadRequest& request )
 {
     try
     {
-        return UploadArt( request.handle, request.uploaderPath );
+        return UploadArt( request.handle, request.uploadCommand );
     }
     catch ( const qwr::QwrException& e )
     {

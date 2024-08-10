@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include <album_art/fetcher.h>
+#include <artwork/fetcher.h>
 #include <discord/discord_integration.h>
 #include <fb2k/config.h>
 
@@ -22,13 +22,13 @@ public:
     void on_init() override
     {
         drp::DiscordAdapter::GetInstance().Initialize();
-        drp::AlbumArtFetcher::Get().Initialize();
+        drp::ArtworkFetcher::Get().Initialize();
     }
 
     void on_quit() override
     {
         qwr::GlobalAbortCallback::GetInstance().Abort();
-        drp::AlbumArtFetcher::Get().Finalize();
+        drp::ArtworkFetcher::Get().Finalize();
         drp::DiscordAdapter::GetInstance().Finalize();
     }
 };

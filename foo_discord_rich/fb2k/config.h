@@ -23,9 +23,9 @@ extern qwr::fb2k::ConfigUint8Enum<ImageSetting> largeImageSettings;
 extern qwr::fb2k::ConfigUint8Enum<ImageSetting> smallImageSettings;
 extern qwr::fb2k::ConfigUint8Enum<TimeSetting> timeSettings;
 extern qwr::fb2k::ConfigBool enableAlbumArtFetch;
-extern qwr::fb2k::ConfigBool enableAlbumArtUpload;
-extern qwr::fb2k::ConfigString albumArtUploaderCmd;
-extern qwr::fb2k::ConfigString albumArtUploadPinQuery;
+extern qwr::fb2k::ConfigBool enableArtUpload;
+extern qwr::fb2k::ConfigString artUploadCmd;
+extern qwr::fb2k::ConfigString artUploadPinQuery;
 
 extern qwr::fb2k::ConfigString topTextQuery;
 extern qwr::fb2k::ConfigString middleTextQuery;

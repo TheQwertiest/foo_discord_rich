@@ -34,6 +34,7 @@ public:
     ~PreferenceTabManager() override;
 
     void OnDataChanged();
+    void RequestUiChange( int nId, bool enable );
 
     // preferences_page_instance
     HWND get_wnd() override;

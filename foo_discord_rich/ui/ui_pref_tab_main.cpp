@@ -26,9 +26,9 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
     , swapSmallImages_( config::swapSmallImages )
     , ddxOptions_( {
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( isEnabled_, IDC_CHECK_IS_ENABLED ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( topTextQuery_, IDC_TEXTBOX_TOP_TEXT ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( middleTextQuery_, IDC_TEXTBOX_MIDDLE_TEXT ),
-          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( bottomTextQuery_, IDC_TEXTBOX_BOTTOM_TEXT ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( topTextQuery_, IDC_EDIT_TOP_TEXT ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( middleTextQuery_, IDC_EDIT_MIDDLE_TEXT ),
+          qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_TextEdit>( bottomTextQuery_, IDC_EDIT_BOTTOM_TEXT ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( enableAlbumArtFetch_, IDC_CHECK_FETCH_ALBUM_ART ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( largeImageSettings_, std::initializer_list<int>{ IDC_RADIO_IMG_LIGHT, IDC_RADIO_IMG_DARK, IDC_RADIO_IMG_DISABLED } ),
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_RadioRange>( smallImageSettings_, std::initializer_list<int>{ IDC_RADIO_PLAYBACK_IMG_LIGHT, IDC_RADIO_PLAYBACK_IMG_DARK, IDC_RADIO_PLAYBACK_IMG_DISABLED } ),
@@ -37,6 +37,7 @@ PreferenceTabMain::PreferenceTabMain( PreferenceTabManager* pParent )
           qwr::ui::CreateUiDdxOption<qwr::ui::UiDdx_CheckBox>( swapSmallImages_, IDC_CHECK_SWAP_STATUS ),
       } )
 {
+    isAlbumArtFetchOverriden_ = config::enableArtUpload;
 }
 
 PreferenceTabMain::~PreferenceTabMain()
@@ -62,7 +63,16 @@ const wchar_t* PreferenceTabMain::Name() const
     return L"Main";
 }
 
-t_uint32 PreferenceTabMain::get_state()
+void PreferenceTabMain::OnUiChangeRequest( int nID, bool enable )
+{
+    if ( nID == IDC_CHECK_FETCH_ALBUM_ART )
+    {
+        enableAlbumArtFetch_.SetValue( enable );
+        isAlbumArtFetchOverriden_ = !enable;
+    }
+}
+
+t_uint32 PreferenceTabMain::GetState()
 {
     const bool hasChanged =
         ddxOptions_.cend() != std::find_if( ddxOptions_.cbegin(), ddxOptions_.cend(), []( const auto& ddxOpt ) {
@@ -72,7 +82,7 @@ t_uint32 PreferenceTabMain::get_state()
     return ( preferences_state::resettable | preferences_state::dark_mode_supported | ( hasChanged ? preferences_state::changed : 0 ) );
 }
 
-void PreferenceTabMain::apply()
+void PreferenceTabMain::Apply()
 {
     for ( auto& ddxOpt: ddxOptions_ )
     {
@@ -80,14 +90,15 @@ void PreferenceTabMain::apply()
     }
 }
 
-void PreferenceTabMain::reset()
+void PreferenceTabMain::Reset()
 {
     for ( auto& ddxOpt: ddxOptions_ )
     {
         ddxOpt->Option().ResetToDefault();
     }
 
-    UpdateUiFromCfg();
+    isAlbumArtFetchOverriden_ = false;
+    DoFullDdxToUi();
 }
 
 BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
@@ -98,13 +109,15 @@ BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
     {
         ddxOpt->Ddx().SetHwnd( m_hWnd );
     }
-    UpdateUiFromCfg();
+    DoFullDdxToUi();
 
     // Disable duration options, since they are currently not implemented by Discord API
     for ( auto id: { IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } )
     {
         CButton( GetDlgItem( id ) ).EnableWindow( false );
     }
+
+    CButton( GetDlgItem( IDC_CHECK_FETCH_ALBUM_ART ) ).EnableWindow( !isAlbumArtFetchOverriden_ );
 
     helpUrl_.SetHyperLinkExtendedStyle( HLINK_UNDERLINED | HLINK_COMMANDBUTTON );
     helpUrl_.SetToolTipText( L"Title formatting help" );
@@ -113,7 +126,7 @@ BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
     return TRUE; // set focus to default control
 }
 
-void PreferenceTabMain::OnEditChange( UINT uNotifyCode, int nID, CWindow wndCtl )
+void PreferenceTabMain::OnDdxUiChange( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
     auto it = std::find_if( ddxOptions_.begin(), ddxOptions_.end(), [nID]( auto& val ) {
         return val->Ddx().IsMatchingId( nID );
@@ -137,7 +150,7 @@ void PreferenceTabMain::OnChanged()
     pParent_->OnDataChanged();
 }
 
-void PreferenceTabMain::UpdateUiFromCfg()
+void PreferenceTabMain::DoFullDdxToUi()
 {
     if ( !this->m_hWnd )
     {

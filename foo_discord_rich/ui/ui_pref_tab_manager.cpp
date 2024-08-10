@@ -68,6 +68,14 @@ void PreferenceTabManager::OnDataChanged()
     callback_->on_state_changed();
 }
 
+void PreferenceTabManager::RequestUiChange( int nId, bool enable )
+{
+    for ( auto& tab: tabs_ )
+    {
+        tab->OnUiChangeRequest( nId, enable );
+    }
+}
+
 HWND PreferenceTabManager::get_wnd()
 {
     return m_hWnd;
@@ -78,7 +86,7 @@ t_uint32 PreferenceTabManager::get_state()
     uint32_t state = preferences_state::resettable | preferences_state::dark_mode_supported;
     for ( auto& tab: tabs_ )
     {
-        state |= tab->get_state();
+        state |= tab->GetState();
     }
 
     return state;
@@ -88,7 +96,7 @@ void PreferenceTabManager::apply()
 {
     for ( auto& tab: tabs_ )
     {
-        tab->apply();
+        tab->Apply();
     }
 
     OnDataChanged();
@@ -99,7 +107,7 @@ void PreferenceTabManager::reset()
 {
     for ( auto& tab: tabs_ )
     {
-        tab->reset();
+        tab->Reset();
     }
 
     OnDataChanged();

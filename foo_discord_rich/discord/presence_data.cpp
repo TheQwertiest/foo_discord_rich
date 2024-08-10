@@ -2,7 +2,7 @@
 
 #include "presence_data.h"
 
-#include <album_art/fetcher.h>
+#include <artwork/fetcher.h>
 #include <discord/discord_integration.h>
 #include <fb2k/config.h>
 
@@ -164,26 +164,26 @@ void PresenceModifier::UpdateImage()
             return std::nullopt;
         }
 
-        if ( config::enableAlbumArtUpload )
+        if ( config::enableArtUpload )
         { // overrides art fetching
 
-            const auto albumId = EvaluateQueryForPlayingTrack( metadb, config::albumArtUploadPinQuery );
-            const AlbumArtFetcher::UploadRequest request{
-                .artPinId = EvaluateQueryForPlayingTrack( metadb, config::albumArtUploadPinQuery ),
+            const auto albumId = EvaluateQueryForPlayingTrack( metadb, config::artUploadPinQuery );
+            const ArtworkFetcher::UploadRequest request{
+                .artPinId = EvaluateQueryForPlayingTrack( metadb, config::artUploadPinQuery ),
                 .handle = metadb,
-                .uploaderPath = config::albumArtUploaderCmd };
+                .uploadCommand = config::artUploadCmd };
 
-            return AlbumArtFetcher::Get().GetArtUrl( request );
+            return ArtworkFetcher::Get().GetArtUrl( request );
         }
         if ( config::enableAlbumArtFetch )
         {
             const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "$if3($meta(MUSICBRAINZ_ALBUMID),$meta(MUSICBRAINZ ALBUM ID))" );
-            const AlbumArtFetcher::MusicBrainzFetchRequest request{
+            const ArtworkFetcher::MusicBrainzFetchRequest request{
                 .artist = EvaluateQueryForPlayingTrack( metadb, "%artist%" ),
                 .album = EvaluateQueryForPlayingTrack( metadb, "%album%" ),
                 .userReleaseMbidOpt = userReleaseMbid.empty() ? std::optional<qwr::u8string>{} : userReleaseMbid };
 
-            return AlbumArtFetcher::Get().GetArtUrl( request );
+            return ArtworkFetcher::Get().GetArtUrl( request );
         }
         return std::nullopt;
     }();

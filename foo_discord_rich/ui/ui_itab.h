@@ -12,15 +12,11 @@ public:
     virtual CDialogImplBase& Dialog() = 0;
     virtual const wchar_t* Name() const = 0;
 
-    // preferences_page_instance
+    virtual void OnUiChangeRequest( int nID, bool enable ) = 0;
 
-    //! @returns a combination of preferences_state constants.
-    virtual uint32_t get_state() = 0;
-    //! @returns the window handle.
-    //! Applies preferences changes.
-    virtual void apply() = 0;
-    //! Resets this page's content to the default values. Does not apply any changes - lets user preview the changes before hitting "apply".
-    virtual void reset() = 0;
+    virtual uint32_t GetState() = 0;
+    virtual void Apply() = 0;
+    virtual void Reset() = 0;
 };
 
 } // namespace drp::ui

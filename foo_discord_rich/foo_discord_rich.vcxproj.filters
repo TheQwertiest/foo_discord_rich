@@ -16,11 +16,11 @@
     <Filter Include="resources">
       <UniqueIdentifier>{be01d18f-b5d4-4cbd-bfef-8bb55e89465e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="album_art">
-      <UniqueIdentifier>{9fbf3842-764c-4d29-9baf-29f65646a0fe}</UniqueIdentifier>
-    </Filter>
     <Filter Include="fb2k\callbacks">
       <UniqueIdentifier>{09c7bed0-3142-427d-b1f5-a91b838aa66b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="artwork">
+      <UniqueIdentifier>{9fbf3842-764c-4d29-9baf-29f65646a0fe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -57,17 +57,17 @@
     <ClCompile Include="fb2k\callbacks\playback.cpp">
       <Filter>fb2k\callbacks</Filter>
     </ClCompile>
-    <ClCompile Include="album_art\musicbrainz_fetcher.cpp">
-      <Filter>album_art</Filter>
-    </ClCompile>
-    <ClCompile Include="album_art\uploader.cpp">
-      <Filter>album_art</Filter>
-    </ClCompile>
-    <ClCompile Include="album_art\fetcher.cpp">
-      <Filter>album_art</Filter>
-    </ClCompile>
     <ClCompile Include="utils\subprocess_executor.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="artwork\musicbrainz_fetcher.cpp">
+      <Filter>artwork</Filter>
+    </ClCompile>
+    <ClCompile Include="artwork\uploader.cpp">
+      <Filter>artwork</Filter>
+    </ClCompile>
+    <ClCompile Include="artwork\fetcher.cpp">
+      <Filter>artwork</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,17 +102,17 @@
     <ClInclude Include="utils\logging.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="album_art\musicbrainz_fetcher.h">
-      <Filter>album_art</Filter>
-    </ClInclude>
-    <ClInclude Include="album_art\fetcher.h">
-      <Filter>album_art</Filter>
-    </ClInclude>
-    <ClInclude Include="album_art\uploader.h">
-      <Filter>album_art</Filter>
-    </ClInclude>
     <ClInclude Include="utils\subprocess_executor.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="artwork\musicbrainz_fetcher.h">
+      <Filter>artwork</Filter>
+    </ClInclude>
+    <ClInclude Include="artwork\uploader.h">
+      <Filter>artwork</Filter>
+    </ClInclude>
+    <ClInclude Include="artwork\fetcher.h">
+      <Filter>artwork</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

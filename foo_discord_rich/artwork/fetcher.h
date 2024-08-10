@@ -9,7 +9,7 @@
 namespace drp
 {
 
-class AlbumArtFetcher
+class ArtworkFetcher
 {
 public:
     struct MusicBrainzFetchRequest
@@ -25,7 +25,7 @@ public:
     {
         qwr::u8string artPinId;
         metadb_handle_ptr handle;
-        qwr::u8string uploaderPath;
+        qwr::u8string uploadCommand;
 
         auto operator<=>( const UploadRequest& other ) const = default;
     };
@@ -33,17 +33,18 @@ public:
     using FetchRequest = std::variant<MusicBrainzFetchRequest, UploadRequest>;
 
 public:
-    static AlbumArtFetcher& Get();
+    static ArtworkFetcher& Get();
 
     void Initialize();
     void Finalize();
 
     std::optional<qwr::u8string> GetArtUrl( const FetchRequest& request );
 
-private:
     void LoadCache();
     void SaveCache();
+    static std::filesystem::path GetCacheFilePath();
 
+private:
     void StartThread();
     void StopThread();
 
@@ -53,7 +54,7 @@ private:
     std::optional<qwr::u8string> ProcessFetchRequest( const UploadRequest& request );
 
 private:
-    AlbumArtFetcher() = default;
+    ArtworkFetcher() = default;
 
 private:
     std::mutex mutex_;
