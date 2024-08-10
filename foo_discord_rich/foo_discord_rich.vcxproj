@@ -159,6 +159,7 @@
     <ClCompile Include="ui\ui_pref_tab_main.cpp" />
     <ClCompile Include="ui\ui_pref_tab_manager.cpp" />
     <ClCompile Include="utils\logging.cpp" />
+    <ClCompile Include="utils\subprocess_executor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="album_art\fetcher.h" />
@@ -177,6 +178,7 @@
     <ClInclude Include="ui\ui_pref_tab_manager.h" />
     <ClInclude Include="utils\json_std_extenders.h" />
     <ClInclude Include="utils\logging.h" />
+    <ClInclude Include="utils\subprocess_executor.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="discord\presence_data.h" />

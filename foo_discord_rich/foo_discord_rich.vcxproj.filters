@@ -66,6 +66,9 @@
     <ClCompile Include="album_art\fetcher.cpp">
       <Filter>album_art</Filter>
     </ClCompile>
+    <ClCompile Include="utils\subprocess_executor.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui\ui_pref_tab_manager.h">
@@ -107,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="album_art\uploader.h">
       <Filter>album_art</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\subprocess_executor.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
