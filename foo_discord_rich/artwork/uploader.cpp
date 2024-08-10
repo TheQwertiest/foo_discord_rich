@@ -61,7 +61,15 @@ std::optional<ArtData> GetArtData( const metadb_handle_ptr& handle, abort_callba
             {
                 return std::nullopt;
             }
-            return pPathList->get_path( 0 );
+
+            qwr::u8string path = pPathList->get_path( 0 );
+            if ( constexpr qwr::u8string_view pathPrefix = "file://";
+                 path.starts_with( pathPrefix ) )
+            {
+                path = path.substr( pathPrefix.size() );
+            }
+
+            return path;
         }();
 
         return ArtData{ pArt, pathOpt };
@@ -175,15 +183,14 @@ std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const q
         qwr::QwrException::ExpectTrue(
             !exitCode,
             "Uploader failed with error code {}\n"
-            "Uploader output:\n"
+            "  stdout:\n"
             "```\n"
             "{}\n"
             "```\n"
-            "Uploader error output:\n"
+            "  stderr:\n"
             "```\n"
             "{}\n"
-            "```"
-            "",
+            "```\n",
             exitCode,
             outputOpt.value_or( "" ),
             errorOpt.value_or( "" ) );

@@ -27,9 +27,8 @@ void SubprocessExecutor::WriteData( const qwr::u8string& data )
 {
     qwr::QwrException::ExpectTrue( handles_.hStdinWrite.get(), "SubprocessExecutor error: null hStdinWrite" );
 
-    const auto dataW = qwr::unicode::ToWide( data );
     DWORD written = 0;
-    auto bRet = ::WriteFile( handles_.hStdinWrite.get(), dataW.data(), static_cast<DWORD>( dataW.size() ), &written, nullptr );
+    auto bRet = ::WriteFile( handles_.hStdinWrite.get(), data.data(), static_cast<DWORD>( data.size() ), &written, nullptr );
     qwr::error::CheckWinApi( bRet, "WriteFile" );
 
     handles_.hStdinWrite.reset();
