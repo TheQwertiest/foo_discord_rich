@@ -2,6 +2,7 @@
 
 #### Table of Contents
 - [Unreleased](#unreleased)
+- [2.0.0](#200---2024-08-11)
 - [1.2.0](#120---2019-09-11)
 - [1.1.0](#110---2018-11-07)
 - [1.0.0](#100---2018-11-06)
@@ -9,6 +10,8 @@
 ___
 
 ## [Unreleased][]
+
+## [2.0.0][] - 2024-08-11
 
 ### Added
 - Added x64 support (#39).
@@ -64,7 +67,8 @@ ___
 ## [1.0.0][] - 2018-11-06
 Initial release.
 
-[unreleased]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.2.0...HEAD
+[unreleased]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/TheQwertiest/foo_discord_rich/commits/v1.0.0
