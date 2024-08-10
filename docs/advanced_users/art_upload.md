@@ -30,7 +30,7 @@ Then, in the `Upload command` you need to write the full path to the program (wi
 It is recommended that you surround any paths with quotes, as paths containing spaces will most likely cause problems.
 
 The exact commands that you need to input here change based on the script and are explained with more detail in the [Upload scripts](#upload-scripts) section.  
-The last option is called `Art pin query`, which is better left untouched in most cases (see [Descriptions of options](#descriptions-of-options) for more info).
+The last option is called `Art pin query`, which is better left untouched in most cases (see [Descriptions of options](#options-description) for more info).
 
 ## Uploaders
 
@@ -74,7 +74,7 @@ After these steps you should start seeing the album art show up in your discord 
 To use this script you must have Powershell 7 installed (might work with 6, but I have not tested this). 
 One way of installing it is with [winget](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3#winget)
 Also, for full UTF-8 support you must enable UTF-8 support from 
-`Language -> Administrative language settings -> Change system locale -> Make sure this option is checked "Beta: Use Unicode UTF-8 for worldwide language support".`
+`Language` > `Administrative language settings` > `Change system locale` > `Make sure this option is checked "Beta: Use Unicode UTF-8 for worldwide language support".`
 
 The code can be found from [this gist](https://gist.github.com/vt-idiot/8a7161a48dc6f7f7719423e938217267).
 
@@ -104,9 +104,9 @@ and it can be found [here](https://gist.github.com/okdargy/a55f40c7b339ee0a8b10a
 The author recommends the [ShareX Amazon S3 guide](https://getsharex.com/docs/amazon-s3) 
 if you don't know how to set up a publicly accessible S3 bucket.
 
-## Descriptions of options
+## Options description
 
-This section contains brief descriptions for the different options on the Artwork section in the settings of this plugin.
+This section contains brief description for the different options in the `Preferences` > `Discord Rich Presence Integration` > `Advanced` > `Art upload` section of preferences page.
 
 `Upload and display` checkbox determines whether album art is uploaded and used as the image or not.
 If this option is enabled, it will override and disable the built-in art fetcher from MusicBrainz.
