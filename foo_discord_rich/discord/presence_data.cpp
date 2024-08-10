@@ -166,7 +166,6 @@ void PresenceModifier::UpdateImage()
 
         if ( config::enableArtUpload )
         { // overrides art fetching
-
             const auto albumId = EvaluateQueryForPlayingTrack( metadb, config::artUploadPinQuery );
             const ArtworkFetcher::UploadRequest request{
                 .artPinId = EvaluateQueryForPlayingTrack( metadb, config::artUploadPinQuery ),
