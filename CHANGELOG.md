@@ -19,7 +19,7 @@ ___
 
 ### Changed
 - !!! Now requires foobar2000 v2.0+ !!!
-- Changed Rich Presence activity type from `Playing` to `Listening to` (#2).
+- Changed Rich Presence activity type from `Playing a game` to `Listening to` (#2).
   This change has also other effects, due to the way it's implemented in Discord API:
 	- Additional middle text field was added.
 	- Playback time is no longer displayed.

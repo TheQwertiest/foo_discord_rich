@@ -40,7 +40,7 @@ public:
 
     std::optional<qwr::u8string> GetArtUrl( const FetchRequest& request );
 
-    void LoadCache();
+    void LoadCache( bool throwOnError = false );
     void SaveCache();
     static std::filesystem::path GetCacheFilePath();
 

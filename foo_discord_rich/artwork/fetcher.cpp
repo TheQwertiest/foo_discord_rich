@@ -45,14 +45,23 @@ std::optional<qwr::u8string> GenerateArtPinId( const drp::ArtworkFetcher::FetchR
                 return GenerateMusicBrainzArtPinId( req.artist, req.album );
             },
             []( const drp::ArtworkFetcher::UploadRequest& req ) {
-                if ( req.uploadCommand.empty() )
-                {
-                    return qwr::u8string{};
-                }
                 return req.artPinId;
             } },
         request );
     return ( artPinId.empty() ? std::optional<qwr::u8string>{} : artPinId );
+}
+
+bool IsRequestExecutable( const drp::ArtworkFetcher::FetchRequest& request )
+{
+    return std::visit(
+        qwr::Visitor{
+            []( const drp::ArtworkFetcher::MusicBrainzFetchRequest& req ) {
+                return true;
+            },
+            []( const drp::ArtworkFetcher::UploadRequest& req ) {
+                return !req.uploadCommand.empty();
+            } },
+        request );
 }
 
 } // namespace
@@ -92,6 +101,11 @@ std::optional<qwr::u8string> ArtworkFetcher::GetArtUrl( const FetchRequest& requ
         return artUrlOpt;
     }
 
+    if ( !IsRequestExecutable( request ) )
+    {
+        return std::nullopt;
+    }
+
     {
         std::unique_lock lock( mutex_ );
 
@@ -102,7 +116,7 @@ std::optional<qwr::u8string> ArtworkFetcher::GetArtUrl( const FetchRequest& requ
     return std::nullopt;
 }
 
-void ArtworkFetcher::LoadCache()
+void ArtworkFetcher::LoadCache( bool throwOnError )
 {
     using json = nlohmann::json;
 
@@ -120,14 +134,26 @@ void ArtworkFetcher::LoadCache()
     catch ( const qwr::QwrException& e )
     {
         LogError( fmt::format( "Failed to load cache: {}", e.what() ) );
+        if ( throwOnError )
+        {
+            throw;
+        }
     }
     catch ( const json::exception& e )
     {
         LogError( fmt::format( "Failed to load cache: {}", e.what() ) );
+        if ( throwOnError )
+        {
+            throw;
+        }
     }
     catch ( const fs::filesystem_error& e )
     {
         LogError( fmt::format( "Failed to load cache: {}", e.what() ) );
+        if ( throwOnError )
+        {
+            throw;
+        }
     }
 }
 
@@ -221,9 +247,9 @@ void ArtworkFetcher::ThreadMain()
             return;
         }
 
-        if ( artUrlOpt && qwr::unicode::ToWide( *artUrlOpt ).length() > 255 )
+        if ( artUrlOpt && qwr::unicode::ToWide( *artUrlOpt ).length() > 254 )
         { // Discord API max image key size
-            LogError( fmt::format( "Failed to process art url `{}`:\nlength is bigger than 255", *artUrlOpt ) );
+            LogError( fmt::format( "Failed to process art url `{}`:\nlength is bigger than 254", *artUrlOpt ) );
             artUrlOpt.reset();
         }
 

@@ -136,12 +136,20 @@ void PreferenceTabAdvanced::OnDdxUiChange( UINT uNotifyCode, int nID, CWindow wn
 
 void PreferenceTabAdvanced::OnHelpUrlClick( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
-    ShellExecute( nullptr, L"open", L"" DRP_HOMEPAGE "/docs/advanced/upload_artwork", nullptr, nullptr, SW_SHOW );
+    ShellExecute( nullptr, L"open", L"" DRP_HOMEPAGE "/docs/advanced_users/art_upload", nullptr, nullptr, SW_SHOW );
 }
 
 void PreferenceTabAdvanced::OnLoadCacheClick( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
-    ArtworkFetcher::Get().LoadCache();
+    try
+    {
+        ArtworkFetcher::Get().LoadCache( true );
+    }
+    catch ( const std::exception& e )
+    {
+        const auto errorMsg = fmt::format( "Failed to read art cache:\n{}", e.what() );
+        popup_message::g_show( errorMsg.c_str(), "Loading art cache" );
+    }
 }
 
 void PreferenceTabAdvanced::OnSaveCacheClick( UINT uNotifyCode, int nID, CWindow wndCtl )
