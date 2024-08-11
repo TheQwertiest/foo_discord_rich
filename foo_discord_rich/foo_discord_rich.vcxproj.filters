@@ -69,6 +69,9 @@
     <ClCompile Include="artwork\fetcher.cpp">
       <Filter>artwork</Filter>
     </ClCompile>
+    <ClCompile Include="fb2k\advanced_config.cpp">
+      <Filter>fb2k</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ui\ui_pref_tab_manager.h">
@@ -113,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="artwork\fetcher.h">
       <Filter>artwork</Filter>
+    </ClInclude>
+    <ClInclude Include="fb2k\advanced_config.h">
+      <Filter>fb2k</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

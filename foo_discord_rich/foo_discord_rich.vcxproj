@@ -148,6 +148,7 @@
     <ClCompile Include="discord\discord_integration.cpp" />
     <ClCompile Include="discord\presence_data.cpp" />
     <ClCompile Include="fb2k\acfu_integration.cpp" />
+    <ClCompile Include="fb2k\advanced_config.cpp" />
     <ClCompile Include="fb2k\callbacks\mainmenu.cpp" />
     <ClCompile Include="fb2k\callbacks\playback.cpp" />
     <ClCompile Include="fb2k\config.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="component_guids.h" />
     <ClInclude Include="component_paths.h" />
     <ClInclude Include="discord\discord_integration.h" />
+    <ClInclude Include="fb2k\advanced_config.h" />
     <ClInclude Include="fb2k\config.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
