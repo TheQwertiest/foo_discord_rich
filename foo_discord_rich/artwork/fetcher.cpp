@@ -253,18 +253,16 @@ void ArtworkFetcher::ThreadMain()
             artUrlOpt.reset();
         }
 
+        const auto artPinIdOpt = GenerateArtPinId( *lastRequest );
+        assert( artPinIdOpt );
         {
             std::unique_lock lock( mutex_ );
-
-            const auto artPinIdOpt = GenerateArtPinId( *currentRequestOpt_ );
-            assert( artPinIdOpt );
 
             artPinIdToArtUrl_.try_emplace( *artPinIdOpt, artUrlOpt );
 
             if ( lastRequest == currentRequestOpt_ )
             {
                 currentRequestOpt_.reset();
-                lastRequest.reset();
 
                 if ( artUrlOpt )
                 {
@@ -274,6 +272,7 @@ void ArtworkFetcher::ThreadMain()
                     } );
                 }
             }
+            lastRequest.reset();
         }
     }
 }
