@@ -63,6 +63,11 @@ std::optional<ArtData> GetArtData( const metadb_handle_ptr& handle, abort_callba
             }
 
             qwr::u8string path = pPathList->get_path( 0 );
+            if ( path == handle->get_location().get_path() )
+            { // embedded art
+                return std::nullopt;
+            }
+
             if ( constexpr qwr::u8string_view pathPrefix = "file://";
                  path.starts_with( pathPrefix ) )
             {
@@ -172,6 +177,10 @@ std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const q
 
     aborter.check();
 
+    if ( config::advanced::logUploaderCmds )
+    {
+        LogDebug( "Upload command: `{} {}`", uploadCommand, artPath );
+    }
     const auto artUrl = [&] {
         SubprocessExecutor uploader{ uploadCommand };
 
@@ -184,13 +193,9 @@ std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const q
             !exitCode,
             "Uploader failed with error code {}\n"
             "  stdout:\n"
-            "```\n"
             "{}\n"
-            "```\n"
             "  stderr:\n"
-            "```\n"
-            "{}\n"
-            "```\n",
+            "{}\n",
             exitCode,
             outputOpt.value_or( "" ),
             errorOpt.value_or( "" ) );
@@ -198,6 +203,10 @@ std::optional<qwr::u8string> UploadArt( const metadb_handle_ptr& handle, const q
 
         return *outputOpt;
     }();
+    if ( config::advanced::logUploaderOutput )
+    {
+        LogDebug( "Uploaded url: `{}`", artUrl );
+    }
 
     return artUrl;
 }
