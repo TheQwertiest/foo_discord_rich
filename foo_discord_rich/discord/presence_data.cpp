@@ -176,7 +176,7 @@ void PresenceModifier::UpdateImage()
         }
         if ( config::enableAlbumArtFetch )
         {
-            const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "$if3($meta(MUSICBRAINZ_ALBUMID),$meta(MUSICBRAINZ ALBUM ID))" );
+            const auto userReleaseMbid = EvaluateQueryForPlayingTrack( metadb, "[$lower($if3($meta(MUSICBRAINZ_ALBUMID),$meta(MUSICBRAINZ ALBUM ID)))]" );
             const ArtworkFetcher::MusicBrainzFetchRequest request{
                 .artist = EvaluateQueryForPlayingTrack( metadb, "%artist%" ),
                 .album = EvaluateQueryForPlayingTrack( metadb, "%album%" ),
