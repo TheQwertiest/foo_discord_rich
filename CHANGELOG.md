@@ -2,6 +2,7 @@
 
 #### Table of Contents
 - [Unreleased](#unreleased)
+- [2.0.2](#202---2024-08-11)
 - [2.0.1](#201---2024-08-11)
 - [2.0.0](#200---2024-08-11)
 - [1.2.0](#120---2019-09-11)
@@ -11,6 +12,8 @@
 ___
 
 ## [Unreleased][]
+
+## [2.0.2][] - 2024-08-11
 
 ### Fixed
 - Fixed wrong art request data being used when processing fetched url (#65).
@@ -83,7 +86,8 @@ ___
 ## [1.0.0][] - 2018-11-06
 Initial release.
 
-[unreleased]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.1...HEAD
+[unreleased]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.2...HEAD
+[2.0.2]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.1.0...v1.2.0
