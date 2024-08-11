@@ -11,6 +11,16 @@ ___
 
 ## [Unreleased][]
 
+### Added
+- Added debug logging (`Preferences`>`Advanced`>`Tools`>`Discord Rich Presence Integration`).
+
+### Changed
+- User MBID is now skipped if it's malformed.
+
+### Fixed
+- Fixed wrong album/artist values being used in MusicBrainz fetcher (#63).
+- Fixed incorrect path being passed to uploader when using embedded art (#64).
+
 ## [2.0.0][] - 2024-08-11
 
 ### Added
