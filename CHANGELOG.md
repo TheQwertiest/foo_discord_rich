@@ -12,6 +12,9 @@ ___
 
 ## [Unreleased][]
 
+### Fixed
+- Fixed wrong art request data being used when processing fetched url (#65).
+
 ## [2.0.1][] - 2024-08-11
 
 ### Added
