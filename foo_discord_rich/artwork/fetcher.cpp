@@ -185,7 +185,7 @@ void ArtworkFetcher::SaveCache()
 
 std::filesystem::path ArtworkFetcher::GetCacheFilePath()
 {
-    static const auto cachePath = drp::path::ImageDir() / "art_urls.json";
+    static const auto cachePath = drp::path::ImageDir() / "art_urls.v2.0.1.json";
     return cachePath;
 }
 
