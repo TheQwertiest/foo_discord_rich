@@ -1,6 +1,7 @@
 ---
 title: For advanced users
-nav_order: 4
+parent: Features
+nav_order: 2
 has_children: true
 ---
 

@@ -14,9 +14,10 @@ permalink: /
 
 This is a component for the [foobar2000](https://www.foobar2000.org) audio player, which displays currently played track data via Discord Rich Presence.
 
-Features:
+[Features](features.md):
 - Text field configuration via [title formatting queries](http://wiki.hydrogenaud.io/index.php?title=Foobar2000:Title_Formatting_Reference).
-- Album art fetching via [MusicBrainz](https://musicbrainz.org/) and [Cover Art Archive](https://coverartarchive.org/).
+- Automatic album art fetching from [Cover Art Archive](https://coverartarchive.org/) (via [MusicBrainz](https://musicbrainz.org/)).
+- Foobar2000 art uploading (via external tools).
 - [foo_acfu](https://acfu.3dyd.com) integration.
 
 ## Getting started!
@@ -28,7 +29,7 @@ Features:
 
 [Support thread](https://hydrogenaud.io/index.php/topic,116860.new.html)  
 [Changelog][changelog]  
-Nightly builds: [Win32][nightly_win32], [x64][nightly_x64]
+Dev builds: [Win32][nightly_win32], [x64][nightly_x64]
 
 ## Credits
 

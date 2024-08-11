@@ -1,6 +1,7 @@
 ---
 title: Uploading artwork
 parent: For advanced users
+grand_parent: Features
 ---
 
 # Building component
