@@ -2,6 +2,7 @@
 
 #### Table of Contents
 - [Unreleased](#unreleased)
+- [2.0.1](#201---2024-08-11)
 - [2.0.0](#200---2024-08-11)
 - [1.2.0](#120---2019-09-11)
 - [1.1.0](#110---2018-11-07)
@@ -10,6 +11,18 @@
 ___
 
 ## [Unreleased][]
+
+## [2.0.1][] - 2024-08-11
+
+### Added
+- Added debug logging (`Preferences`>`Advanced`>`Tools`>`Discord Rich Presence Integration`).
+
+### Changed
+- User MBID is now skipped if it's malformed.
+
+### Fixed
+- Fixed wrong album/artist values being used in MusicBrainz fetcher (#63).
+- Fixed incorrect path being passed to uploader when using embedded art (#64).
 
 ## [2.0.0][] - 2024-08-11
 
@@ -67,7 +80,8 @@ ___
 ## [1.0.0][] - 2018-11-06
 Initial release.
 
-[unreleased]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.0...HEAD
+[unreleased]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/TheQwertiest/foo_discord_rich/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/TheQwertiest/foo_discord_rich/compare/v1.0.0...v1.1.0
