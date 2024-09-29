@@ -111,8 +111,8 @@ BOOL PreferenceTabMain::OnInitDialog( HWND hwndFocus, LPARAM lParam )
     }
     DoFullDdxToUi();
 
-    // Disable duration options, since they are currently not implemented by Discord API
-    for ( auto id: { IDC_RADIO_TIME_ELAPSED, IDC_RADIO_TIME_REMAINING, IDC_RADIO_TIME_DISABLED } )
+    // Disable remaining duration since it isn't currently implemented
+    for ( auto id: { IDC_RADIO_TIME_REMAINING } )
     {
         CButton( GetDlgItem( id ) ).EnableWindow( false );
     }

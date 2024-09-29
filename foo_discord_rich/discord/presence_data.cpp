@@ -301,7 +301,7 @@ void PresenceModifier::UpdateDuration( double currentTime )
     case config::TimeSetting::Elapsed:
     {
         pd.presence.startTimestamp = std::time( nullptr ) - std::llround( currentTime );
-        pd.presence.endTimestamp = 0;
+        pd.presence.endTimestamp = std::time( nullptr ) + std::llround( pd.trackLength + currentTime );
 
         break;
     }
