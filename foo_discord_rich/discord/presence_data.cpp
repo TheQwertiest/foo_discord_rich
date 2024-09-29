@@ -298,16 +298,9 @@ void PresenceModifier::UpdateDuration( double currentTime )
     const config::TimeSetting timeSetting = ( ( pd.trackLength && pc->is_playing() && !pc->is_paused() ) ? config::timeSettings : config::TimeSetting::Disabled );
     switch ( timeSetting )
     {
-    case config::TimeSetting::Elapsed:
+    case config::TimeSetting::Enabled:
     {
         pd.presence.startTimestamp = std::time( nullptr ) - std::llround( currentTime );
-        pd.presence.endTimestamp = 0;
-
-        break;
-    }
-    case config::TimeSetting::Remaining:
-    {
-        pd.presence.startTimestamp = 0;
         pd.presence.endTimestamp = std::time( nullptr ) + std::max<uint64_t>( 0, std::llround( pd.trackLength - currentTime ) );
 
         break;
