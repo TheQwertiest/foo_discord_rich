@@ -22,8 +22,9 @@ void DiscordAdapter::Initialize()
         config::middleTextQuery = "";
         config::bottomTextQuery_v1_deprecated = config::bottomTextQuery_v1_deprecated.GetDefaultValue();
     }
-    // currently not working with `Listening to` style
-    config::timeSettings = config::TimeSetting::Disabled;
+
+    if ( config::timeSettings != config::TimeSetting::Enabled && config::timeSettings != config::TimeSetting::Disabled )
+        config::timeSettings = config::TimeSetting::Enabled;
 
     appToken_ = config::discordAppToken;
 

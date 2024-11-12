@@ -13,8 +13,7 @@ enum class ImageSetting : uint8_t
 };
 enum class TimeSetting : uint8_t
 {
-    Elapsed = 0,
-    Remaining,
+    Enabled,
     Disabled
 };
 
