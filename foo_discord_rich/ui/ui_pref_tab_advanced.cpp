@@ -136,7 +136,7 @@ void PreferenceTabAdvanced::OnDdxUiChange( UINT uNotifyCode, int nID, CWindow wn
 
 void PreferenceTabAdvanced::OnHelpUrlClick( UINT uNotifyCode, int nID, CWindow wndCtl )
 {
-    ShellExecute( nullptr, L"open", L"" DRP_HOMEPAGE "/docs/advanced_users/art_upload", nullptr, nullptr, SW_SHOW );
+    ShellExecute( nullptr, L"open", L"" DRP_HOMEPAGE "/docs/features/advanced_users/art_upload", nullptr, nullptr, SW_SHOW );
 }
 
 void PreferenceTabAdvanced::OnLoadCacheClick( UINT uNotifyCode, int nID, CWindow wndCtl )
