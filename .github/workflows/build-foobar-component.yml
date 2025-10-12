@@ -1,0 +1,80 @@
+name: build-foobar-component
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  build-x64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Locate solution
+        shell: pwsh
+        run: |
+          $sln = Get-ChildItem -Path workspaces -Filter *.sln -Recurse | Select-Object -First 1
+          if (-not $sln) { throw "No .sln found under 'workspaces'." }
+          "SOLUTION_PATH=$($sln.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "Using solution: $($sln.FullName)"
+
+      - name: Derive version
+        shell: pwsh
+        run: |
+          $ver = ""
+          if (Test-Path VERSION) { $ver = (Get-Content VERSION -Raw).Trim() }
+          if (-not $ver) { $ver = (git describe --tags --always) -replace '^v','' }
+          if (-not $ver) { $ver = "0.0.0-ci" }
+          "PKG_VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "Version: $ver"
+
+      - name: Build (Release | x64)
+        shell: pwsh
+        run: |
+          $out = "$env:GITHUB_WORKSPACE\out\x64\"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          & msbuild "$env:SOLUTION_PATH" /m `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /p:OutDir="$out"
+          if ($LASTEXITCODE -ne 0) { throw "MSBuild failed." }
+
+      - name: Package .fb2k-component
+        shell: pwsh
+        run: |
+          $dll = Get-ChildItem -Path "$env:GITHUB_WORKSPACE\out\x64" -Filter foo_discord_rich.dll -Recurse | Select-Object -First 1
+          if (-not $dll) { throw "Built DLL not found." }
+
+          $pkgRoot = "$env:GITHUB_WORKSPACE\package"
+          $x64Dir  = Join-Path $pkgRoot "x64"
+          New-Item -ItemType Directory -Force -Path $x64Dir | Out-Null
+
+          Copy-Item $dll.FullName $x64Dir\foo_discord_rich.dll -Force
+
+          # Optional: include license notices if you want
+          if (Test-Path "$env:GITHUB_WORKSPACE\licenses") {
+            Copy-Item "$env:GITHUB_WORKSPACE\licenses" -Destination $pkgRoot -Recurse -Force
+          }
+
+          $outFile = "$env:GITHUB_WORKSPACE\foo_discord_rich-v$env:PKG_VERSION-x64.fb2k-component"
+          if (Test-Path $outFile) { Remove-Item $outFile -Force }
+          Compress-Archive -Path "$pkgRoot\*" -DestinationPath $outFile
+
+          Write-Host "Packaged: $outFile"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: foo_discord_rich-v${{ env.PKG_VERSION }}-x64.fb2k-component
+          path: foo_discord_rich-v${{ env.PKG_VERSION }}-x64.fb2k-component
+          if-no-files-found: error
